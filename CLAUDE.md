@@ -17,15 +17,18 @@ resources, teaches concepts, assesses understanding, and emails progress reports
 **Submission deadline:** 2026-04-08
 **Problem statement:** Build a multi-agent AI system that helps users manage tasks, schedules, and
 information by interacting with multiple tools and data sources.
+**Demo scope:** Two subjects only — **Math + Physics** (Grade 7-10, CBSE-aligned). Math is the
+universal pain point; Physics showcases `code_executor` with live simulations (projectile motion,
+graphs). Together they prove multi-subject capability without scope creep.
 
 ### How EduFlow maps to the problem statement
 
 | Requirement | EduFlow implementation |
 |---|---|
-| Primary agent coordinating sub-agents | Orchestrator routes to 6 specialised agents |
-| Store and retrieve structured data | AlloyDB: students, syllabus, plans, progress, assessments |
-| Multiple tools via MCP | Google Calendar, Gmail, Database (AlloyDB via MCP Toolbox) |
-| Multi-step workflows | Plan → Schedule → Learn → Assess → Report → Adapt |
+| Primary agent coordinating sub-agents | Orchestrator coordinates 8 sub-agents via 5 pipelines |
+| Store and retrieve structured data | YAML curriculum files (syllabus, questions) + AlloyDB (plans, progress, assessments) |
+| Multiple tools via MCP | Calendar, Tasks, Gmail, Docs/Drive (via `gws` MCP) + Database (MCP Toolbox) |
+| Multi-step workflows | Plan → Schedule → Track → Teach → Notes → Progress → Report |
 | API-based deployment | FastAPI on Cloud Run (3 services) |
 
 ### Tech Stack
@@ -36,10 +39,10 @@ information by interacting with multiple tools and data sources.
 | LLM | `gemini-2.5-flash` (default for all agents) |
 | Code Execution | `BuiltInCodeExecutor` (sandboxed Python, math/physics only) |
 | Web Search | `GoogleSearchTool` (Gemini-native grounding) |
-| Database | AlloyDB (PostgreSQL-compatible, pgvector + ScaNN) |
+| Curriculum Data | YAML files in `data/curricula/` (syllabus, questions — static) |
+| Database | AlloyDB (PostgreSQL-compatible — runtime state only: plans, progress, assessments) |
 | Database MCP | MCP Toolbox for Databases (`tools.yaml`) |
-| Calendar MCP | Google Calendar API via MCP server |
-| Email MCP | Gmail API via MCP server |
+| Workspace MCP | Google Workspace CLI (`gws mcp`) — Calendar, Tasks, Gmail, Docs, Drive |
 | Video Search | YouTube Data API v3 (function tool) |
 | Frontend | Streamlit (streaming chat + video embed + progress dashboard) |
 | Backend API | FastAPI (`get_fast_api_app()` + `DatabaseSessionService`) |
@@ -59,13 +62,16 @@ eduflow/
 │   ├── .env                            # API keys — never commit
 │   ├── tools/                          # Shared tool instances
 │   │   ├── __init__.py                 # Exports: google_search, code_executor
-│   │   └── youtube_search.py           # YouTube Data API v3 function tool
+│   │   ├── youtube_search.py           # YouTube Data API v3 function tool
+│   │   └── curriculum_loader.py        # Loads YAML curriculum files at agent construction
 │   ├── subagents/                      # Self-contained agents
 │   │   ├── __init__.py
 │   │   ├── curriculum_planner.py       # Plans learning sessions from syllabus
 │   │   ├── content_agent.py            # Finds YouTube videos, generates summaries
-│   │   ├── calendar_agent.py           # MCP: Google Calendar event management
-│   │   ├── email_agent.py              # MCP: Gmail — plans, reports, alerts
+│   │   ├── calendar_agent.py           # Workspace MCP: Google Calendar events
+│   │   ├── tasks_agent.py              # Workspace MCP: Google Tasks tracking
+│   │   ├── email_agent.py              # Workspace MCP: Gmail — plans, reports
+│   │   ├── docs_agent.py               # Workspace MCP: Google Docs study notes
 │   │   ├── tutor_agent.py              # Teaches concepts with code execution
 │   │   ├── assessment_agent.py         # Generates quizzes, evaluates answers
 │   │   └── response_formatter.py       # Formats tutor output (reuse pattern)
@@ -75,22 +81,27 @@ eduflow/
 │       ├── curriculum_planner_prompt.py
 │       ├── content_agent_prompt.py
 │       ├── calendar_agent_prompt.py
+│       ├── tasks_agent_prompt.py
 │       ├── email_agent_prompt.py
+│       ├── docs_agent_prompt.py
 │       ├── tutor_agent_prompt.py
 │       ├── assessment_agent_prompt.py
 │       └── response_formatter_prompt.py
-├── mcp_servers/                        # Custom MCP server configurations
-│   ├── calendar/                       # Google Calendar MCP server
-│   │   ├── server.py
-│   │   └── requirements.txt
-│   ├── gmail/                          # Gmail MCP server
-│   │   ├── server.py
-│   │   └── requirements.txt
+├── data/
+│   └── curricula/                      # YAML curriculum files (replaces DB syllabus)
+│       ├── _schema.yaml                # Pydantic validation schema
+│       └── cbse/                       # Board/curriculum system
+│           └── math/                   # Subject
+│               ├── grade-7.yaml        # One file per grade+subject
+│               ├── grade-8.yaml
+│               ├── grade-9.yaml
+│               └── grade-10.yaml
+├── mcp_servers/                        # MCP server configurations
 │   └── database/                       # MCP Toolbox config (AlloyDB)
 │       └── tools.yaml
+│   # Note: Calendar, Tasks, Gmail, Docs, Drive all use Google Workspace
+│   # CLI (`gws mcp`) — no custom MCP servers needed for these.
 ├── scripts/
-│   ├── data_pipeline/                  # Syllabus and seed data ingestion
-│   │   └── seed_syllabus.py
 │   └── infra/                          # Infrastructure setup scripts
 │       ├── setup_alloydb.sh
 │       ├── start_toolbox.sh
@@ -120,20 +131,24 @@ eduflow/
 orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 │
 ├── planning_pipeline (SequentialAgent)
-│   ├── curriculum_planner_agent    (LlmAgent — database MCP tools)
+│   ├── curriculum_planner_agent    (LlmAgent — YAML curriculum in context)
 │   │   Breaks "learn X in Y days" into structured sessions
-│   │   Queries syllabus DB for topics, prerequisites, sequence
-│   │   Adapts plan based on student performance data
+│   │   Uses YAML curriculum data injected into instruction at construction
+│   │   Determines session count based on topic depth + prerequisites
 │   └── content_agent               (LlmAgent — youtube_search tool)
 │       Finds YouTube videos per topic
 │       Generates session summaries and study material outlines
 │
 ├── scheduling_pipeline (SequentialAgent)
-│   ├── calendar_agent              (LlmAgent — Calendar MCP tools)
+│   ├── calendar_agent              (LlmAgent — Workspace MCP: Calendar)
 │   │   Creates Google Calendar events for each session
 │   │   Includes video links and topic summaries in event description
 │   │   Handles rescheduling when student falls behind
-│   └── email_agent                 (LlmAgent — Gmail MCP tools)
+│   ├── tasks_agent                 (LlmAgent — Workspace MCP: Tasks)
+│   │   Creates TaskList per chapter with tasks per session
+│   │   Attaches YouTube links + key concept notes to each task
+│   │   Marks tasks complete as sessions finish (To Do → Done)
+│   └── email_agent                 (LlmAgent — Workspace MCP: Gmail)
 │       Sends learning plan to student + parent
 │       Sends session reminders
 │       Sends progress reports after assessments
@@ -145,11 +160,17 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 │   └── response_formatter          (LlmAgent — include_contents='none')
 │       Formats tutor output into clean textbook-style response
 │
+├── notes_pipeline (SequentialAgent)
+│   └── docs_agent                  (LlmAgent — Workspace MCP: Docs + Drive)
+│       Creates/updates formatted Google Doc study notes per chapter
+│       Organizes in Drive folders: EduFlow/{Subject}/{Grade}/
+│       Appends session summaries, key concepts, YouTube links
+│
 └── assessment_pipeline (SequentialAgent)
-    └── assessment_agent            (LlmAgent — database MCP tools)
-        Generates quizzes per topic from DB or AI-generated
+    └── assessment_agent            (LlmAgent — YAML questions + database MCP)
+        Uses quiz questions from YAML curriculum or AI-generated
         Evaluates answers (deterministic + LLM)
-        Stores scores and weak areas in DB
+        Stores scores and weak areas in DB via database MCP
         Triggers email_agent for progress report to parent
 ```
 
@@ -158,12 +179,14 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 | Agent | Type | MCP/Tools | Role |
 |---|---|---|---|
 | `orchestrator_agent` | LlmAgent | — | Understands student intent, routes to correct pipeline, manages multi-step workflow state |
-| `curriculum_planner_agent` | LlmAgent | Database MCP | Queries syllabus, creates structured multi-session learning plans |
+| `curriculum_planner_agent` | LlmAgent | YAML curriculum (in context) | Reads syllabus from YAML, creates structured multi-session learning plans |
 | `content_agent` | LlmAgent | `youtube_search` | Finds relevant educational videos per topic, generates summaries |
-| `calendar_agent` | LlmAgent | Calendar MCP | Creates/updates/cancels Google Calendar events for study sessions |
-| `email_agent` | LlmAgent | Gmail MCP | Sends plans, reminders, progress reports to student and parent |
+| `calendar_agent` | LlmAgent | Workspace MCP (Calendar) | Creates/updates/cancels Google Calendar events for study sessions |
+| `tasks_agent` | LlmAgent | Workspace MCP (Tasks) | Creates task lists, tracks session progress (To Do → Done), attaches links |
+| `email_agent` | LlmAgent | Workspace MCP (Gmail) | Sends plans, reminders, progress reports to student and parent |
+| `docs_agent` | LlmAgent | Workspace MCP (Docs+Drive) | Creates formatted study notes, organizes in Drive folders |
 | `tutor_agent` | LlmAgent | `code_executor` | Teaches concepts, explains step-by-step, answers follow-up questions |
-| `assessment_agent` | LlmAgent | Database MCP | Generates quizzes, evaluates answers, tracks performance in DB |
+| `assessment_agent` | LlmAgent | YAML questions + Database MCP | Uses questions from YAML curriculum, evaluates answers, stores scores in DB |
 | `response_formatter` | LlmAgent | — | Pure formatting of tutor output (no tools, `include_contents='none'`) |
 
 ### 3.3 Orchestration Pattern
@@ -180,35 +203,62 @@ Student: "I want to learn Quadratic Equations in 1 week"
   ├─► [1] Orchestrator identifies: learning goal + timeframe
   │
   ├─► [2] planning_pipeline:
-  │       curriculum_planner queries syllabus DB → breaks into 4 sessions
+  │       curriculum_planner queries syllabus DB → determines session count
+  │         based on topic depth, prerequisites, and grade-appropriate pacing
   │       content_agent finds YouTube videos for each session topic
   │       Output: structured plan with topics, videos, dates
   │
   ├─► [3] scheduling_pipeline:
-  │       calendar_agent creates 4 Google Calendar events
+  │       calendar_agent creates Calendar events per session (WHEN to study)
+  │       tasks_agent creates TaskList with tasks + YouTube links (WHAT to learn)
   │       email_agent sends learning plan to student + parent
-  │       Output: confirmation of events created + emails sent
+  │       Output: calendar events + task list + email confirmation
   │
-  │   ── Student returns for Session 1 ──
+  │   ── Student returns for a session ──
   │
   ├─► [4] tutoring_pipeline:
-  │       tutor_agent teaches "Basics & Standard Form"
+  │       tutor_agent teaches the session topic (grade-aware persona)
   │       response_formatter formats the explanation
   │       Output: clean lesson with embedded video reference
   │
-  ├─► [5] assessment_pipeline:
+  ├─► [5] notes_pipeline:
+  │       docs_agent creates/updates Google Doc study notes for the chapter
+  │       Appends: session heading, key concepts, YouTube link, practice problems
+  │       Saves to Drive: EduFlow/{Subject}/{Grade}/
+  │       Output: shareable Google Doc link (KNOWLEDGE retained)
+  │
+  ├─► [6] assessment_pipeline:
   │       assessment_agent generates quiz on session topic
   │       Evaluates answers, stores score + weak areas in DB
   │       Output: feedback + performance summary
   │
-  ├─► [6] scheduling_pipeline (again):
-  │       email_agent sends progress report to parent
+  ├─► [7] scheduling_pipeline (again):
+  │       tasks_agent marks session task as ✅ completed
+  │       email_agent sends progress report to parent (includes Doc link)
   │       calendar_agent updates remaining sessions if adaptation needed
   │
-  └─► [7] Orchestrator: summarises session, previews next session
+  └─► [8] Orchestrator: summarises session, previews next session
 ```
 
+**Tool purpose mapping:**
+- **Calendar** = WHEN (time-blocked study sessions in student's day)
+- **Tasks** = WHAT + PROGRESS (topic checklist, To Do → Done)
+- **Docs + Drive** = KNOWLEDGE (formatted study notes for future reference)
+- **Gmail** = COMMUNICATION (parent notifications with links)
+- **AlloyDB** = DATA (structured persistence for plans, progress, assessments)
+
+> **Session count & duration:** The `curriculum_planner_agent` determines how many sessions
+> a topic needs based on concept depth, prerequisite count, and grade band. Session duration
+> is optimized for student attention: Foundation ~25 min, Building ~35 min, Bridging ~45 min,
+> Advanced ~60 min.
+
 ### 3.5 Session State Keys
+
+> ADK state prefixes: `user:` persists across ALL sessions for a user (stored in
+> `user_states` table). No prefix = current session only. `temp:` = current turn only.
+> See Section 5.1 for full ADK session architecture.
+
+**User-scoped state (`user:` prefix — persists across sessions):**
 
 | Key | Set by | Used by | Purpose |
 |---|---|---|---|
@@ -217,10 +267,19 @@ Student: "I want to learn Quadratic Equations in 1 week"
 | `user:parent_email` | UI profile form | email_agent | Parent's email for reports |
 | `user:grade_level` | UI profile form | curriculum_planner | Grade-appropriate content |
 | `user:preferred_language` | UI profile form | All agents | Response language |
+| `user:grade_band` | orchestrator | tutor, content, curriculum_planner | `foundation`/`building`/`bridging`/`advanced` |
+
+**Session-scoped state (no prefix — current conversation only):**
+
+| Key | Set by | Used by | Purpose |
+|---|---|---|---|
 | `current_plan_id` | curriculum_planner | All agents | Active learning plan reference |
 | `current_session_id` | orchestrator | tutor, assessment | Current study session reference |
 | `session_topic` | curriculum_planner | tutor, content | Current session's topic |
 | `session_video_url` | content_agent | UI (embed) | YouTube video for current session |
+| `task_list_id` | tasks_agent | tasks_agent | Google Tasks list ID for current plan |
+| `doc_url` | docs_agent | orchestrator, email | Google Doc URL for study notes |
+| `drive_folder_id` | docs_agent | docs_agent | Drive folder ID (EduFlow/{Subject}/{Grade}/) |
 | `tutor_solution` | tutor_agent | response_formatter | Raw tutor output (same pattern as AI Tutor project) |
 | `formatted_response` | response_formatter | orchestrator | Formatted tutor output |
 | `assessment_result` | assessment_agent | orchestrator, email | Quiz score + feedback |
@@ -231,16 +290,18 @@ Student: "I want to learn Quadratic Equations in 1 week"
 
 ### 4.1 Tool Assignment by Agent
 
-| Agent | Database MCP | Calendar MCP | Gmail MCP | `youtube_search` | `code_executor` |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `curriculum_planner_agent` | ✓ | — | — | — | — |
-| `content_agent` | — | — | — | ✓ | — |
-| `calendar_agent` | — | ✓ | — | — | — |
-| `email_agent` | — | — | ✓ | — | — |
-| `tutor_agent` | — | — | — | — | ✓ |
-| `assessment_agent` | ✓ | — | — | — | — |
-| `response_formatter` | — | — | — | — | — |
-| `orchestrator_agent` | — | — | — | — | — |
+| Agent | Database MCP | Workspace MCP (Cal) | Workspace MCP (Tasks) | Workspace MCP (Gmail) | Workspace MCP (Docs/Drive) | `youtube_search` | `code_executor` |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `curriculum_planner_agent` | — | — | — | — | — | — | — |
+| `content_agent` | — | — | — | — | — | ✓ | — |
+| `calendar_agent` | — | ✓ | — | — | — | — | — |
+| `tasks_agent` | — | — | ✓ | — | — | — | — |
+| `email_agent` | — | — | — | ✓ | — | — | — |
+| `docs_agent` | — | — | — | — | ✓ | — | — |
+| `tutor_agent` | — | — | — | — | — | — | ✓ |
+| `assessment_agent` | ✓ | — | — | — | — | — | — |
+| `response_formatter` | — | — | — | — | — | — | — |
+| `orchestrator_agent` | — | — | — | — | — | — | — |
 
 > **Constraint carried from AI Tutor project:** `code_executor` (Gemini built-in) cannot coexist
 > with function-calling tools (MCP tools) in the same agent. This is why `tutor_agent` uses ONLY
@@ -248,55 +309,103 @@ Student: "I want to learn Quadratic Equations in 1 week"
 
 ### 4.2 MCP Servers
 
-#### Database MCP (MCP Toolbox for Databases → AlloyDB)
+#### MCP Server 1: Google Workspace CLI (`gws mcp`)
+
+**One MCP server covers all Google Workspace tools.** No custom MCP servers needed.
+
+```bash
+# Install
+npm install -g @googleworkspace/cli
+
+# Run as MCP server (exposes Calendar + Tasks + Gmail + Docs + Drive)
+gws mcp -s calendar,tasks,gmail,docs,drive
+
+# OAuth setup
+gws auth setup    # configure OAuth client
+gws auth login    # authorize with Google account
+```
+
+**Auth:** OAuth2 via `gws auth login`. Pre-authorize before demo. Same OAuth client
+covers all 5 services.
+
+**Tools exposed per service:**
+
+| Service | Key tools used by EduFlow | Agent |
+|---|---|---|
+| **Calendar** | Create/update/delete events, list events | `calendar_agent` |
+| **Tasks** | Create task list, create/update/complete tasks, attach links | `tasks_agent` |
+| **Gmail** | Send email, reply, search | `email_agent` |
+| **Docs** | Create document, append text, format headings | `docs_agent` |
+| **Drive** | Create folder, upload, organize files | `docs_agent` |
+
+**ADK integration:** `gws mcp` supports `streamable-http` transport. Connect via
+`MCPToolset` with `StreamableHTTPConnectionParams`.
+
+#### MCP Server 2: Database MCP (MCP Toolbox for Databases → AlloyDB)
 
 Reuses the exact pattern from the AI Tutor project. `tools.yaml` defines parameterised SQL tools.
 
-**Tools exposed:**
+**Tools exposed (runtime state only — syllabus/questions in YAML, profile in ADK user_states):**
 
 | Tool | Purpose | SQL pattern |
 |---|---|---|
-| `get-syllabus-topics` | Fetch topics for a subject + grade in sequence order | `SELECT ... FROM syllabus WHERE grade=$1 AND subject=$2 ORDER BY sequence_order` |
-| `get-topic-prerequisites` | Check prerequisite topics | `SELECT ... FROM syllabus WHERE id = ANY($1::uuid[])` |
-| `get-student-profile` | Fetch student + parent email | `SELECT ... FROM students WHERE id=$1` |
 | `save-learning-plan` | Insert a new learning plan | `INSERT INTO learning_plans ...` |
-| `save-session` | Insert a session within a plan | `INSERT INTO sessions ...` |
+| `save-study-session` | Insert a study session within a plan | `INSERT INTO study_sessions ...` |
+| `update-study-session` | Update session status/integration IDs | `UPDATE study_sessions SET status=$1 ...` |
 | `save-assessment` | Store quiz result + weak areas | `INSERT INTO assessments ...` |
-| `get-student-progress` | Fetch progress for adaptation | `SELECT ... FROM progress WHERE student_id=$1` |
+| `get-student-progress` | Fetch progress for adaptation | `SELECT ... FROM progress WHERE user_id=$1` |
 | `update-progress` | Update mastery level after assessment | `UPDATE progress SET mastery_level=$1 ...` |
-| `get-quiz-questions` | Fetch questions for a topic | `SELECT ... FROM questions WHERE topic_id=$1 AND difficulty<=$2` |
 
-#### Google Calendar MCP Server
+### 4.3 Google Tasks: How Topics Map to Tasks
 
-Custom lightweight MCP server wrapping Google Calendar API v3.
+```
+TaskList: "📐 Quadratic Equations — Math (Grade 8)"
+│
+├── Task: "Session 1: Basics & Standard Form"
+│     status: needsAction → completed
+│     due: 2026-04-01
+│     notes: "Key concepts: ax²+bx+c form, identifying a,b,c coefficients"
+│     links: [{url: "https://youtube.com/...", description: "Video tutorial"}]
+│
+├── Task: "Session 2: Factoring Method"
+│     status: needsAction
+│     due: 2026-04-03
+│     notes: "Key concepts: finding factors, splitting middle term"
+│     links: [{url: "https://youtube.com/...", description: "Video tutorial"}]
+│
+└── ... (AI determines session count based on topic depth)
+```
 
-**Tools exposed:**
+**Task fields used:** `title` (1024 chars max), `notes` (8192 chars — enough for key
+concepts), `links[]` (YouTube URLs), `due` (session date), `status` (needsAction/completed).
+One level of subtasks supported if needed for sub-topics.
 
-| Tool | Purpose |
-|---|---|
-| `create-event` | Create a calendar event (title, datetime, duration, description with video link) |
-| `update-event` | Reschedule or update an existing event |
-| `delete-event` | Cancel a study session |
-| `list-events` | List upcoming study sessions for a student |
+### 4.4 Google Docs: Study Notes Structure
 
-**Auth:** OAuth2 with pre-authorized refresh token for demo. Service account for production.
-Research needed on Day 1: evaluate existing open-source Calendar MCP servers vs building custom.
+```
+Google Doc: "Study Notes: Quadratic Equations — Math Grade 8"
+│
+├── Heading 1: Quadratic Equations
+│
+├── Heading 2: Session 1 — Basics & Standard Form
+│     Key Concepts:
+│       • A quadratic equation has the form ax² + bx + c = 0
+│       • 'a' is the coefficient of x², 'b' of x, 'c' is the constant
+│     Video: [Standard Form Explained — YouTube link]
+│     Practice: Identify a, b, c in: 3x² - 5x + 2 = 0
+│
+├── Heading 2: Session 2 — Factoring Method
+│     (appended after Session 2 tutoring completes)
+│
+└── ... (grows session by session — living document)
 
-#### Gmail MCP Server
+Saved in Drive: EduFlow/Math/Grade 8/Study Notes - Quadratic Equations.gdoc
+```
 
-Custom lightweight MCP server wrapping Gmail API v1.
+**Docs API approach:** Use Drive API to upload HTML content as a Google Doc (simpler than
+`batchUpdate`). Headings via `<h1>`, `<h2>` tags auto-convert to Doc headings.
 
-**Tools exposed:**
-
-| Tool | Purpose |
-|---|---|
-| `send-email` | Send email to student or parent (plan, report, alert) |
-| `send-email-with-template` | Send using predefined templates (plan summary, progress report) |
-
-**Auth:** Same OAuth2 pattern as Calendar MCP.
-Research needed on Day 1: evaluate existing open-source Gmail MCP servers vs building custom.
-
-### 4.3 YouTube Search Function Tool
+### 4.5 YouTube Search Function Tool
 
 Not an MCP tool — a regular ADK function tool using YouTube Data API v3.
 
@@ -317,42 +426,68 @@ def youtube_search(query: str, max_results: int = 3) -> str:
 
 ---
 
-## 5. Database Schema (AlloyDB)
+## 5. Data Persistence Architecture
 
-### 5.1 Core Tables
+EduFlow uses a **two-layer** data strategy:
+
+- **YAML curriculum files** (static) — syllabus structure, concepts, quiz questions.
+  Lives in codebase at `data/curricula/`. Zero cost. See Section 5.2.
+- **AlloyDB** (dynamic) — runtime state that changes per student.
+  Only 4 custom tables. ADK auto-manages 5 more tables for session/state.
+
+### 5.1 ADK Session Tables (Auto-Managed)
+
+`DatabaseSessionService` auto-creates these 5 tables. **Do not modify manually.**
+
+| ADK Table | Purpose | Key columns |
+|---|---|---|
+| `sessions` | Conversation sessions | `app_name`, `user_id`, `id`, `state` (JSONB) |
+| `events` | Full conversation history (messages, tool calls) | `session_id`, `event_data` (JSONB) |
+| `user_states` | `user:` prefixed state — persists across ALL sessions for a user | `app_name`, `user_id`, `state` (JSONB) |
+| `app_states` | `app:` prefixed state — shared across ALL users | `app_name`, `state` (JSONB) |
+| `adk_internal_metadata` | Schema version tracking | `key`, `value` |
+
+**State prefix system:**
+
+| Prefix | Scope | Persists across sessions? | Storage |
+|---|---|---|---|
+| `user:` | Per user, all sessions | **Yes** | `user_states` table |
+| `app:` | Global, all users | **Yes** | `app_states` table |
+| *(no prefix)* | Current session only | **No** | `sessions.state` column |
+| `temp:` | Current agent turn only | **Never stored** | Stripped before persistence |
+
+**Student profile via `user:` state** (replaces a custom `students` table):
+
+ADK's `user:` prefix means profile data set once persists across every future session
+for that user — no custom `students` table needed.
+
+| State key | Set by | Stored in | Available in all sessions? |
+|---|---|---|---|
+| `user:name` | UI profile form | `user_states` | Yes |
+| `user:email` | UI profile form | `user_states` | Yes |
+| `user:parent_email` | UI profile form | `user_states` | Yes |
+| `user:grade_level` | UI profile form | `user_states` | Yes |
+| `user:preferred_language` | UI profile form | `user_states` | Yes |
+| `user:grade_band` | orchestrator | `user_states` | Yes |
+
+### 5.2 Custom Tables (4 tables — runtime business data)
+
+> **IMPORTANT:** ADK auto-creates a table named `sessions`. Our custom table for study
+> sessions is named **`study_sessions`** to avoid collision. Same AlloyDB database,
+> same connection string — they coexist.
 
 ```sql
--- Student profiles
-CREATE TABLE students (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(200) NOT NULL,
-    email VARCHAR(200),
-    parent_email VARCHAR(200),
-    grade VARCHAR(20) NOT NULL,          -- 'Grade 5', 'Grade 10', 'Undergraduate'
-    preferred_language VARCHAR(50) DEFAULT 'English',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- NOTE: Student profiles are stored in ADK's user_states table via user: prefix.
+-- No custom students table needed. All custom tables reference user_id VARCHAR(128)
+-- which matches ADK's user_id format.
 
--- Syllabus structure: grade → subject → chapter → topics
-CREATE TABLE syllabus (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    grade VARCHAR(20) NOT NULL,
-    subject VARCHAR(50) NOT NULL,         -- 'math', 'physics', 'biology', etc.
-    chapter VARCHAR(200) NOT NULL,        -- 'Quadratic Equations'
-    topic VARCHAR(200) NOT NULL,          -- 'Standard Form', 'Factoring Method'
-    description TEXT,                     -- Brief topic description for planner context
-    prerequisites UUID[],                 -- Array of prerequisite topic IDs
-    sequence_order INT NOT NULL,          -- Order within the chapter
-    estimated_minutes INT DEFAULT 45,     -- Estimated study time
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX ON syllabus (grade, subject);
-CREATE INDEX ON syllabus (grade, subject, chapter);
+-- NOTE: Syllabus and quiz questions are in YAML curriculum files.
+-- See Section 5.3.
 
 -- Learning plans
 CREATE TABLE learning_plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID REFERENCES students(id),
+    user_id VARCHAR(128) NOT NULL,        -- ADK user_id (same as user_states)
     subject VARCHAR(50) NOT NULL,
     goal TEXT NOT NULL,                   -- "Learn Quadratic Equations"
     start_date DATE NOT NULL,
@@ -361,32 +496,34 @@ CREATE TABLE learning_plans (
     status VARCHAR(20) DEFAULT 'active', -- 'active', 'completed', 'paused'
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX ON learning_plans (student_id, status);
+CREATE INDEX ON learning_plans (user_id, status);
 
--- Individual study sessions within a plan
-CREATE TABLE sessions (
+-- Individual study sessions within a plan (RENAMED to avoid ADK collision)
+CREATE TABLE study_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     plan_id UUID REFERENCES learning_plans(id),
-    topic_id UUID REFERENCES syllabus(id),
-    session_number INT NOT NULL,          -- 1, 2, 3, 4...
+    topic_key VARCHAR(200) NOT NULL,      -- YAML topic ref: "quadratic-equations.standard-form"
+    session_number INT NOT NULL,          -- 1, 2, 3, ...
     scheduled_date DATE,
     scheduled_time TIME,
     video_url TEXT,                        -- YouTube video link
     video_title VARCHAR(500),
     summary TEXT,                          -- AI-generated session summary
     calendar_event_id VARCHAR(200),       -- Google Calendar event ID (for updates)
+    task_id VARCHAR(200),                 -- Google Tasks task ID (for status updates)
+    doc_id VARCHAR(200),                  -- Google Docs document ID (for appending notes)
     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'in_progress', 'completed', 'skipped'
     completed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX ON sessions (plan_id, session_number);
+CREATE INDEX ON study_sessions (plan_id, session_number);
 
 -- Assessment results
 CREATE TABLE assessments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID REFERENCES sessions(id),
-    student_id UUID REFERENCES students(id),
-    topic_id UUID REFERENCES syllabus(id),
+    session_id UUID REFERENCES study_sessions(id),
+    user_id VARCHAR(128) NOT NULL,        -- ADK user_id
+    topic_key VARCHAR(200) NOT NULL,      -- YAML topic ref: "quadratic-equations.standard-form"
     score DECIMAL(5,2),                    -- Percentage score
     total_questions INT,
     correct_answers INT,
@@ -394,42 +531,212 @@ CREATE TABLE assessments (
     feedback TEXT,                         -- AI-generated feedback summary
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX ON assessments (student_id, topic_id);
+CREATE INDEX ON assessments (user_id, topic_key);
 
 -- Aggregated progress tracking
 CREATE TABLE progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id UUID REFERENCES students(id),
-    topic_id UUID REFERENCES syllabus(id),
+    user_id VARCHAR(128) NOT NULL,        -- ADK user_id
+    topic_key VARCHAR(200) NOT NULL,      -- YAML topic ref: "quadratic-equations.standard-form"
     mastery_level VARCHAR(20) DEFAULT 'not_started',  -- 'not_started', 'beginner', 'intermediate', 'mastered'
     best_score DECIMAL(5,2),
     attempts INT DEFAULT 0,
     last_assessed TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(student_id, topic_id)
+    UNIQUE(user_id, topic_key)
 );
-CREATE INDEX ON progress (student_id);
-
--- Quiz question bank (per topic)
-CREATE TABLE questions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    topic_id UUID REFERENCES syllabus(id),
-    difficulty INT CHECK (difficulty BETWEEN 1 AND 5),
-    question_text TEXT NOT NULL,
-    options JSONB,                          -- MCQ: ["A. ...", "B. ...", "C. ...", "D. ..."]
-    correct_option VARCHAR(5),
-    explanation TEXT,                       -- Why the answer is correct
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX ON questions (topic_id, difficulty);
+CREATE INDEX ON progress (user_id);
 ```
 
-### 5.2 Seed Data Strategy
+**What goes where (the clean split):**
 
-**Syllabus data:** Seed Grade 7-10 Math syllabus (CBSE/ICSE-aligned) covering major chapters.
-Start with Math only for the demo — other subjects are structurally identical.
+| Data | Where it lives | Why |
+|---|---|---|
+| Student profile (name, email, grade) | ADK `user_states` via `user:` prefix | Persists across sessions automatically, no custom table needed |
+| Conversation context (current topic, plan ID) | ADK `sessions.state` (no prefix) | Scoped to current conversation, auto-managed |
+| Conversation history | ADK `events` table | Auto-stored by ADK on every interaction |
+| Learning plans | Custom `learning_plans` | Needs relational queries, joins, status tracking |
+| Study session schedule + integration IDs | Custom `study_sessions` | Links to Calendar/Tasks/Docs, tracks completion |
+| Quiz scores + weak areas | Custom `assessments` | Needs aggregation, reporting, trend analysis |
+| Topic mastery levels | Custom `progress` | Drives adaptation — "skip review if mastered" |
 
-**Quiz questions:** AI-generated via Gemini for seeded syllabus topics. 5-10 questions per topic.
+**How data helps the student:**
+
+```
+[1] Student returns for new session
+    │
+    ├── ADK loads user: state automatically
+    │   → Agent knows: name, grade, language, grade_band
+    │
+    ├── get-student-progress (DB MCP) → reads progress table
+    │   → Agent knows: which topics mastered, which need work
+    │
+    └── Curriculum planner has YAML in context
+        → Agent knows: full topic structure, prerequisites, concepts
+        → Plans sessions intelligently (skip mastered, focus on weak)
+
+[2] After assessment
+    │
+    ├── save-assessment → stores score + weak_areas in assessments table
+    │   → Next session: tutor focuses on weak_areas
+    │
+    ├── update-progress → updates mastery_level in progress table
+    │   → If mastery_level stays low → planner adds review session
+    │   → If mastery_level reaches 'mastered' → move to next topic
+    │
+    └── email_agent sends report to parent (from user:parent_email)
+        → Parent sees: score, weak areas, Google Doc link for notes
+```
+
+### 5.3 YAML Curriculum Files (Replaces DB Syllabus)
+
+Syllabus and quiz questions are **static reference data** — they don't change per student.
+Storing them in YAML files instead of AlloyDB eliminates DB cost for syllabus, makes the
+system community-extensible, and gives agents zero-latency access (no MCP round-trip).
+
+**Format:** YAML (best LLM accuracy for Gemini family, human-editable, natural hierarchy).
+
+**Directory:** `data/curricula/{board}/{subject}/grade-{N}.yaml` — one file per grade+subject.
+
+**Auto-discovery:** System scans `data/curricula/` at startup, discovers all available
+boards/subjects/grades. No registration step needed.
+
+**YAML file structure:**
+
+```yaml
+# data/curricula/cbse/math/grade-8.yaml
+curriculum:
+  board: CBSE
+  subject: math
+  grade: 8
+  language: English
+
+chapters:
+  - id: quadratic-equations
+    title: Quadratic Equations
+    sequence: 1
+
+    topics:
+      - id: standard-form
+        title: Basics & Standard Form
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Quadratic equation definition
+          - Standard form ax² + bx + c = 0
+          - Identifying coefficients a, b, c
+        youtube_search_hints:
+          - "quadratic equation standard form grade 8 tutorial"
+        questions:
+          - question: "In 3x² - 5x + 2 = 0, what is the value of 'a'?"
+            options: ["1", "3", "-5", "2"]
+            answer: "3"
+            explanation: "In ax² + bx + c form, 'a' is the coefficient of x²"
+            difficulty: 1
+
+      - id: factoring-method
+        title: Factoring Method
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [standard-form]
+        concepts:
+          - Splitting the middle term
+          - Finding factor pairs
+          - Zero product property
+        youtube_search_hints:
+          - "factoring quadratic equations grade 8"
+        questions:
+          - question: "Solve x² + 5x + 6 = 0 by factoring"
+            options: ["x = -2, -3", "x = 2, 3", "x = -1, -6", "x = 1, 6"]
+            answer: "x = -2, -3"
+            explanation: "x² + 5x + 6 = (x+2)(x+3) = 0"
+            difficulty: 2
+```
+
+**Prerequisites as DAG (dotted paths):**
+- Same chapter: `prerequisites: [standard-form]`
+- Cross-chapter: `prerequisites: [algebraic-expressions.polynomials]`
+- Cross-subject (future): `prerequisites: [math/grade-8/algebra.linear-equations]`
+
+**Agent consumption — load at construction time:**
+
+```python
+import yaml
+from pathlib import Path
+
+def load_curriculum(board: str, subject: str, grade: int) -> dict:
+    path = Path(f"data/curricula/{board}/{subject}/grade-{grade}.yaml")
+    return yaml.safe_load(path.read_text())
+
+def discover_curricula(base_path: str = "data/curricula") -> dict:
+    """Scan curriculum directory and return all available options."""
+    curricula = {}
+    for yaml_file in Path(base_path).rglob("*.yaml"):
+        if yaml_file.name.startswith("_"):
+            continue
+        data = yaml.safe_load(yaml_file.read_text())
+        key = f"{data['curriculum']['board']}/{data['curriculum']['subject']}/grade-{data['curriculum']['grade']}"
+        curricula[key] = data
+    return curricula
+```
+
+**Pydantic validation (in `_schema.yaml` / `curriculum_loader.py`):**
+
+```python
+from pydantic import BaseModel
+from typing import Optional
+
+class Question(BaseModel):
+    question: str
+    options: list[str]
+    answer: str
+    explanation: str = ""
+    difficulty: int = 1
+
+class Topic(BaseModel):
+    id: str
+    title: str
+    sequence: int
+    estimated_minutes: int = 45
+    prerequisites: list[str] = []
+    concepts: list[str] = []
+    youtube_search_hints: list[str] = []
+    questions: list[Question] = []
+
+class Chapter(BaseModel):
+    id: str
+    title: str
+    sequence: int
+    topics: list[Topic]
+
+class CurriculumMeta(BaseModel):
+    board: str
+    subject: str
+    grade: int
+    language: str = "English"
+
+class CurriculumFile(BaseModel):
+    curriculum: CurriculumMeta
+    chapters: list[Chapter]
+```
+
+**Math chapters for demo (Grade 7-10, CBSE-aligned):**
+
+| Chapter | Topics (3-5 each) | Why |
+|---|---|---|
+| Number Systems | Rational numbers, Irrational numbers, Real number line | Foundation concept, grade differentiation is clear |
+| Algebraic Expressions | Polynomials, Factoring, Linear equations | Bread-and-butter tutoring demand |
+| Quadratic Equations | Standard form, Factoring method, Quadratic formula, Completing the square | **Primary demo chapter** |
+| Geometry | Triangles, Circle theorems, Coordinate geometry | Visual + code_executor for plotting |
+| Statistics & Probability | Mean/median/mode, Probability basics | Code_executor for data visualization |
+
+**Physics (backlog):** Structurally identical YAML files. Add once Math flow is complete.
+Chapters: Motion, Force & Laws of Motion, Gravitation, Work & Energy, Light.
+
+**Community extensibility:** Anyone adds a new board/subject/grade by creating a YAML file
+in `data/curricula/{board}/{subject}/grade-{N}.yaml` and opening a PR. No DB migration,
+no code change. The system auto-discovers it at startup.
 
 ---
 
@@ -446,6 +753,9 @@ Carried forward from AI Tutor project:
 | Agent variable | `<name>_agent` | `curriculum_planner_agent`, `email_agent` |
 | Prompt constant | `<AGENT_NAME>_INSTRUCTION` | `CURRICULUM_PLANNER_INSTRUCTION` |
 | ADK `name=` field | `snake_case` | `curriculum_planner_agent` |
+| Curriculum file | `grade-{N}.yaml` in `data/curricula/{board}/{subject}/` | `data/curricula/cbse/math/grade-8.yaml` |
+| Topic ID in YAML | `kebab-case` | `standard-form`, `factoring-method` |
+| Topic key in DB | `chapter.topic` dotted path | `quadratic-equations.standard-form` |
 
 ### 6.2 Agent Construction Rules
 
@@ -526,19 +836,23 @@ Cloud Run: eduflow-frontend (Streamlit)
     ▼  POST /run_sse
 Cloud Run: eduflow-backend (FastAPI + ADK agents)
     │
-    ├─► Calendar MCP server (in-process or sidecar)
-    ├─► Gmail MCP server (in-process or sidecar)
+    ├─► Google Workspace MCP (gws mcp — streamable-http)
+    │       ├── Calendar (schedule sessions)
+    │       ├── Tasks (track progress)
+    │       ├── Gmail (notify parent)
+    │       ├── Docs (study notes)
+    │       └── Drive (organize files)
     │
     ├─► MCP Toolbox ─── Cloud Run: eduflow-toolbox
     │                       │
     │                       ▼
     │                   AlloyDB (asia-southeast1)
-    │                       ├── students, syllabus, learning_plans
-    │                       ├── sessions, assessments, progress
-    │                       └── questions
+    │                       ├── ADK: sessions, events, user_states (auto)
+    │                       └── Custom: learning_plans, study_sessions,
+    │                           assessments, progress
     │
     ▼
-Google APIs (Calendar, Gmail, YouTube)
+Google APIs (YouTube Data API v3)
 ```
 
 ### 8.2 Environment Variables
@@ -552,8 +866,8 @@ Google APIs (Calendar, Gmail, YouTube)
 | `MCP_TOOLBOX_URL` | backend | URL to MCP Toolbox Cloud Run service |
 | `SESSION_DB_URI` | backend | `postgresql+asyncpg://...` for AlloyDB |
 | `YOUTUBE_API_KEY` | backend | YouTube Data API v3 key |
-| `GOOGLE_OAUTH_CLIENT_ID` | backend | OAuth2 for Calendar + Gmail |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | backend | OAuth2 for Calendar + Gmail |
+| `GOOGLE_OAUTH_CLIENT_ID` | backend | OAuth2 for Workspace MCP (Calendar, Tasks, Gmail, Docs, Drive) |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | backend | OAuth2 for Workspace MCP |
 | `GOOGLE_OAUTH_REFRESH_TOKEN` | backend | Pre-authorized token for demo |
 | `BACKEND_URL` | frontend | URL to backend Cloud Run service |
 
@@ -571,42 +885,46 @@ Google APIs (Calendar, Gmail, YouTube)
 ## 9. Implementation Phases (10-Day Plan)
 
 ### Phase 1: Foundation + Research (Days 1-2)
-> **Goal:** Project setup, schema design, validate MCP server approach for Calendar/Gmail.
+> **Goal:** Project setup, schema design, validate `gws` MCP server with ADK.
 
 | # | Item | Priority | Notes |
 |---|------|----------|-------|
 | 1.1 | **Project scaffold** | Critical | Git repo, virtualenv, `eduflow_agents/` package, CLAUDE.md, .gitignore, .env.example |
-| 1.2 | **AlloyDB schema** | Critical | Create all tables from Section 5. Reuse AlloyDB cluster from AI Tutor project. |
-| 1.3 | **Seed syllabus data** | Critical | Grade 7-10 Math (CBSE-aligned). 4-5 chapters, 3-5 topics each. Script: `seed_syllabus.py` |
-| 1.4 | **MCP server research** | Critical | Evaluate existing Calendar/Gmail MCP servers for ADK compatibility. Decision: build custom vs reuse. |
+| 1.2 | **AlloyDB schema** | Critical | Create 4 custom tables from Section 5.2 (learning_plans, study_sessions, assessments, progress). ADK auto-creates session tables. Reuse AlloyDB cluster from AI Tutor project. |
+| 1.3 | **YAML curriculum files** | Critical | Create `data/curricula/cbse/math/grade-{7..10}.yaml` with chapters, topics, concepts, questions. Validate with Pydantic schema. |
+| 1.4 | **Google Workspace CLI setup** | Critical | `npm install -g @googleworkspace/cli`, `gws auth login`, test `gws mcp` with ADK `MCPToolset` |
 | 1.5 | **YouTube API setup** | High | Get API key, test search endpoint, build `youtube_search` function tool |
-| 1.6 | **OAuth2 setup** | High | Google Cloud Console: enable Calendar + Gmail APIs, create OAuth client, get refresh token |
+| 1.6 | **OAuth2 setup** | High | Google Cloud Console: enable Calendar, Tasks, Gmail, Docs, Drive APIs. Single OAuth client for all. |
 
 ### Phase 2: MCP Tools + Database Layer (Days 3-4)
 > **Goal:** All MCP tools working and tested independently.
 
 | # | Item | Priority | Notes |
 |---|------|----------|-------|
-| 2.1 | **Database MCP (MCP Toolbox)** | Critical | `tools.yaml` with all SQL tools from Section 4.2. Test with `curl` against local toolbox. |
-| 2.2 | **Calendar MCP server** | Critical | Build/configure server. Test: create event, list events, update event. |
-| 2.3 | **Gmail MCP server** | Critical | Build/configure server. Test: send email to test address. |
-| 2.4 | **YouTube function tool** | High | `youtube_search.py` in tools/. Test: search returns video URLs. |
-| 2.5 | **Quiz question seeding** | High | AI-generate 5-10 MCQ questions per seeded topic. Script: `seed_questions.py` |
+| 2.1 | **Database MCP (MCP Toolbox)** | Critical | `tools.yaml` with runtime SQL tools from Section 4.2 (no syllabus/questions tools). Test with `curl` against local toolbox. |
+| 2.2 | **Workspace MCP — Calendar** | Critical | Test via `gws`: create event, list events, update event. |
+| 2.3 | **Workspace MCP — Tasks** | Critical | Test via `gws`: create task list, add tasks with notes+links, complete tasks. |
+| 2.4 | **Workspace MCP — Gmail** | Critical | Test via `gws`: send email to test address. |
+| 2.5 | **Workspace MCP — Docs+Drive** | Critical | Test via `gws`: create doc, append content, create Drive folder. |
+| 2.6 | **YouTube function tool** | High | `youtube_search.py` in tools/. Test: search returns video URLs. |
+| 2.7 | **Curriculum loader** | High | `curriculum_loader.py` in tools/. Auto-discover + Pydantic validate YAML files. Test: load grade-8 math curriculum. |
 
 ### Phase 3: Agent Implementation (Days 5-6)
-> **Goal:** All 7 agents implemented and working in `adk web`.
+> **Goal:** All 9 agents + 1 formatter implemented and working in `adk web`.
 
 | # | Item | Priority | Notes |
 |---|------|----------|-------|
-| 3.1 | **orchestrator_agent** | Critical | Root agent with AgentTool-wrapped pipelines. Routing logic for plan/teach/assess/schedule intents. |
-| 3.2 | **curriculum_planner_agent** | Critical | Queries syllabus DB, creates structured session plans. Writes plan to DB. |
+| 3.1 | **orchestrator_agent** | Critical | Root agent with AgentTool-wrapped pipelines. Routing logic for plan/teach/assess/schedule/notes intents. |
+| 3.2 | **curriculum_planner_agent** | Critical | Uses YAML curriculum in context, determines session count based on topic depth, writes plan to DB. |
 | 3.3 | **content_agent** | Critical | Uses youtube_search to find videos per topic. Returns video URLs + titles. |
 | 3.4 | **calendar_agent** | Critical | Creates Google Calendar events for planned sessions. Stores event IDs in DB. |
-| 3.5 | **email_agent** | Critical | Sends learning plan email + progress reports. Uses templates. |
-| 3.6 | **tutor_agent** | High | Teaches concepts with code_executor. Reuse prompt patterns from AI Tutor. |
-| 3.7 | **assessment_agent** | High | Fetches quiz from DB, evaluates answers, stores results, triggers progress update. |
-| 3.8 | **response_formatter** | High | Reuse `make_response_formatter()` factory pattern from AI Tutor. |
-| 3.9 | **Pipeline wiring** | Critical | SequentialAgent pipelines + AgentTool wrappers in `agent.py`. |
+| 3.5 | **tasks_agent** | Critical | Creates TaskList per chapter, adds tasks with notes + YouTube links, marks complete. |
+| 3.6 | **email_agent** | Critical | Sends learning plan email + progress reports. Includes Doc links. |
+| 3.7 | **docs_agent** | Critical | Creates/updates Google Doc study notes per chapter. Organizes in Drive folders. |
+| 3.8 | **tutor_agent** | High | Teaches concepts with code_executor. Grade-band persona injection. |
+| 3.9 | **assessment_agent** | High | Uses quiz questions from YAML curriculum, evaluates answers, stores results in DB, triggers progress update. |
+| 3.10 | **response_formatter** | High | Reuse `make_response_formatter()` factory pattern from AI Tutor. |
+| 3.11 | **Pipeline wiring** | Critical | SequentialAgent pipelines (planning, scheduling, tutoring, notes, assessment) + AgentTool wrappers. |
 
 ### Phase 4: Frontend (Days 7-8)
 > **Goal:** Polished Streamlit UI with video embedding and progress dashboard.
@@ -633,67 +951,69 @@ Google APIs (Calendar, Gmail, YouTube)
 
 ---
 
-## 10. Demo Script (3-Minute Video)
+## 10. Demo Script (3-Minute Video) & Test Plan
 
-```
-[0:00-0:30] Problem: "250M+ APAC students lack structured learning support.
-             Teachers are overwhelmed. Parents are disconnected from progress."
+> Full script, exact inputs/outputs, test checkpoints, setup checklist, and fallback
+> plan are in **`DEMO_SCRIPT.md`** (kept separate to reduce context load during coding).
 
-[0:30-0:50] Solution: "EduFlow — an AI system that plans, schedules, teaches,
-             assesses, and reports. Not just a chatbot — a complete learning workflow."
+### 10.1 Script Overview
 
-[0:50-2:20] Live Demo:
-  1. Student: "I want to learn Quadratic Equations in 1 week"
-  2. Show: AI creates 4-session plan with topics and videos
-  3. Show: Google Calendar — real events appeared!
-  4. Show: Email inbox — parent received the learning plan!
-  5. Student starts Session 1 — video embedded, tutor explains concept
-  6. Student takes quiz — AI evaluates, stores results
-  7. Show: Parent receives progress report email
-  8. Show: Progress dashboard in sidebar
+| Segment | Duration | Criteria targeted |
+|---|---|---|
+| A. The Problem | 0:00–0:20 | Impactful Vision |
+| B. EduFlow in One Line | 0:20–0:30 | Innovation |
+| C. Live Demo — Planning | 0:30–1:10 | Technical Merit, UX |
+| D. Live Demo — Grade-Aware Teaching | 1:10–1:50 | Innovation, Impact |
+| E. Live Demo — Voice + Multilingual | 1:50–2:15 | Impact, Innovation |
+| F. Live Demo — Real Integrations | 2:15–2:35 | Technical Merit |
+| G. Architecture Flash | 2:35–2:50 | Technical Merit |
+| H. Closing | 2:50–3:00 | Impactful Vision |
 
-[2:20-2:50] Architecture: ADK multi-agent → MCP (Calendar, Gmail, Database) →
-             AlloyDB → Cloud Run. Highlight: 7 agents, 4 MCP tools, 11-step workflow.
+### 10.2 Key Test Checkpoints (Summary)
 
-[2:50-3:00] "EduFlow: Because every student deserves a personal learning manager."
-```
+See `DEMO_SCRIPT.md` for full per-segment inputs, expected outputs, and detailed checklists.
+
+| Demo segment | What to verify works |
+|---|---|
+| C. Planning | YAML read → sessions planned → Calendar events + parent email created |
+| D. Grade teaching | `get_grade_band()` correct → persona applied → YouTube differs by grade |
+| E. Voice + Hindi | `st.audio_input` → Gemini detects Hindi → response in Hindi |
+| F. Integrations | Calendar, Tasks, Docs, Drive, Gmail all show real AI-created content |
 
 ---
 
 ## 11. Risks & Mitigations
 
+> **Timeline note:** Planning/research complete as of Day 3. ~7 implementation days remain
+> before the 2026-04-08 deadline. Risks are ordered by implementation phase impact.
+
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Calendar/Gmail OAuth2 complexity | High | Research Day 1. Fallback: use service account or mock the API for demo |
-| YouTube API quota (100 searches/day free) | Medium | Cache results in DB. Pre-seed popular topic videos. |
-| Vertex AI rate limits | High | Use API key for demo (same lesson from AI Tutor). Request quota increase early. |
-| Scope creep on tutoring quality | Medium | Keep tutor_agent simple. The WORKFLOW is the star, not explanation depth. |
-| 10-day timeline pressure | High | Math-only for demo. Other subjects are structurally identical — mention in roadmap. |
-| Cold start on Cloud Run | Low | Handled: empty response detection + "warming up" message (proven pattern). |
+| **YAML curriculum quality** | High | Author Math Grade 7-10 YAML on Day 1 before any agent work. Validate with Pydantic schema. Test `curriculum_planner_agent` with grade-8 YAML before moving to next phase. All agents depend on this — it is the critical path. |
+| **`gws mcp` deployment on Cloud Run** | High | Run `gws mcp` as a 4th Cloud Run service. Test Cloud Run → `gws mcp` connectivity in Phase 2 before building agents that depend on it. Fallback: direct Google API function tools (pre-built backup per demo fallback plan). |
+| **Workspace MCP OAuth2 + `gws` stability** | High | Pin `@googleworkspace/cli` to a specific version. Test `gws auth login` + all 5 services (Calendar, Tasks, Gmail, Docs, Drive) end-to-end in Phase 2. Pre-authorize OAuth refresh token before demo day. |
+| **7-day timeline (was 10-day plan)** | High | Prioritize core flow first: planner → calendar → tutor → assessment. Docs/Tasks/email agents are additive — demo still works without them. Cut Phase 4 video embedding if behind schedule. |
+| **Vertex AI rate limits** | High | Use API key (not Vertex AI) for demo — proven from AI Tutor project. Request quota increase by Day 5. |
+| **`study_sessions` / ADK `sessions` table collision** | Medium | Setup script must never manually create a `sessions` table — ADK owns that name. Add explicit check in `setup_alloydb.sh`. ADK auto-creates its tables on first run via `DatabaseSessionService`. |
+| **`user_id` format in custom tables** | Medium | Enforce UUID format for `user_id` in Streamlit profile form (`str(uuid.uuid4())`). Store in `user:id` session state on first visit. Prevents SQL errors from email-style or special-character user IDs. |
+| **YAML context window size in planner** | Medium | Keep each grade YAML under 2,000 tokens. Inject only the relevant chapter when a specific learning goal is given — not the entire grade curriculum. Test with grade-8 math before scaling to all grades. |
+| **AlloyDB VPC connectivity from Cloud Run** | Medium | Set up Serverless VPC Access connector in Phase 1 infra. Reuse config from AI Tutor project. Verify `MCP_TOOLBOX_URL` is reachable from Cloud Run backend before Phase 3 agent work begins. |
+| **YouTube API quota (100 searches/day free)** | Medium | Pre-populate `youtube_search_hints` in YAML with known-good video IDs per topic. Content agent uses hints first, falls back to live search only if hints return no results. Eliminates most API calls. |
+| **Scope creep on tutoring quality** | Medium | Workflow is the star, not explanation depth. Grade-band personas in Section 14 are finalised — do not iterate on prompts during implementation. |
+| **Cold start on Cloud Run** | Low | Proven pattern from AI Tutor: empty response detection + "warming up" message. Pre-warm backend 5 min before demo recording. |
 
 ---
 
 ## 12. What's Reused vs New
 
-| Component | Reused from AI Tutor | New for EduFlow |
-|---|---|---|
-| ADK agent framework | ✓ | — |
-| SequentialAgent + AgentTool pattern | ✓ | — |
-| MCP Toolbox for Databases | ✓ | New tools.yaml with different SQL |
-| AlloyDB cluster | ✓ (same cluster, new DB) | New schema |
-| Cloud Run deployment pattern | ✓ | — |
-| Dockerfile patterns | ✓ | — |
-| Streamlit SSE streaming | ✓ | Video embed + progress panel new |
-| FastAPI backend | ✓ | — |
-| response_formatter pattern | ✓ | — |
-| code_executor on tutor | ✓ | — |
-| Google Calendar MCP | — | **New** |
-| Gmail MCP | — | **New** |
-| YouTube search tool | — | **New** |
-| Curriculum planner agent | — | **New** |
-| Multi-step workflow orchestration | — | **New** |
-| Student progress tracking | — | **New** |
-| Parent notification system | — | **New** |
+**Reused from AI Tutor:** ADK framework, SequentialAgent + AgentTool pattern, MCP Toolbox
+wiring, AlloyDB cluster (new DB/schema), Cloud Run + Dockerfile patterns, FastAPI backend,
+Streamlit SSE streaming, `response_formatter` factory, `code_executor` on tutor agent.
+
+**New for EduFlow:** Google Workspace MCP (`gws`) — Calendar, Tasks, Gmail, Docs, Drive;
+YAML curriculum files (replaces DB syllabus); YouTube search tool; curriculum planner agent;
+tasks agent; docs agent; multi-step workflow orchestration; grade-aware teaching personas
+(Section 14); voice input + multilingual (Section 15); parent notification system.
 
 ---
 
@@ -719,6 +1039,10 @@ cp eduflow_agents/.env.example eduflow_agents/.env   # fill in API keys
 # Linux/macOS:
 bash scripts/infra/start_toolbox.sh
 
+# Start Google Workspace MCP server (Calendar, Tasks, Gmail, Docs, Drive)
+gws auth login                              # one-time OAuth setup
+gws mcp -s calendar,tasks,gmail,docs,drive  # runs on streamable-http
+
 # Run agents locally
 adk web   # select 'eduflow_agents' from dropdown
 
@@ -734,3 +1058,171 @@ GOOGLE_API_KEY=<gemini-api-key>
 YOUTUBE_API_KEY=<youtube-data-api-key>
 GOOGLE_OAUTH_REFRESH_TOKEN=<pre-authorized-token>
 ```
+
+---
+
+## 14. Grade-Aware Teaching & Content Generation
+
+> **Core idea:** The same topic taught differently per grade. EduFlow's tutor doesn't just
+> explain — it hooks the student with grade-appropriate analogies, concise language, and
+> curiosity-sparking questions. YouTube links are filtered by grade band.
+
+### 14.1 Design Principles (from Google LearnLM)
+
+LearnLM capabilities are now infused into Gemini 2.5. We encode these five learning science
+principles directly into our tutor prompt:
+
+| Principle | Prompt technique |
+|---|---|
+| **Active Learning** | End each explanation with a thought-provoking question, not a summary |
+| **Cognitive Load** | One concept per turn. Short sentences. No walls of text. |
+| **Adaptation** | Grade-band persona injected via session state |
+| **Curiosity** | Lead with a "hook" — a surprising fact, real-world connection, or "what if?" |
+| **Metacognition** | Occasionally ask: "What part clicked? What still feels fuzzy?" |
+
+### 14.2 Grade Bands
+
+| Band | Grades | Vocabulary | Examples | Hook Style |
+|---|---|---|---|---|
+| **Foundation** | 5-6 | Everyday words. Define math terms on first use. | Pizza slices, marbles, pocket money | "Did you know..." + fun fact |
+| **Building** | 7-8 | Formal terms with simple definitions | Speed/distance, simple interest | "What if I told you..." + pattern |
+| **Bridging** | 9-10 | Standard math terminology | Textbook-style, multi-step | "Here's the trick that most students miss..." |
+| **Advanced** | 11-12 | University-level precision | Competition, proof-based | "This connects to..." + cross-domain link |
+
+### 14.3 Tutor Prompt Pattern
+
+Every tutor response follows this structure:
+
+```
+1. HOOK (1 sentence) — Surprise, analogy, or "what if?" to grab attention
+2. EXPLAIN (3-5 sentences) — Core concept, grade-appropriate vocabulary
+3. EXAMPLE (worked) — Step-by-step, real-world for lower grades, algebraic for higher
+4. SPARK (1 question) — "Why do you think...?" / "What would happen if...?"
+```
+
+Grade-band persona snippet (injected by orchestrator):
+
+```python
+GRADE_BAND_PERSONAS = {
+    "foundation": """You are a fun, encouraging math tutor for a Grade {grade} student.
+HOOK: Start every explanation with a surprising real-world connection the student can
+  see or touch (pizza, playground, coins). Make them go "whoa!"
+LANGUAGE: Everyday words only. Max 12 words per sentence. Define any math term simply.
+EXAMPLES: Use physical objects and counting. Show pictures in words.
+STYLE: One concept at a time. Full worked example first, then guided practice.
+TONE: Warm and encouraging. Never say "wrong" — say "Almost! Let's try together."
+END: Close with a curiosity question: "What do you think would happen if...?"
+""",
+    "building": """You are a supportive math tutor for a Grade {grade} student.
+HOOK: Start with a "what if" scenario or a pattern to discover.
+LANGUAGE: Introduce formal terms with simple definitions on first use.
+EXAMPLES: Semi-real scenarios (speed, interest, geometry), then algebraic.
+STYLE: One worked example → "Your turn" with hints available.
+TONE: Supportive. "Not quite — here's a clue."
+END: Ask "Can you spot the pattern?" or "Why does this work?"
+""",
+    "bridging": """You are a math tutor for a Grade {grade} student preparing for exams.
+HOOK: Start with the trick or insight that makes this topic click.
+LANGUAGE: Standard mathematical terminology. No simplification needed.
+EXAMPLES: Textbook-style. Multi-step problems.
+STYLE: Problem → attempt → hints only if stuck → verify.
+TONE: Direct. "Your step 3 has an issue — can you find it?"
+END: Ask "Why does this method work?" or "When would it fail?"
+""",
+    "advanced": """You are a rigorous math tutor for a Grade {grade} student targeting
+competitive exams.
+HOOK: Start with a cross-domain connection or an elegant insight.
+LANGUAGE: University-level precision. No dumbing down.
+EXAMPLES: Competition-level. Proof-based. Edge cases.
+STYLE: Problem → student works → critique approach → discuss alternatives.
+END: "Can you generalize?" or "Prove that..."
+"""
+}
+
+def get_grade_band(grade: str) -> str:
+    grade_num = int(''.join(filter(str.isdigit, grade)) or '7')
+    if grade_num <= 6: return "foundation"
+    elif grade_num <= 8: return "building"
+    elif grade_num <= 10: return "bridging"
+    return "advanced"
+```
+
+### 14.4 YouTube Search Adaptation
+
+`youtube_search` appends grade-appropriate modifiers:
+
+| Band | Query suffix | Why |
+|---|---|---|
+| Foundation | `"for kids" OR "animated"` | Visual, fun explainers |
+| Building | `"tutorial" OR "explained"` | Step-by-step walkthroughs |
+| Bridging | `"CBSE" OR "ICSE" OR "board exam"` | Exam-relevant content |
+| Advanced | `"proof" OR "advanced" OR "lecture"` | Rigorous, depth-first |
+
+### 14.5 Demo Moment (The "Wow")
+
+Split-screen: same question, two grades.
+
+- **Grade 6:** "What is area of a circle?" → Thin circle segments rearranged into a rectangle (visual proof: long side = πr, short side = r, so area = πr²) + animated YouTube video
+- **Grade 10:** Same question → Derive using integration (concentric rings of width dr, integrate 2πr·dr from 0 to R → πR²) + code_executor verification + lecture-style video
+
+Same system. Same agent. Different grade. **Different teacher.**
+
+### 14.6 Research Sources
+
+- [LearnLM — Gemini API docs](https://ai.google.dev/gemini-api/docs/learnlm)
+- [Classroom AI: LLMs as Grade-Specific Teachers (Nature, 2026)](https://arxiv.org/abs/2601.06225)
+- [Adaptive Scaffolding for LLM Pedagogical Agents (arXiv 2508.01503)](https://arxiv.org/abs/2508.01503)
+- [GraphMASAL: Multi-Agent Adaptive Learning (arXiv 2511.11035)](https://www.arxiv.org/pdf/2511.11035)
+
+---
+
+## 15. Voice Input & Multilingual Support
+
+> Students can speak in their native language and receive tutor responses in the same
+> language. Removes two barriers at once: typing difficulty and language.
+
+### 15.1 Approach: Gemini Native Audio (Multimodal)
+
+Gemini 2.5 Flash accepts audio input natively — no separate speech-to-text or translation
+service needed. It auto-detects the spoken language and responds accordingly.
+
+**Supported:** 70+ languages including Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam,
+Marathi, Punjabi, Urdu, Gujarati, Vietnamese, Thai, Indonesian, and more.
+
+**Flow:**
+1. `st.audio_input("Speak your answer", sample_rate=16000)` captures WAV in Streamlit
+2. Audio bytes sent to backend via `/run_sse` as part of request
+3. Backend passes audio as multimodal input to Gemini alongside conversation context
+4. Gemini auto-detects language, transcribes, understands, and responds in same language
+5. Tutor prompt includes: "Respond in {user:preferred_language}"
+
+**Fallback:** Text chat input always available. Both input modes coexist.
+
+### 15.2 Multilingual Tutor Behaviour
+
+| Scenario | Behaviour |
+|---|---|
+| Student speaks Hindi | Gemini detects Hindi, responds in Hindi |
+| Student mixes Hindi + English | Gemini handles code-switching naturally |
+| `preferred_language` set to Tamil | All tutor responses in Tamil, regardless of input language |
+| Language not set | Gemini mirrors the student's spoken/typed language |
+
+The grade-band personas (Section 14) work across languages — Gemini adapts vocabulary
+complexity within the target language.
+
+### 15.3 Implementation Effort
+
+| Item | Effort | Notes |
+|---|---|---|
+| `st.audio_input` in Streamlit | ~5 lines | Built-in widget, no extra package |
+| Pass audio bytes to backend | ~10 lines | Add to `/run_sse` request payload |
+| Gemini multimodal input handling | ~10 lines | Convert WAV to `types.Blob` for Gemini |
+| Language preference in tutor prompt | Already exists | `user:preferred_language` session state key |
+
+### 15.4 Demo Moment
+
+"A Grade 7 student in rural India speaks in Hindi: 'मुझे द्विघात समीकरण समझाओ'
+(Explain quadratic equations to me). EduFlow responds with a friendly, grade-appropriate
+explanation in Hindi, with a YouTube video link."
+
+**Same system. Any language. Any grade. Accessible education for all.**
