@@ -1,0 +1,819 @@
+curriculum:
+  board: CBSE
+  subject: math
+  grade: 7
+  language: English
+
+chapters:
+
+  # -------------------------------------------------------------------------
+  - id: integers
+    title: Integers
+    sequence: 1
+    topics:
+      - id: intro-integers
+        title: Introduction to Integers
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Negative numbers and integers on a number line
+          - Ordering integers — greater than, less than
+          - Absolute value of an integer
+          - Opposite of an integer
+        youtube_search_hints:
+          - "integers introduction number line class 7 CBSE"
+        questions:
+          - question: "Which of the following is the greatest integer?"
+            options: ["−10", "−1", "0", "−100"]
+            answer: "0"
+            explanation: "On the number line, 0 > −1 > −10 > −100. So 0 is the greatest."
+            difficulty: 1
+          - question: "The absolute value of −15 is:"
+            options: ["−15", "15", "0", "−1"]
+            answer: "15"
+            explanation: "Absolute value (|x|) is the distance from zero — always non-negative. |−15| = 15."
+            difficulty: 1
+
+      - id: operations-integers
+        title: Operations on Integers
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [intro-integers]
+        concepts:
+          - Adding integers — same sign (add, keep sign), different sign (subtract, take sign of larger)
+          - Subtracting integers — add the opposite
+          - Multiplying integers — same signs give positive, different signs give negative
+          - Dividing integers — same rule as multiplication for sign
+        youtube_search_hints:
+          - "operations on integers class 7 CBSE addition subtraction multiplication"
+        questions:
+          - question: "(−7) × (−4) = ?"
+            options: ["−28", "28", "11", "−11"]
+            answer: "28"
+            explanation: "Negative × Negative = Positive. (−7) × (−4) = 28."
+            difficulty: 1
+          - question: "(−48) ÷ 6 = ?"
+            options: ["8", "−8", "42", "−42"]
+            answer: "−8"
+            explanation: "Negative ÷ Positive = Negative. 48 ÷ 6 = 8, so (−48) ÷ 6 = −8."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: fractions
+    title: Fractions
+    sequence: 2
+    topics:
+      - id: operations-fractions
+        title: Operations on Fractions
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Adding and subtracting fractions with different denominators (using LCM)
+          - Multiplying fractions — multiply numerators, multiply denominators
+          - Dividing fractions — multiply by reciprocal
+          - Mixed numbers and improper fractions
+        youtube_search_hints:
+          - "fractions operations class 7 CBSE add subtract multiply divide"
+        questions:
+          - question: "2/3 + 3/4 = ?"
+            options: ["5/7", "5/12", "17/12", "6/7"]
+            answer: "17/12"
+            explanation: "LCM of 3 and 4 is 12. 2/3=8/12, 3/4=9/12. Sum=17/12."
+            difficulty: 1
+          - question: "3/5 ÷ 9/10 = ?"
+            options: ["27/50", "2/3", "5/6", "6/5"]
+            answer: "2/3"
+            explanation: "3/5 × 10/9 = 30/45 = 2/3."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: decimals
+    title: Decimals
+    sequence: 3
+    topics:
+      - id: operations-decimals
+        title: Operations on Decimals
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Adding and subtracting decimals — align decimal points
+          - Multiplying decimals — multiply as integers, then place decimal
+          - Dividing decimals — shift decimal points to make divisor an integer
+          - Converting between fractions and decimals
+        youtube_search_hints:
+          - "decimals operations class 7 CBSE multiply divide"
+        questions:
+          - question: "3.5 × 1.2 = ?"
+            options: ["4.7", "4.20", "42", "4.2"]
+            answer: "4.2"
+            explanation: "35 × 12 = 420. Two decimal places total: 4.20 = 4.2."
+            difficulty: 1
+          - question: "0.48 ÷ 0.6 = ?"
+            options: ["0.8", "8", "0.08", "0.48"]
+            answer: "0.8"
+            explanation: "0.48/0.6 = 48/60 = 4/5 = 0.8."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: rational-numbers
+    title: Rational Numbers
+    sequence: 4
+    topics:
+      - id: intro-rational
+        title: Introduction to Rational Numbers
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [fractions.operations-fractions]
+        concepts:
+          - Rational number — p/q where p, q are integers and q ≠ 0
+          - Positive and negative rational numbers
+          - Equivalent rational numbers
+          - Standard form of a rational number
+        youtube_search_hints:
+          - "rational numbers introduction class 7 CBSE"
+        questions:
+          - question: "Which of these is a rational number?"
+            options: ["√3", "π", "−7/5", "∞"]
+            answer: "−7/5"
+            explanation: "−7/5 is in p/q form with integers p=−7, q=5≠0. It is rational."
+            difficulty: 1
+
+      - id: operations-rational
+        title: Operations on Rational Numbers
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [intro-rational]
+        concepts:
+          - Adding/subtracting rational numbers (find common denominator)
+          - Multiplying rational numbers
+          - Dividing rational numbers — multiply by reciprocal
+          - Rational numbers on a number line
+        youtube_search_hints:
+          - "operations on rational numbers class 7 CBSE"
+        questions:
+          - question: "1/2 + (−3/4) = ?"
+            options: ["−1/4", "1/4", "−5/4", "5/4"]
+            answer: "−1/4"
+            explanation: "LCM=4: 2/4 + (−3/4) = −1/4."
+            difficulty: 1
+          - question: "(−2/3) × (−9/4) = ?"
+            options: ["−3/2", "3/2", "6/7", "−6/7"]
+            answer: "3/2"
+            explanation: "Neg × Neg = Pos. (2×9)/(3×4) = 18/12 = 3/2."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: exponents
+    title: Exponents
+    sequence: 5
+    topics:
+      - id: laws-exponents
+        title: Exponents and Laws
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Exponent notation — aⁿ means a multiplied n times
+          - Product rule — aᵐ × aⁿ = aᵐ⁺ⁿ
+          - Quotient rule — aᵐ ÷ aⁿ = aᵐ⁻ⁿ
+          - Power rule — (aᵐ)ⁿ = aᵐⁿ
+          - a⁰ = 1 for any non-zero a
+        youtube_search_hints:
+          - "exponents laws class 7 CBSE powers"
+        questions:
+          - question: "5³ × 5² = ?"
+            options: ["5⁵", "5⁶", "25⁵", "10⁵"]
+            answer: "5⁵"
+            explanation: "Product rule: 5³ × 5² = 5^(3+2) = 5⁵."
+            difficulty: 1
+          - question: "(2³)² = ?"
+            options: ["2⁵", "2⁶", "4³", "8²"]
+            answer: "2⁶"
+            explanation: "Power rule: (2³)² = 2^(3×2) = 2⁶."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: algebraic-expressions
+    title: Algebraic Expressions
+    sequence: 6
+    topics:
+      - id: terms-and-operations
+        title: Terms, Coefficients, and Operations
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Terms — constants, variables, coefficients
+          - Like and unlike terms
+          - Adding and subtracting algebraic expressions
+          - Value of an expression for a given variable
+        youtube_search_hints:
+          - "algebraic expressions terms like unlike class 7 CBSE"
+        questions:
+          - question: "The coefficient of x in −5xy is:"
+            options: ["−5", "−5y", "y", "5"]
+            answer: "−5y"
+            explanation: "In −5xy, the coefficient of x is the rest: −5y."
+            difficulty: 1
+          - question: "Add 3a + 4b and 2a − 3b:"
+            options: ["5a + b", "5a − b", "a + 7b", "5a + 7b"]
+            answer: "5a + b"
+            explanation: "(3a+2a) + (4b−3b) = 5a + b."
+            difficulty: 1
+
+      - id: simple-expressions
+        title: Simple Expressions and Formulas
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [terms-and-operations]
+        concepts:
+          - Evaluating expressions by substitution
+          - Using formulas — perimeter, area
+          - Generating number patterns using expressions
+        youtube_search_hints:
+          - "evaluating algebraic expressions substitution class 7"
+        questions:
+          - question: "If a = 3 and b = 2, find 2a² − 3b:"
+            options: ["10", "12", "8", "6"]
+            answer: "12"
+            explanation: "2(3²) − 3(2) = 2(9) − 6 = 18 − 6 = 12."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: linear-equations
+    title: Linear Equations in One Variable
+    sequence: 7
+    topics:
+      - id: solving-one-variable
+        title: Solving Linear Equations
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [algebraic-expressions.terms-and-operations]
+        concepts:
+          - Equation — LHS = RHS
+          - Solving by transposing (moving terms across =)
+          - Equations with variables on one side, numbers on other
+          - Checking the solution by substitution
+        youtube_search_hints:
+          - "linear equations one variable class 7 CBSE transposing"
+        questions:
+          - question: "Solve 3x − 5 = 7:"
+            options: ["x = 2", "x = 4", "x = 3", "x = 6"]
+            answer: "x = 4"
+            explanation: "3x = 7 + 5 = 12. x = 12/3 = 4."
+            difficulty: 1
+          - question: "Solve 2(x + 3) = 14:"
+            options: ["x = 4", "x = 7", "x = 5", "x = 3"]
+            answer: "x = 4"
+            explanation: "x + 3 = 7. x = 4."
+            difficulty: 1
+
+      - id: word-problems-equations
+        title: Word Problems on Linear Equations
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [solving-one-variable]
+        concepts:
+          - Translating real situations into equations
+          - Age problems with one unknown
+          - Perimeter problems
+          - Consecutive number problems
+        youtube_search_hints:
+          - "word problems linear equations class 7 age perimeter"
+        questions:
+          - question: "Riya is 5 years older than her brother. Their ages sum to 25. Riya's age:"
+            options: ["10", "12", "15", "13"]
+            answer: "15"
+            explanation: "Let brother = x. Riya = x+5. x+(x+5)=25. 2x=20. x=10. Riya=15."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: ratio-and-proportion
+    title: Ratio and Proportion
+    sequence: 8
+    topics:
+      - id: ratio
+        title: Ratio
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Ratio — comparison of two quantities (a:b)
+          - Equivalent ratios — multiplying/dividing both parts by same number
+          - Simplest form of a ratio
+          - Comparing ratios
+        youtube_search_hints:
+          - "ratio class 7 CBSE equivalent ratios"
+        questions:
+          - question: "The ratio 24:36 in simplest form is:"
+            options: ["4:6", "2:3", "6:9", "12:18"]
+            answer: "2:3"
+            explanation: "HCF of 24 and 36 is 12. 24÷12 : 36÷12 = 2:3."
+            difficulty: 1
+
+      - id: proportion
+        title: Proportion and Unitary Method
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [ratio]
+        concepts:
+          - Proportion — a:b = c:d (product of means = product of extremes)
+          - Unitary method — find value of one unit, then scale
+          - Direct proportion
+        youtube_search_hints:
+          - "proportion unitary method class 7 CBSE"
+        questions:
+          - question: "If 8 pens cost ₹56, how much do 5 pens cost?"
+            options: ["₹35", "₹40", "₹30", "₹45"]
+            answer: "₹35"
+            explanation: "Cost of 1 pen = 56÷8 = ₹7. Cost of 5 pens = 5×7 = ₹35."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: unitary-method
+    title: Unitary Method
+    sequence: 9
+    topics:
+      - id: direct-variation
+        title: Direct Variation Problems
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [ratio-and-proportion.proportion]
+        concepts:
+          - Direct variation — more of one → more of another
+          - Setting up the unitary method table
+          - Word problems — speed, workers, goods
+        youtube_search_hints:
+          - "unitary method direct variation class 7 CBSE word problems"
+        questions:
+          - question: "A car travels 180 km in 3 hours. Distance in 5 hours at same speed:"
+            options: ["200 km", "250 km", "300 km", "360 km"]
+            answer: "300 km"
+            explanation: "Speed = 180/3 = 60 km/h. In 5 hours = 60×5 = 300 km."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: percentage
+    title: Percentage
+    sequence: 10
+    topics:
+      - id: percentage-basics
+        title: Percentage — Concept and Conversion
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [fractions.operations-fractions]
+        concepts:
+          - Percent means per hundred
+          - Converting fractions/decimals to percent and back
+          - Finding percentage of a quantity
+          - Finding what percent one is of another
+        youtube_search_hints:
+          - "percentage basics class 7 CBSE fraction decimal conversion"
+        questions:
+          - question: "What is 30% of 150?"
+            options: ["30", "45", "50", "15"]
+            answer: "45"
+            explanation: "30% of 150 = (30/100) × 150 = 45."
+            difficulty: 1
+          - question: "What percent of 80 is 20?"
+            options: ["16%", "20%", "25%", "40%"]
+            answer: "25%"
+            explanation: "(20/80) × 100 = 25%."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: profit-and-loss
+    title: Profit and Loss
+    sequence: 11
+    topics:
+      - id: profit-loss-basics
+        title: Profit and Loss Basics
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [percentage.percentage-basics]
+        concepts:
+          - Cost Price (CP) and Selling Price (SP)
+          - Profit = SP − CP; Loss = CP − SP
+          - Profit% = (Profit/CP) × 100
+          - Loss% = (Loss/CP) × 100
+          - Finding SP or CP when profit%/loss% is given
+        youtube_search_hints:
+          - "profit and loss class 7 CBSE basics"
+        questions:
+          - question: "Bought for ₹400, sold for ₹460. Profit% is:"
+            options: ["10%", "12%", "15%", "20%"]
+            answer: "15%"
+            explanation: "Profit = 60. Profit% = (60/400)×100 = 15%."
+            difficulty: 1
+          - question: "SP = ₹550 with 10% profit. CP ="
+            options: ["₹500", "₹495", "₹480", "₹520"]
+            answer: "₹500"
+            explanation: "SP = CP × (1 + 10/100) → 550 = CP × 1.1 → CP = 500."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: simple-interest
+    title: Simple Interest
+    sequence: 12
+    topics:
+      - id: si-formula
+        title: Simple Interest Formula
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [percentage.percentage-basics]
+        concepts:
+          - SI = (P × R × T) / 100
+          - Amount = P + SI
+          - Finding P, R, or T given the other values
+          - Real-world problems on loans and savings
+        youtube_search_hints:
+          - "simple interest formula class 7 CBSE P R T"
+        questions:
+          - question: "SI on ₹1200 at 5% per annum for 3 years:"
+            options: ["₹150", "₹180", "₹200", "₹60"]
+            answer: "₹180"
+            explanation: "SI = (1200×5×3)/100 = 18000/100 = ₹180."
+            difficulty: 1
+          - question: "Principal is ₹5000, SI for 2 years is ₹600. Rate of interest:"
+            options: ["5%", "6%", "8%", "12%"]
+            answer: "6%"
+            explanation: "R = (SI×100)/(P×T) = (600×100)/(5000×2) = 6%."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: lines-and-angles
+    title: Lines and Angles
+    sequence: 13
+    topics:
+      - id: types-of-angles
+        title: Types of Angles and Their Pairs
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Acute, right, obtuse, straight, reflex angles
+          - Complementary angles — sum 90°
+          - Supplementary angles — sum 180°
+          - Adjacent angles, linear pair, vertically opposite
+        youtube_search_hints:
+          - "types of angles complementary supplementary class 7 CBSE"
+        questions:
+          - question: "The complement of 37° is:"
+            options: ["53°", "143°", "63°", "47°"]
+            answer: "53°"
+            explanation: "Complement = 90° − 37° = 53°."
+            difficulty: 1
+          - question: "Two angles are supplementary. One is 70°. The other is:"
+            options: ["20°", "110°", "120°", "290°"]
+            answer: "110°"
+            explanation: "Supplement = 180° − 70° = 110°."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: properties-parallel-lines
+    title: Properties of Parallel Lines
+    sequence: 14
+    topics:
+      - id: transversal-angles
+        title: Angles with a Transversal
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [lines-and-angles.types-of-angles]
+        concepts:
+          - Corresponding angles — equal (when lines are parallel)
+          - Alternate interior angles — equal
+          - Co-interior angles — supplementary
+          - Identifying parallel lines using angle properties
+        youtube_search_hints:
+          - "parallel lines transversal angles class 7 CBSE corresponding alternate"
+        questions:
+          - question: "Alternate interior angles are:"
+            options: ["Always supplementary", "Equal when lines are parallel", "Always 90°", "Equal only when perpendicular"]
+            answer: "Equal when lines are parallel"
+            explanation: "When a transversal cuts parallel lines, alternate interior angles are equal."
+            difficulty: 1
+          - question: "Co-interior angles (same side of transversal between parallel lines) add up to:"
+            options: ["90°", "180°", "270°", "360°"]
+            answer: "180°"
+            explanation: "Co-interior angles are supplementary — they sum to 180°."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: properties-triangles
+    title: Properties of Triangles
+    sequence: 15
+    topics:
+      - id: angle-sum-exterior
+        title: Angle Sum and Exterior Angle Property
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [properties-parallel-lines.transversal-angles]
+        concepts:
+          - Sum of all angles of a triangle = 180°
+          - Exterior angle = sum of two non-adjacent interior angles
+          - Types of triangles — by sides (scalene, isosceles, equilateral) and angles
+        youtube_search_hints:
+          - "angle sum property triangle exterior angle class 7 CBSE"
+        questions:
+          - question: "Two angles of a triangle are 55° and 75°. The third angle is:"
+            options: ["40°", "50°", "60°", "120°"]
+            answer: "50°"
+            explanation: "Third angle = 180° − 55° − 75° = 50°."
+            difficulty: 1
+          - question: "An exterior angle of a triangle is 120°. One non-adjacent interior angle is 70°. The other is:"
+            options: ["50°", "60°", "10°", "190°"]
+            answer: "50°"
+            explanation: "Exterior angle = sum of non-adjacent interior angles. 120° = 70° + x. x = 50°."
+            difficulty: 1
+
+      - id: pythagoras-intro
+        title: Pythagoras Theorem (Introduction)
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [angle-sum-exterior]
+        concepts:
+          - Right triangle — one angle is 90°
+          - Hypotenuse — longest side, opposite 90°
+          - Pythagorean theorem — c² = a² + b²
+          - Identifying right triangles using the theorem
+        youtube_search_hints:
+          - "Pythagoras theorem introduction class 7 CBSE right triangle"
+        questions:
+          - question: "In a right triangle with legs 6 cm and 8 cm, the hypotenuse is:"
+            options: ["10 cm", "14 cm", "√28 cm", "12 cm"]
+            answer: "10 cm"
+            explanation: "c = √(6²+8²) = √(36+64) = √100 = 10 cm."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: congruence
+    title: Congruence
+    sequence: 16
+    topics:
+      - id: congruent-figures
+        title: Congruent Triangles and Criteria
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [properties-triangles.angle-sum-exterior]
+        concepts:
+          - Congruent figures — same shape and size
+          - SSS, SAS, ASA, RHS criteria
+          - Corresponding parts of congruent triangles (CPCT)
+          - Identifying congruence in real figures
+        youtube_search_hints:
+          - "congruence of triangles class 7 CBSE SSS SAS ASA"
+        questions:
+          - question: "Two triangles with all three sides equal are congruent by:"
+            options: ["SAS", "SSS", "ASA", "RHS"]
+            answer: "SSS"
+            explanation: "SSS (Side-Side-Side): all three pairs of corresponding sides are equal."
+            difficulty: 1
+          - question: "In △ABC and △PQR, ∠B=∠Q=90°, AB=PQ, BC=QR. Congruence by:"
+            options: ["SAS", "SSS", "ASA", "RHS"]
+            answer: "RHS"
+            explanation: "Right angle (90°) + equal hypotenuse... wait: BC=QR is a leg. AB=PQ is also a leg. Check: if right angle at B and Q, then hypotenuse is AC and PR. With AB=PQ and BC=QR (legs), this is SAS."
+            explanation: "∠B=∠Q=90°, AB=PQ (one side), BC=QR (another side). Two sides and included angle → SAS."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: constructions
+    title: Constructions
+    sequence: 17
+    topics:
+      - id: basic-constructions
+        title: Basic Geometric Constructions
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Drawing a perpendicular to a line through a point
+          - Bisecting a line segment
+          - Bisecting an angle
+          - Constructing a triangle given three sides
+        youtube_search_hints:
+          - "basic constructions class 7 CBSE perpendicular bisector angle"
+        questions:
+          - question: "To bisect a line segment AB, we draw arcs from A and B with the same radius and the radius must be:"
+            options: ["Less than AB", "Equal to AB", "More than half of AB", "Exactly AB/2"]
+            answer: "More than half of AB"
+            explanation: "Arcs from A and B must intersect — radius must exceed half of AB."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: symmetry
+    title: Reflection and Rotational Symmetry
+    sequence: 18
+    topics:
+      - id: line-symmetry
+        title: Line Symmetry (Reflection Symmetry)
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Line of symmetry — divides figure into two mirror halves
+          - Number of lines of symmetry in regular polygons
+          - Figures with no line of symmetry
+          - Reflection of a point across a line
+        youtube_search_hints:
+          - "line symmetry reflection class 7 CBSE"
+        questions:
+          - question: "A rectangle has how many lines of symmetry?"
+            options: ["1", "2", "4", "0"]
+            answer: "2"
+            explanation: "A rectangle has 2 lines of symmetry — one horizontal and one vertical through the centre."
+            difficulty: 1
+          - question: "A regular hexagon has how many lines of symmetry?"
+            options: ["3", "4", "6", "12"]
+            answer: "6"
+            explanation: "A regular hexagon has 6 lines of symmetry — 3 through opposite vertices, 3 through midpoints of opposite sides."
+            difficulty: 2
+
+      - id: rotational-symmetry
+        title: Rotational Symmetry
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [line-symmetry]
+        concepts:
+          - Centre of rotation and angle of rotation
+          - Order of rotational symmetry — number of times figure looks the same in one full rotation
+          - Order of symmetry for regular polygons = number of sides
+          - Figures with rotational symmetry of order 1 (no rotational symmetry)
+        youtube_search_hints:
+          - "rotational symmetry order class 7 CBSE"
+        questions:
+          - question: "The order of rotational symmetry of a square is:"
+            options: ["1", "2", "3", "4"]
+            answer: "4"
+            explanation: "A square looks the same after rotations of 90°, 180°, 270°, 360° — order 4."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: three-dimensional-shapes
+    title: Three-Dimensional Shapes
+    sequence: 19
+    topics:
+      - id: faces-edges-vertices
+        title: Faces, Edges and Vertices
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Faces, edges, vertices of 3D solids
+          - Euler's formula — F + V − E = 2
+          - Nets of cubes, cuboids, cylinders, cones, pyramids
+          - Identifying 3D shapes from 2D drawings
+        youtube_search_hints:
+          - "3D shapes faces edges vertices nets class 7 CBSE"
+        questions:
+          - question: "A triangular pyramid (tetrahedron) has how many faces?"
+            options: ["3", "4", "5", "6"]
+            answer: "4"
+            explanation: "A triangular pyramid has 1 triangular base + 3 triangular lateral faces = 4 faces."
+            difficulty: 1
+          - question: "Using Euler's formula, a solid has 8 vertices and 12 edges. How many faces?"
+            options: ["4", "5", "6", "8"]
+            answer: "6"
+            explanation: "F + V − E = 2 → F + 8 − 12 = 2 → F = 6. (This is a cuboid.)"
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: mensuration
+    title: Mensuration
+    sequence: 20
+    topics:
+      - id: perimeter-and-area
+        title: Perimeter and Area of Plane Figures
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Perimeter — sum of all sides
+          - Area of rectangle = l × b
+          - Area of square = a²
+          - Area of parallelogram = base × height
+          - Area of triangle = ½ × base × height
+        youtube_search_hints:
+          - "perimeter area rectangle triangle parallelogram class 7 CBSE"
+        questions:
+          - question: "Area of a triangle with base 10 cm and height 7 cm:"
+            options: ["35 cm²", "70 cm²", "17 cm²", "14 cm²"]
+            answer: "35 cm²"
+            explanation: "Area = ½ × 10 × 7 = 35 cm²."
+            difficulty: 1
+          - question: "Perimeter of a rectangle with l=12 cm and b=5 cm:"
+            options: ["34 cm", "60 cm", "17 cm", "24 cm"]
+            answer: "34 cm"
+            explanation: "Perimeter = 2(l+b) = 2(12+5) = 2×17 = 34 cm."
+            difficulty: 1
+
+      - id: circles-mensuration
+        title: Circumference and Area of a Circle
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [perimeter-and-area]
+        concepts:
+          - Circumference = 2πr or πd
+          - Area of circle = πr²
+          - Using π = 22/7 or 3.14
+          - Real-world problems involving circles
+        youtube_search_hints:
+          - "circumference area circle class 7 CBSE"
+        questions:
+          - question: "Circumference of a circle with r=7 cm (π=22/7):"
+            options: ["22 cm", "44 cm", "154 cm", "88 cm"]
+            answer: "44 cm"
+            explanation: "C = 2πr = 2 × (22/7) × 7 = 44 cm."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: data-collection
+    title: Collection and Organisation of Data
+    sequence: 21
+    topics:
+      - id: organising-data
+        title: Organising Data — Tally, Tables, Mean, Median, Mode
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Collecting and recording data — tally marks
+          - Frequency table
+          - Mean = sum / count
+          - Median — middle value of sorted data
+          - Mode — most frequent value
+        youtube_search_hints:
+          - "data collection mean median mode class 7 CBSE"
+        questions:
+          - question: "Mean of 6, 8, 10, 4, 12 is:"
+            options: ["7", "8", "9", "10"]
+            answer: "8"
+            explanation: "Sum = 40. Mean = 40/5 = 8."
+            difficulty: 1
+          - question: "Mode of 2, 4, 3, 2, 5, 2, 4 is:"
+            options: ["2", "4", "3", "5"]
+            answer: "2"
+            explanation: "2 appears 3 times — most frequent. Mode = 2."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: bar-graphs
+    title: Bar Graphs
+    sequence: 22
+    topics:
+      - id: drawing-reading-bar-graphs
+        title: Drawing and Reading Bar Graphs
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [data-collection.organising-data]
+        concepts:
+          - Components — title, axes, scale, bars
+          - Choosing appropriate scale
+          - Reading data from bar graphs
+          - Drawing bar graphs from data tables
+          - Double bar graphs — comparing two sets of data
+        youtube_search_hints:
+          - "bar graphs drawing reading class 7 CBSE double bar"
+        questions:
+          - question: "In a bar graph, what does the height of a bar represent?"
+            options: ["The class interval", "The frequency or value", "The scale", "The title"]
+            answer: "The frequency or value"
+            explanation: "The height of each bar corresponds to the frequency or the data value of that category."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: probability
+    title: Probability
+    sequence: 23
+    topics:
+      - id: intro-probability
+        title: Introduction to Probability
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Random experiment and outcomes
+          - Sample space — list of all possible outcomes
+          - P(event) = favourable outcomes / total outcomes
+          - Probability is always between 0 and 1
+          - Complementary events — P(E) + P(Ē) = 1
+        youtube_search_hints:
+          - "probability introduction class 7 CBSE basic"
+        questions:
+          - question: "A die is rolled. Probability of getting 3:"
+            options: ["1", "1/3", "1/6", "3/6"]
+            answer: "1/6"
+            explanation: "One favourable outcome (3) out of 6 total. P = 1/6."
+            difficulty: 1
+          - question: "A bag has 3 red and 7 green balls. P(green):"
+            options: ["7/10", "3/10", "3/7", "7/3"]
+            answer: "7/10"
+            explanation: "7 green out of 10 total. P = 7/10."
+            difficulty: 1
+          - question: "P(getting a head when a coin is tossed) ="
+            options: ["0", "1", "1/2", "2"]
+            answer: "1/2"
+            explanation: "Sample space = {H, T}. Favourable = {H}. P(H) = 1/2."
+            difficulty: 1

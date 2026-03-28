@@ -1,0 +1,20 @@
+# MCP Toolbox for Databases — serves AlloyDB tools via HTTP
+# Uses Alpine + gcompat for glibc shim (required for Go binary on Alpine)
+FROM alpine:3.19
+
+# gcompat provides glibc compatibility for the Go-compiled Toolbox binary
+RUN apk add --no-cache gcompat wget ca-certificates
+
+WORKDIR /app
+
+# Download MCP Toolbox binary (replace VERSION with pinned release)
+ARG TOOLBOX_VERSION=0.7.0
+RUN wget -O toolbox \
+    "https://storage.googleapis.com/genai-toolbox/v${TOOLBOX_VERSION}/linux/amd64/toolbox" \
+    && chmod +x toolbox
+
+COPY mcp_servers/database/tools.yaml ./tools.yaml
+
+EXPOSE 5000
+
+CMD ["./toolbox", "--tools-file=tools.yaml", "--port=5000"]

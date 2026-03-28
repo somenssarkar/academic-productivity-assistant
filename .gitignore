@@ -1,0 +1,44 @@
+# ── Credentials & secrets ──────────────────────────────────────────────────
+eduflow_agents/.env
+.env
+.env.*
+!.env.example
+scripts/infra/env.ps1           # filled-in copy of env.ps1.example
+
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+**/*.pyc
+**/*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── ADK / Google Cloud ───────────────────────────────────────────────────────
+application_default_credentials.json
+gcloud/
+.config/gcloud/
+
+# ── Node / gws ───────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Streamlit ────────────────────────────────────────────────────────────────
+.streamlit/secrets.toml
