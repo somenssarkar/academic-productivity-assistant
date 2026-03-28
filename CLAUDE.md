@@ -338,8 +338,10 @@ covers all 5 services.
 | **Docs** | Create document, append text, format headings | `docs_agent` |
 | **Drive** | Create folder, upload, organize files | `docs_agent` |
 
-**ADK integration:** `gws mcp` supports `streamable-http` transport. Connect via
-`MCPToolset` with `StreamableHTTPConnectionParams`.
+**ADK integration:** Google Workspace tools are implemented as Python function tools
+using `google-api-python-client` with OAuth2 credentials from environment variables.
+Located in `eduflow_agents/tools/workspace/`. No MCP server required for Workspace.
+(`gws mcp` subcommand does not exist in any released version of `@googleworkspace/cli`.)
 
 #### MCP Server 2: Database MCP (MCP Toolbox for Databases → AlloyDB)
 
@@ -836,7 +838,7 @@ Cloud Run: eduflow-frontend (Streamlit)
     ▼  POST /run_sse
 Cloud Run: eduflow-backend (FastAPI + ADK agents)
     │
-    ├─► Google Workspace MCP (gws mcp — streamable-http)
+    ├─► Google Workspace function tools (google-api-python-client + OAuth2)
     │       ├── Calendar (schedule sessions)
     │       ├── Tasks (track progress)
     │       ├── Gmail (notify parent)
@@ -884,17 +886,19 @@ Google APIs (YouTube Data API v3)
 
 ## 9. Implementation Phases (10-Day Plan)
 
-### Phase 1: Foundation + Research (Days 1-2)
-> **Goal:** Project setup, schema design, validate `gws` MCP server with ADK.
+### Phase 1: Foundation + Research (Days 1-2) ✅ COMPLETE
+> **Goal:** Project setup, schema design, validate Google Workspace tool approach.
+> **Note:** `gws mcp` subcommand does not exist in any released version of `@googleworkspace/cli`.
+> Workspace tools implemented as Python function tools using `google-api-python-client` instead.
 
-| # | Item | Priority | Notes |
-|---|------|----------|-------|
-| 1.1 | **Project scaffold** | Critical | Git repo, virtualenv, `eduflow_agents/` package, CLAUDE.md, .gitignore, .env.example |
-| 1.2 | **AlloyDB schema** | Critical | Create 4 custom tables from Section 5.2 (learning_plans, study_sessions, assessments, progress). ADK auto-creates session tables. Reuse AlloyDB cluster from AI Tutor project. |
-| 1.3 | **YAML curriculum files** | Critical | Create `data/curricula/cbse/math/grade-{7..10}.yaml` with chapters, topics, concepts, questions. Validate with Pydantic schema. |
-| 1.4 | **Google Workspace CLI setup** | Critical | `npm install -g @googleworkspace/cli`, `gws auth login`, test `gws mcp` with ADK `MCPToolset` |
-| 1.5 | **YouTube API setup** | High | Get API key, test search endpoint, build `youtube_search` function tool |
-| 1.6 | **OAuth2 setup** | High | Google Cloud Console: enable Calendar, Tasks, Gmail, Docs, Drive APIs. Single OAuth client for all. |
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 1.1 | **Project scaffold** | Critical | ✅ Done | Git repo, virtualenv, `eduflow_agents/` package, CLAUDE.md, .gitignore, .env.example |
+| 1.2 | **AlloyDB schema** | Critical | ✅ Done | SQL in `scripts/infra/setup_alloydb.sh`. Pending: run against live AlloyDB in Phase 2. |
+| 1.3 | **YAML curriculum files** | Critical | ✅ Done | Grade 7-10 CBSE Math YAML created and Pydantic-validated. |
+| 1.4 | **Google Workspace tools** | Critical | ✅ Done | OAuth2 function tools in `eduflow_agents/tools/workspace/` (calendar, tasks, gmail, docs, drive). |
+| 1.5 | **YouTube API setup** | High | ✅ Done | Dedicated API key created, restricted to YouTube Data API v3. `youtube_search` tested and working. |
+| 1.6 | **OAuth2 setup** | High | ✅ Done | All 5 scopes verified: calendar, tasks, gmail.send, documents, drive. Refresh token in `.env`. |
 
 ### Phase 2: MCP Tools + Database Layer (Days 3-4)
 > **Goal:** All MCP tools working and tested independently.
@@ -1041,7 +1045,7 @@ bash scripts/infra/start_toolbox.sh
 
 # Start Google Workspace MCP server (Calendar, Tasks, Gmail, Docs, Drive)
 gws auth login                              # one-time OAuth setup
-gws mcp -s calendar,tasks,gmail,docs,drive  # runs on streamable-http
+gws mcp -s calendar,tasks,gmail,docs,drive  # runs over stdio (ADK spawns per-agent subprocesses)
 
 # Run agents locally
 adk web   # select 'eduflow_agents' from dropdown
