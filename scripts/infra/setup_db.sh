@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# setup_alloydb.sh — Creates EduFlow custom tables in AlloyDB
-# Run ONCE against a fresh AlloyDB database.
+# setup_db.sh — Creates EduFlow custom tables in Cloud SQL (PostgreSQL 15)
+# Run ONCE against a fresh database.
 # ADK auto-creates its own tables (sessions, events, user_states, etc.) on first run.
 # DO NOT manually create a table named 'sessions' — ADK owns that name.
+#
+# Usage:
+#   DB_HOST=<cloud-sql-public-ip> DB_USER=eduflow_user PGPASSWORD=<password> bash scripts/infra/setup_db.sh
 
 set -euo pipefail
 
@@ -11,7 +14,7 @@ DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-eduflow}"
 DB_USER="${DB_USER:-postgres}"
 
-echo "==> Connecting to AlloyDB at $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER"
+echo "==> Connecting to Cloud SQL at $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER"
 
 psql "host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER" <<'SQL'
 
@@ -100,3 +103,4 @@ SQL
 
 echo "==> EduFlow tables created successfully."
 echo "    ADK session tables will be auto-created on first backend startup."
+echo "    Set SESSION_DB_URI in eduflow_agents/.env to connect the backend."

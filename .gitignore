@@ -21,6 +21,10 @@ build/
 .mypy_cache/
 .ruff_cache/
 
+# ── Binaries ─────────────────────────────────────────────────────────────────
+scripts/infra/toolbox.exe
+toolbox
+
 # ── ADK / Google Cloud ───────────────────────────────────────────────────────
 application_default_credentials.json
 gcloud/

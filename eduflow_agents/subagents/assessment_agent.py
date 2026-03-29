@@ -8,9 +8,10 @@ MODEL = "gemini-2.5-flash"
 # Database MCP (MCP Toolbox) — for saving assessment results
 _db_mcp = MCPToolset(
     connection_params=StreamableHTTPConnectionParams(
-        url="http://localhost:5000/mcp",  # MCP Toolbox default
+        url="http://localhost:5000/mcp",
     ),
     tool_filter=["save-assessment", "update-progress", "get-student-progress"],
+    # toolset: eduflow-tools (defined in mcp_servers/database/tools.yaml)
 )
 
 assessment_agent = LlmAgent(

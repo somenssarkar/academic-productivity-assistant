@@ -894,24 +894,26 @@ Google APIs (YouTube Data API v3)
 | # | Item | Priority | Status | Notes |
 |---|------|----------|--------|-------|
 | 1.1 | **Project scaffold** | Critical | ✅ Done | Git repo, virtualenv, `eduflow_agents/` package, CLAUDE.md, .gitignore, .env.example |
-| 1.2 | **AlloyDB schema** | Critical | ✅ Done | SQL in `scripts/infra/setup_alloydb.sh`. Pending: run against live AlloyDB in Phase 2. |
+| 1.2 | **AlloyDB schema** | Critical | ✅ Done | Switched to Cloud SQL PostgreSQL 15 (cheaper, same compatibility). 4 tables created via `scripts/infra/setup_db.py`. |
 | 1.3 | **YAML curriculum files** | Critical | ✅ Done | Grade 7-10 CBSE Math YAML created and Pydantic-validated. |
 | 1.4 | **Google Workspace tools** | Critical | ✅ Done | OAuth2 function tools in `eduflow_agents/tools/workspace/` (calendar, tasks, gmail, docs, drive). |
 | 1.5 | **YouTube API setup** | High | ✅ Done | Dedicated API key created, restricted to YouTube Data API v3. `youtube_search` tested and working. |
 | 1.6 | **OAuth2 setup** | High | ✅ Done | All 5 scopes verified: calendar, tasks, gmail.send, documents, drive. Refresh token in `.env`. |
 
-### Phase 2: MCP Tools + Database Layer (Days 3-4)
-> **Goal:** All MCP tools working and tested independently.
+### Phase 2: MCP Tools + Database Layer (Days 3-4) ✅ COMPLETE
+> **Goal:** All tools working and tested independently.
+> **Note:** Workspace tools are Python function tools (not MCP). Only Database uses MCP Toolbox.
+> **Note:** MCP Toolbox v0.30.0 requires dict-format tools (not list), all parameters need description, no `number` type (use `string` + SQL cast).
 
-| # | Item | Priority | Notes |
-|---|------|----------|-------|
-| 2.1 | **Database MCP (MCP Toolbox)** | Critical | `tools.yaml` with runtime SQL tools from Section 4.2 (no syllabus/questions tools). Test with `curl` against local toolbox. |
-| 2.2 | **Workspace MCP — Calendar** | Critical | Test via `gws`: create event, list events, update event. |
-| 2.3 | **Workspace MCP — Tasks** | Critical | Test via `gws`: create task list, add tasks with notes+links, complete tasks. |
-| 2.4 | **Workspace MCP — Gmail** | Critical | Test via `gws`: send email to test address. |
-| 2.5 | **Workspace MCP — Docs+Drive** | Critical | Test via `gws`: create doc, append content, create Drive folder. |
-| 2.6 | **YouTube function tool** | High | `youtube_search.py` in tools/. Test: search returns video URLs. |
-| 2.7 | **Curriculum loader** | High | `curriculum_loader.py` in tools/. Auto-discover + Pydantic validate YAML files. Test: load grade-8 math curriculum. |
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 2.1 | **Database MCP (MCP Toolbox)** | Critical | ✅ Done | `tools.yaml` fixed for v0.30.0 format. 6 tools loading. Toolbox runs via `start_toolbox.ps1`. |
+| 2.2 | **Workspace tools — Calendar** | Critical | ✅ Done | `create_calendar_event` tested — returns event_id + event_link. |
+| 2.3 | **Workspace tools — Tasks** | Critical | ✅ Done | `create_task_list`, `create_task`, `complete_task` tested — all IDs returned correctly. |
+| 2.4 | **Workspace tools — Gmail** | Critical | ✅ Done | `send_email` tested — message_id returned, email delivered. |
+| 2.5 | **Workspace tools — Docs+Drive** | Critical | ✅ Done | Drive folders created (EduFlow/Math/Grade 8), Doc created with URL, section appended. |
+| 2.6 | **YouTube function tool** | High | ✅ Done | Tested and working. |
+| 2.7 | **Curriculum loader** | High | ✅ Done | Pydantic-validated. All 4 grades load correctly. |
 
 ### Phase 3: Agent Implementation (Days 5-6)
 > **Goal:** All 9 agents + 1 formatter implemented and working in `adk web`.

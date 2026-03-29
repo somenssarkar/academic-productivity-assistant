@@ -1,18 +1,17 @@
 sources:
-  alloydb:
-    kind: alloydb-postgres
-    project: ${GOOGLE_CLOUD_PROJECT}
-    region: asia-southeast1
-    cluster: eduflow-cluster
-    instance: eduflow-instance
+  cloudsql:
+    kind: postgres
+    host: ${DB_HOST}
+    port: 5432
     database: eduflow
     user: ${DB_USER}
     password: ${DB_PASSWORD}
 
 tools:
-  - name: save-learning-plan
+
+  save-learning-plan:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: >
       Insert a new learning plan for a student.
       Returns the generated plan UUID.
@@ -40,9 +39,9 @@ tools:
       VALUES ($1, $2, $3, $4::date, $5::date, $6)
       RETURNING id::text
 
-  - name: save-study-session
+  save-study-session:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: >
       Insert a study session within a learning plan.
       Returns the generated session UUID.
@@ -55,6 +54,7 @@ tools:
         description: Dotted YAML topic ref e.g. "quadratic-equations.standard-form"
       - name: session_number
         type: integer
+        description: Session sequence number within the plan (1, 2, 3...)
       - name: scheduled_date
         type: string
         description: ISO date YYYY-MM-DD
@@ -63,10 +63,13 @@ tools:
         description: HH:MM (24h)
       - name: video_url
         type: string
+        description: YouTube video URL for the session
       - name: video_title
         type: string
+        description: Display title of the YouTube video
       - name: summary
         type: string
+        description: AI-generated session summary
     statement: |
       INSERT INTO study_sessions
         (plan_id, topic_key, session_number, scheduled_date, scheduled_time,
@@ -75,9 +78,9 @@ tools:
         ($1::uuid, $2, $3, $4::date, $5::time, $6, $7, $8)
       RETURNING id::text
 
-  - name: update-study-session
+  update-study-session:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: >
       Update a study session's status and/or integration IDs
       (calendar_event_id, task_id, doc_id).
@@ -90,10 +93,13 @@ tools:
         description: "pending | in_progress | completed | skipped"
       - name: calendar_event_id
         type: string
+        description: Google Calendar event ID to store
       - name: task_id
         type: string
+        description: Google Tasks task ID to store
       - name: doc_id
         type: string
+        description: Google Docs document ID to store
     statement: |
       UPDATE study_sessions SET
         status = COALESCE(NULLIF($2, ''), status),
@@ -103,71 +109,90 @@ tools:
         completed_at = CASE WHEN $2 = 'completed' THEN NOW() ELSE completed_at END
       WHERE id = $1::uuid
 
-  - name: save-assessment
+  save-assessment:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: Store a quiz result including score and weak areas.
     parameters:
       - name: session_id
         type: string
+        description: UUID of the study session
       - name: user_id
         type: string
+        description: ADK user ID
       - name: topic_key
         type: string
+        description: Dotted YAML topic ref e.g. "quadratic-equations.standard-form"
       - name: score
-        type: number
+        type: string
         description: Percentage score (0-100)
       - name: total_questions
         type: integer
+        description: Total number of questions in the quiz
       - name: correct_answers
         type: integer
+        description: Number of questions answered correctly
       - name: weak_areas
         type: string
         description: Comma-separated list of weak sub-topics
       - name: feedback
         type: string
+        description: AI-generated feedback summary for the student
     statement: |
       INSERT INTO assessments
         (session_id, user_id, topic_key, score, total_questions,
          correct_answers, weak_areas, feedback)
       VALUES
-        ($1::uuid, $2, $3, $4, $5, $6,
+        ($1::uuid, $2, $3, $4::numeric, $5, $6,
          string_to_array($7, ','), $8)
       RETURNING id::text
 
-  - name: get-student-progress
+  get-student-progress:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: Fetch all topic progress records for a student.
     parameters:
       - name: user_id
         type: string
+        description: ADK user ID
     statement: |
       SELECT topic_key, mastery_level, best_score, attempts, last_assessed
       FROM progress
       WHERE user_id = $1
       ORDER BY last_assessed DESC NULLS LAST
 
-  - name: update-progress
+  update-progress:
     kind: postgres-sql
-    source: alloydb
+    source: cloudsql
     description: >
       Update (upsert) a student's mastery level for a topic after assessment.
     parameters:
       - name: user_id
         type: string
+        description: ADK user ID
       - name: topic_key
         type: string
+        description: Dotted YAML topic ref e.g. "quadratic-equations.standard-form"
       - name: mastery_level
         type: string
         description: "not_started | beginner | intermediate | mastered"
       - name: score
-        type: number
+        type: string
+        description: Latest assessment score (0-100)
     statement: |
       INSERT INTO progress (user_id, topic_key, mastery_level, best_score, attempts, last_assessed)
-      VALUES ($1, $2, $3, $4, 1, NOW())
+      VALUES ($1, $2, $3, $4::numeric, 1, NOW())
       ON CONFLICT (user_id, topic_key) DO UPDATE SET
         mastery_level = EXCLUDED.mastery_level,
         best_score = GREATEST(progress.best_score, EXCLUDED.best_score),
         attempts = progress.attempts + 1,
         last_assessed = NOW()
+
+toolsets:
+  eduflow-tools:
+    - save-learning-plan
+    - save-study-session
+    - update-study-session
+    - save-assessment
+    - get-student-progress
+    - update-progress
