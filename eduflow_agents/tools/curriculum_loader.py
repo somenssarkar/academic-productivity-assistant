@@ -129,6 +129,44 @@ def get_topic(curriculum: CurriculumFile, topic_key: str) -> Optional[Topic]:
     return None
 
 
+def get_grade_band(grade_level: str) -> str:
+    """Map a grade level string to a grade band name.
+
+    Args:
+        grade_level: e.g. "Grade 8", "8", "grade-8"
+
+    Returns:
+        One of: "foundation", "building", "bridging", "advanced"
+    """
+    import re
+    match = re.search(r'\d+', str(grade_level))
+    grade = int(match.group()) if match else 8
+    if grade <= 6:
+        return "foundation"
+    elif grade <= 8:
+        return "building"
+    elif grade <= 10:
+        return "bridging"
+    return "advanced"
+
+
+def curriculum_to_toc_string(curriculum: CurriculumFile) -> str:
+    """Return a compact table of contents for all chapters (no topic detail).
+
+    Used when the specific chapter is not yet identified — keeps token count low.
+    """
+    meta = curriculum.curriculum
+    lines = [
+        f"Board: {meta.board} | Subject: {meta.subject} | Grade: {meta.grade}",
+        "",
+        "Available chapters:",
+    ]
+    for chapter in sorted(curriculum.chapters, key=lambda c: c.sequence):
+        topic_ids = ", ".join(t.id for t in sorted(chapter.topics, key=lambda t: t.sequence))
+        lines.append(f"  {chapter.sequence}. {chapter.title} (id: {chapter.id}) — topics: {topic_ids}")
+    return "\n".join(lines)
+
+
 def curriculum_to_context_string(curriculum: CurriculumFile, chapter_id: Optional[str] = None) -> str:
     """Serialize curriculum (or one chapter) to a compact string for LLM context injection.
 

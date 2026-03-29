@@ -29,6 +29,10 @@ toolbox
 application_default_credentials.json
 gcloud/
 .config/gcloud/
+eduflow_agents/.adk/
+
+# ── Local testing artifacts ───────────────────────────────────────────────────
+testing/
 
 # ── Node / gws ───────────────────────────────────────────────────────────────
 node_modules/

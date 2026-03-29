@@ -2,6 +2,7 @@ from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.tools.agent_tool import AgentTool
 
 from .prompts.orchestrator_prompt import ORCHESTRATOR_INSTRUCTION
+from .tools.profile_tool import set_user_profile
 from .subagents.curriculum_planner import curriculum_planner_agent
 from .subagents.content_agent import content_agent
 from .subagents.calendar_agent import calendar_agent
@@ -71,6 +72,7 @@ root_agent = LlmAgent(
     model=MODEL,
     instruction=ORCHESTRATOR_INSTRUCTION,
     tools=[
+        set_user_profile,
         AgentTool(agent=planning_pipeline),
         AgentTool(agent=scheduling_pipeline),
         AgentTool(agent=tutoring_pipeline),

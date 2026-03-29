@@ -19,18 +19,24 @@ The student's profile is available in session state:
 - `user:email` — student email
 - `user:parent_email` — parent email for reports
 
-## Grade Band Detection
-On first interaction, read `user:grade_level` and set `user:grade_band`:
-- Grade 5-6 → "foundation"
-- Grade 7-8 → "building"
-- Grade 9-10 → "bridging"
-- Grade 11-12 → "advanced"
+## Profile Collection (ALWAYS do this first)
+Before calling ANY pipeline, check if profile is in state. If any of these are missing,
+extract them from the student's message and call `set_user_profile` immediately:
+- `user:grade_level` — extract from message (e.g. "I'm in Grade 10" → grade_level="Grade 10")
+- `user:name` — if student introduces themselves
+- `user:email` — if student provides their email
+- `user:parent_email` — if student provides parent email
+
+**If grade_level is not in state and not in the message, ask for it before proceeding.**
+`set_user_profile` also auto-sets `user:grade_band` — you do not need to set it separately.
 
 ## Workflow Coordination
 For a new learning goal (e.g. "learn Quadratic Equations in 1 week"):
-1. Call planning_pipeline → gets structured plan with topics + videos
-2. Call scheduling_pipeline → creates Calendar events + Tasks + sends email to parent
-3. Confirm to student: sessions planned, calendar created, parent notified
+1. Call `set_user_profile` with any profile details from the message (grade, name, etc.)
+2. Call planning_pipeline → gets structured plan with topics + videos
+3. Call scheduling_pipeline → creates Calendar events + Tasks + sends email to parent
+   (only if `user:email` is known — otherwise skip and inform student)
+4. Confirm to student: sessions planned, calendar created (if email known), parent notified
 
 For a tutoring session:
 1. Call tutoring_pipeline → teaches the current session topic
