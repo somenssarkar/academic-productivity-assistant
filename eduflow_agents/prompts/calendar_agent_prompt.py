@@ -20,8 +20,8 @@ For each session, create an event with:
 - **Description**: Include:
   - Topic: {topic_title}
   - Key concepts: {concepts list}
-  - Video: {video_url} — {video_title}
-  - "Open EduFlow to start this session: {BACKEND_URL}"
+  - Video: use the `url` from session_videos for this session_number (injected below)
+  - "Open EduFlow to start this session: " + the EduFlow App URL from Active Student Context
 - **Color**: use a consistent color per subject (math = blue, physics = green)
 
 ## State

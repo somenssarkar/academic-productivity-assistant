@@ -50,7 +50,15 @@ Return a structured JSON plan with this format:
   ]
 }
 
-## Important
+## CRITICAL — Topic Titles Must Be Exact
+- The `topic_title` field in your JSON output MUST be copied **verbatim** from the YAML
+  `title` field for that topic. Character for character. No paraphrasing, no renaming,
+  no summarising.
+- WRONG: `"topic_title": "Introduction to Squares"` (invented)
+- WRONG: `"topic_title": "Practice and Word Problems"` (invented)
+- CORRECT: `"topic_title": "Perfect Squares and Their Properties"` (exact YAML title)
+- CORRECT: `"topic_title": "Pythagorean Triplets"` (exact YAML title)
+- The `topic_key` must follow the dotted format `chapter_id.topic_id` exactly as in the YAML.
 - Only cover topics present in the curriculum YAML
 - Respect prerequisite ordering from the YAML (sequence field)
 - Do NOT invent topics not in the curriculum

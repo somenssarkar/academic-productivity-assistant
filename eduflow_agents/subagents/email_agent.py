@@ -17,6 +17,8 @@ def _build_instruction(context: ReadonlyContext) -> str:
     doc_url = context.state.get("doc_url", "")
     assessment_result = context.state.get("assessment_result", "")
 
+    session_videos = context.state.get("session_videos", "")
+
     header = f"## Active Student Context\n"
     header += f"- Name: {student_name}\n"
     header += f"- Student Email: {student_email}\n"
@@ -29,7 +31,23 @@ def _build_instruction(context: ReadonlyContext) -> str:
     if assessment_result:
         header += f"- Assessment Result: {assessment_result}\n"
 
-    return EMAIL_AGENT_INSTRUCTION + f"\n\n{header}"
+    videos_section = ""
+    if session_videos:
+        videos_section = (
+            f"\n\n## Video URLs for This Plan (from content_agent — use EXACTLY as shown)\n"
+            f"These are the real YouTube URLs returned by the YouTube API. "
+            f"Use the `url` field for each session_number in the Video column of the email table. "
+            f"Do NOT invent or modify these URLs in any way.\n\n"
+            f"{session_videos}"
+        )
+    else:
+        videos_section = (
+            "\n\n## Video URLs\n"
+            "No session_videos found in state. Use 'Video coming soon' for all Video cells — "
+            "do NOT invent YouTube URLs."
+        )
+
+    return EMAIL_AGENT_INSTRUCTION + f"\n\n{header}" + videos_section
 
 
 email_agent = LlmAgent(
