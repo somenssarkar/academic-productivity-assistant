@@ -27,8 +27,8 @@ graphs). Together they prove multi-subject capability without scope creep.
 |---|---|
 | Primary agent coordinating sub-agents | Orchestrator coordinates 8 sub-agents via 5 pipelines |
 | Store and retrieve structured data | YAML curriculum files (syllabus, questions) + AlloyDB (plans, progress, assessments) |
-| Multiple tools via MCP | Calendar, Tasks, Gmail, Docs/Drive (via `gws` MCP) + Database (MCP Toolbox) |
-| Multi-step workflows | Plan → Schedule → Track → Teach → Notes → Progress → Report |
+| Multiple tools via MCP | Calendar, Gmail, Docs/Drive (via `gws` MCP) + Database (MCP Toolbox) |
+| Multi-step workflows | Plan → Schedule → Notes → Teach → Assess → Report |
 | API-based deployment | FastAPI on Cloud Run (3 services) |
 
 ### Tech Stack
@@ -42,7 +42,7 @@ graphs). Together they prove multi-subject capability without scope creep.
 | Curriculum Data | YAML files in `data/curricula/` (syllabus, questions — static) |
 | Database | AlloyDB (PostgreSQL-compatible — runtime state only: plans, progress, assessments) |
 | Database MCP | MCP Toolbox for Databases (`tools.yaml`) |
-| Workspace MCP | Google Workspace CLI (`gws mcp`) — Calendar, Tasks, Gmail, Docs, Drive |
+| Workspace MCP | Google Workspace CLI (`gws mcp`) — Calendar, Gmail, Docs, Drive |
 | Video Search | YouTube Data API v3 (function tool) |
 | Frontend | Streamlit (streaming chat + video embed + progress dashboard) |
 | Backend API | FastAPI (`get_fast_api_app()` + `DatabaseSessionService`) |
@@ -69,7 +69,6 @@ eduflow/
 │   │   ├── curriculum_planner.py       # Plans learning sessions from syllabus
 │   │   ├── content_agent.py            # Finds YouTube videos, generates summaries
 │   │   ├── calendar_agent.py           # Workspace MCP: Google Calendar events
-│   │   ├── tasks_agent.py              # Workspace MCP: Google Tasks tracking
 │   │   ├── email_agent.py              # Workspace MCP: Gmail — plans, reports
 │   │   ├── docs_agent.py               # Workspace MCP: Google Docs study notes
 │   │   ├── tutor_agent.py              # Teaches concepts with code execution
@@ -81,7 +80,6 @@ eduflow/
 │       ├── curriculum_planner_prompt.py
 │       ├── content_agent_prompt.py
 │       ├── calendar_agent_prompt.py
-│       ├── tasks_agent_prompt.py
 │       ├── email_agent_prompt.py
 │       ├── docs_agent_prompt.py
 │       ├── tutor_agent_prompt.py
@@ -99,7 +97,7 @@ eduflow/
 ├── mcp_servers/                        # MCP server configurations
 │   └── database/                       # MCP Toolbox config (AlloyDB)
 │       └── tools.yaml
-│   # Note: Calendar, Tasks, Gmail, Docs, Drive all use Google Workspace
+│   # Note: Calendar, Gmail, Docs, Drive all use Google Workspace
 │   # CLI (`gws mcp`) — no custom MCP servers needed for these.
 ├── scripts/
 │   └── infra/                          # Infrastructure setup scripts
@@ -142,16 +140,15 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 ├── scheduling_pipeline (SequentialAgent)
 │   ├── calendar_agent              (LlmAgent — Workspace MCP: Calendar)
 │   │   Creates Google Calendar events for each session
-│   │   Includes video links and topic summaries in event description
-│   │   Handles rescheduling when student falls behind
-│   ├── tasks_agent                 (LlmAgent — Workspace MCP: Tasks)
-│   │   Creates TaskList per chapter with tasks per session
-│   │   Attaches YouTube links + key concept notes to each task
-│   │   Marks tasks complete as sessions finish (To Do → Done)
+│   │   Includes video link, key concepts, and tutor starter prompt in event description
+│   │   e.g. "Start your session: Ask EduFlow → 'Teach me Perfect Squares'"
 │   └── email_agent                 (LlmAgent — Workspace MCP: Gmail)
-│       Sends learning plan to student + parent
-│       Sends session reminders
+│       Sends learning plan to student + parent (with Study Notes doc link)
 │       Sends progress reports after assessments
+│
+│   NOTE: tasks_agent removed — Google Tasks API has restrictions on free personal
+│   accounts that make it unsuitable for demo. Calendar + Docs + Gmail provide
+│   equivalent scheduling and tracking capability.
 │
 ├── tutoring_pipeline (SequentialAgent)
 │   ├── tutor_agent                 (LlmAgent — code_executor)
@@ -181,9 +178,8 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 | `orchestrator_agent` | LlmAgent | — | Understands student intent, routes to correct pipeline, manages multi-step workflow state |
 | `curriculum_planner_agent` | LlmAgent | YAML curriculum (in context) | Reads syllabus from YAML, creates structured multi-session learning plans |
 | `content_agent` | LlmAgent | `youtube_search` | Finds relevant educational videos per topic, generates summaries |
-| `calendar_agent` | LlmAgent | Workspace MCP (Calendar) | Creates/updates/cancels Google Calendar events for study sessions |
-| `tasks_agent` | LlmAgent | Workspace MCP (Tasks) | Creates task lists, tracks session progress (To Do → Done), attaches links |
-| `email_agent` | LlmAgent | Workspace MCP (Gmail) | Sends plans, reminders, progress reports to student and parent |
+| `calendar_agent` | LlmAgent | Workspace MCP (Calendar) | Creates Google Calendar events with topic, video link, and tutor starter prompt |
+| `email_agent` | LlmAgent | Workspace MCP (Gmail) | Sends plans (with doc link), reminders, progress reports to student and parent |
 | `docs_agent` | LlmAgent | Workspace MCP (Docs+Drive) | Creates formatted study notes, organizes in Drive folders |
 | `tutor_agent` | LlmAgent | `code_executor` | Teaches concepts, explains step-by-step, answers follow-up questions |
 | `assessment_agent` | LlmAgent | YAML questions + Database MCP | Uses questions from YAML curriculum, evaluates answers, stores scores in DB |
@@ -197,55 +193,65 @@ to the student. This prevents intermediate agent outputs from cluttering the cha
 
 ### 3.4 Multi-Step Workflow (The Core Demo)
 
+Five-stage flow centred on one student's complete learning journey.
+
 ```
-Student: "I want to learn Quadratic Equations in 1 week"
+Student: "I want to learn Squares and Square Roots in 3 days"
   │
-  ├─► [1] Orchestrator identifies: learning goal + timeframe
+  ├─► Stage 1 — PLAN
+  │       curriculum_planner reads Grade 8 YAML → exact topic titles, session count,
+  │         concepts, prerequisites, grade-appropriate duration
+  │       content_agent searches YouTube → 3 real grade-appropriate videos
+  │       Output: structured curriculum_plan + session_videos in state
   │
-  ├─► [2] planning_pipeline:
-  │       curriculum_planner queries syllabus DB → determines session count
-  │         based on topic depth, prerequisites, and grade-appropriate pacing
-  │       content_agent finds YouTube videos for each session topic
-  │       Output: structured plan with topics, videos, dates
+  ├─► Stage 2 — SCHEDULE  (automatic, same orchestrator turn)
+  │       calendar_agent creates 3 Calendar events, each containing:
+  │         - Topic title (verbatim from YAML), duration, YouTube video link
+  │         - Tutor starter prompt: "Ask EduFlow → 'Teach me Perfect Squares'"
+  │         - Link to EduFlow Streamlit app
+  │       email_agent sends to student + parent:
+  │         - Session plan table with video links
+  │         - Link to Study Notes Google Doc (created in Stage 3)
+  │         - Encouraging sign-off
+  │       Output: calendar invites sent + parent email delivered
   │
-  ├─► [3] scheduling_pipeline:
-  │       calendar_agent creates Calendar events per session (WHEN to study)
-  │       tasks_agent creates TaskList with tasks + YouTube links (WHAT to learn)
-  │       email_agent sends learning plan to student + parent
-  │       Output: calendar events + task list + email confirmation
+  ├─► Stage 3 — NOTES  (triggered after scheduling, same turn)
+  │       docs_agent creates Google Doc in Drive: EduFlow/Math/Grade 8/
+  │         "Study Notes: Squares and Square Roots — Math Grade 8"
+  │         Full chapter overview at plan time:
+  │           H1: Chapter title
+  │           H2 per session: topic title, key concepts, YouTube link
+  │         Grows session-by-session: tutor appends notes after each lesson
+  │       Output: doc_url stored in state → passed to email_agent + orchestrator
   │
-  │   ── Student returns for a session ──
+  │   ── Student returns for Session 1 (sees calendar prompt, opens Streamlit) ──
   │
-  ├─► [4] tutoring_pipeline:
-  │       tutor_agent teaches the session topic (grade-aware persona)
-  │       response_formatter formats the explanation
-  │       Output: clean lesson with embedded video reference
+  ├─► Stage 4 — TUTOR
+  │       tutor_agent teaches using:
+  │         - Grade 8 "building" band persona (formal but approachable)
+  │         - YAML concepts for the session topic injected into context
+  │           (same concepts as in the Study Notes doc — cohesive experience)
+  │         - HOOK → EXPLAIN → EXAMPLE → SPARK structure
+  │         - code_executor: live Python verification (9=3², 81=9², etc.)
+  │       response_formatter renders clean output in Streamlit chat
+  │       docs_agent appends session notes to existing Drive doc
+  │       Output: formatted lesson in UI + doc updated
   │
-  ├─► [5] notes_pipeline:
-  │       docs_agent creates/updates Google Doc study notes for the chapter
-  │       Appends: session heading, key concepts, YouTube link, practice problems
-  │       Saves to Drive: EduFlow/{Subject}/{Grade}/
-  │       Output: shareable Google Doc link (KNOWLEDGE retained)
-  │
-  ├─► [6] assessment_pipeline:
-  │       assessment_agent generates quiz on session topic
-  │       Evaluates answers, stores score + weak areas in DB
-  │       Output: feedback + performance summary
-  │
-  ├─► [7] scheduling_pipeline (again):
-  │       tasks_agent marks session task as ✅ completed
-  │       email_agent sends progress report to parent (includes Doc link)
-  │       calendar_agent updates remaining sessions if adaptation needed
-  │
-  └─► [8] Orchestrator: summarises session, previews next session
+  └─► Stage 5 — ASSESS + REPORT
+          assessment_agent serves YAML quiz questions for the session topic
+          Evaluates answers, stores score + weak_areas in DB
+          email_agent sends parent report:
+            - Score, weak areas, Google Doc link, next session preview
+          If weak areas detected → tutor revisits them in next session
+          Output: parent notified + student progress tracked in DB
 ```
 
 **Tool purpose mapping:**
-- **Calendar** = WHEN (time-blocked study sessions in student's day)
-- **Tasks** = WHAT + PROGRESS (topic checklist, To Do → Done)
-- **Docs + Drive** = KNOWLEDGE (formatted study notes for future reference)
-- **Gmail** = COMMUNICATION (parent notifications with links)
+- **Calendar** = WHEN + HOW TO START (time-blocked sessions + tutor prompt in invite)
+- **Docs + Drive** = KNOWLEDGE (chapter overview at plan time, grows per session)
+- **Gmail** = COMMUNICATION (plan email with doc link, parent progress reports)
 - **AlloyDB** = DATA (structured persistence for plans, progress, assessments)
+- **YouTube API** = CONTENT (grade-appropriate videos per topic)
 
 > **Session count & duration:** The `curriculum_planner_agent` determines how many sessions
 > a topic needs based on concept depth, prerequisite count, and grade band. Session duration
@@ -277,7 +283,6 @@ Student: "I want to learn Quadratic Equations in 1 week"
 | `current_session_id` | orchestrator | tutor, assessment | Current study session reference |
 | `session_topic` | curriculum_planner | tutor, content | Current session's topic |
 | `session_video_url` | content_agent | UI (embed) | YouTube video for current session |
-| `task_list_id` | tasks_agent | tasks_agent | Google Tasks list ID for current plan |
 | `doc_url` | docs_agent | orchestrator, email | Google Doc URL for study notes |
 | `drive_folder_id` | docs_agent | docs_agent | Drive folder ID (EduFlow/{Subject}/{Grade}/) |
 | `tutor_solution` | tutor_agent | response_formatter | Raw tutor output (same pattern as AI Tutor project) |
@@ -290,18 +295,17 @@ Student: "I want to learn Quadratic Equations in 1 week"
 
 ### 4.1 Tool Assignment by Agent
 
-| Agent | Database MCP | Workspace MCP (Cal) | Workspace MCP (Tasks) | Workspace MCP (Gmail) | Workspace MCP (Docs/Drive) | `youtube_search` | `code_executor` |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `curriculum_planner_agent` | — | — | — | — | — | — | — |
-| `content_agent` | — | — | — | — | — | ✓ | — |
-| `calendar_agent` | — | ✓ | — | — | — | — | — |
-| `tasks_agent` | — | — | ✓ | — | — | — | — |
-| `email_agent` | — | — | — | ✓ | — | — | — |
-| `docs_agent` | — | — | — | — | ✓ | — | — |
-| `tutor_agent` | — | — | — | — | — | — | ✓ |
-| `assessment_agent` | ✓ | — | — | — | — | — | — |
-| `response_formatter` | — | — | — | — | — | — | — |
-| `orchestrator_agent` | — | — | — | — | — | — | — |
+| Agent | Database MCP | Workspace MCP (Cal) | Workspace MCP (Gmail) | Workspace MCP (Docs/Drive) | `youtube_search` | `code_executor` |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `curriculum_planner_agent` | — | — | — | — | — | — |
+| `content_agent` | — | — | — | — | ✓ | — |
+| `calendar_agent` | — | ✓ | — | — | — | — |
+| `email_agent` | — | — | ✓ | — | — | — |
+| `docs_agent` | — | — | — | ✓ | — | — |
+| `tutor_agent` | — | — | — | — | — | ✓ |
+| `assessment_agent` | ✓ | — | — | — | — | — |
+| `response_formatter` | — | — | — | — | — | — |
+| `orchestrator_agent` | — | — | — | — | — | — |
 
 > **Constraint carried from AI Tutor project:** `code_executor` (Gemini built-in) cannot coexist
 > with function-calling tools (MCP tools) in the same agent. This is why `tutor_agent` uses ONLY
@@ -318,7 +322,7 @@ Student: "I want to learn Quadratic Equations in 1 week"
 npm install -g @googleworkspace/cli
 
 # Run as MCP server (exposes Calendar + Tasks + Gmail + Docs + Drive)
-gws mcp -s calendar,tasks,gmail,docs,drive
+gws mcp -s calendar,gmail,docs,drive
 
 # OAuth setup
 gws auth setup    # configure OAuth client
@@ -333,7 +337,6 @@ covers all 5 services.
 | Service | Key tools used by EduFlow | Agent |
 |---|---|---|
 | **Calendar** | Create/update/delete events, list events | `calendar_agent` |
-| **Tasks** | Create task list, create/update/complete tasks, attach links | `tasks_agent` |
 | **Gmail** | Send email, reply, search | `email_agent` |
 | **Docs** | Create document, append text, format headings | `docs_agent` |
 | **Drive** | Create folder, upload, organize files | `docs_agent` |
@@ -358,31 +361,7 @@ Reuses the exact pattern from the AI Tutor project. `tools.yaml` defines paramet
 | `get-student-progress` | Fetch progress for adaptation | `SELECT ... FROM progress WHERE user_id=$1` |
 | `update-progress` | Update mastery level after assessment | `UPDATE progress SET mastery_level=$1 ...` |
 
-### 4.3 Google Tasks: How Topics Map to Tasks
-
-```
-TaskList: "📐 Quadratic Equations — Math (Grade 8)"
-│
-├── Task: "Session 1: Basics & Standard Form"
-│     status: needsAction → completed
-│     due: 2026-04-01
-│     notes: "Key concepts: ax²+bx+c form, identifying a,b,c coefficients"
-│     links: [{url: "https://youtube.com/...", description: "Video tutorial"}]
-│
-├── Task: "Session 2: Factoring Method"
-│     status: needsAction
-│     due: 2026-04-03
-│     notes: "Key concepts: finding factors, splitting middle term"
-│     links: [{url: "https://youtube.com/...", description: "Video tutorial"}]
-│
-└── ... (AI determines session count based on topic depth)
-```
-
-**Task fields used:** `title` (1024 chars max), `notes` (8192 chars — enough for key
-concepts), `links[]` (YouTube URLs), `due` (session date), `status` (needsAction/completed).
-One level of subtasks supported if needed for sub-topics.
-
-### 4.4 Google Docs: Study Notes Structure
+### 4.3 Google Docs: Study Notes Structure
 
 ```
 Google Doc: "Study Notes: Quadratic Equations — Math Grade 8"
@@ -407,7 +386,7 @@ Saved in Drive: EduFlow/Math/Grade 8/Study Notes - Quadratic Equations.gdoc
 **Docs API approach:** Use Drive API to upload HTML content as a Google Doc (simpler than
 `batchUpdate`). Headings via `<h1>`, `<h2>` tags auto-convert to Doc headings.
 
-### 4.5 YouTube Search Function Tool
+### 4.4 YouTube Search Function Tool
 
 Not an MCP tool — a regular ADK function tool using YouTube Data API v3.
 
@@ -512,7 +491,6 @@ CREATE TABLE study_sessions (
     video_title VARCHAR(500),
     summary TEXT,                          -- AI-generated session summary
     calendar_event_id VARCHAR(200),       -- Google Calendar event ID (for updates)
-    task_id VARCHAR(200),                 -- Google Tasks task ID (for status updates)
     doc_id VARCHAR(200),                  -- Google Docs document ID (for appending notes)
     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'in_progress', 'completed', 'skipped'
     completed_at TIMESTAMPTZ,
@@ -909,8 +887,7 @@ Google APIs (YouTube Data API v3)
 |---|------|----------|--------|-------|
 | 2.1 | **Database MCP (MCP Toolbox)** | Critical | ✅ Done | `tools.yaml` fixed for v0.30.0 format. 6 tools loading. Toolbox runs via `start_toolbox.ps1`. |
 | 2.2 | **Workspace tools — Calendar** | Critical | ✅ Done | `create_calendar_event` tested — returns event_id + event_link. |
-| 2.3 | **Workspace tools — Tasks** | Critical | ✅ Done | `create_task_list`, `create_task`, `complete_task` tested — all IDs returned correctly. |
-| 2.4 | **Workspace tools — Gmail** | Critical | ✅ Done | `send_email` tested — message_id returned, email delivered. |
+| 2.3 | **Workspace tools — Gmail** | Critical | ✅ Done | `send_email` tested — message_id returned, email delivered. |
 | 2.5 | **Workspace tools — Docs+Drive** | Critical | ✅ Done | Drive folders created (EduFlow/Math/Grade 8), Doc created with URL, section appended. |
 | 2.6 | **YouTube function tool** | High | ✅ Done | Tested and working. |
 | 2.7 | **Curriculum loader** | High | ✅ Done | Pydantic-validated. All 4 grades load correctly. |
@@ -923,14 +900,13 @@ Google APIs (YouTube Data API v3)
 | 3.1 | **orchestrator_agent** | Critical | Root agent with AgentTool-wrapped pipelines. Routing logic for plan/teach/assess/schedule/notes intents. |
 | 3.2 | **curriculum_planner_agent** | Critical | Uses YAML curriculum in context, determines session count based on topic depth, writes plan to DB. |
 | 3.3 | **content_agent** | Critical | Uses youtube_search to find videos per topic. Returns video URLs + titles. |
-| 3.4 | **calendar_agent** | Critical | Creates Google Calendar events for planned sessions. Stores event IDs in DB. |
-| 3.5 | **tasks_agent** | Critical | Creates TaskList per chapter, adds tasks with notes + YouTube links, marks complete. |
-| 3.6 | **email_agent** | Critical | Sends learning plan email + progress reports. Includes Doc links. |
-| 3.7 | **docs_agent** | Critical | Creates/updates Google Doc study notes per chapter. Organizes in Drive folders. |
-| 3.8 | **tutor_agent** | High | Teaches concepts with code_executor. Grade-band persona injection. |
+| 3.4 | **calendar_agent** | Critical | Creates Google Calendar events with topic, video link, and tutor starter prompt per session. |
+| 3.5 | **email_agent** | Critical | Sends learning plan email (with doc link) + parent progress reports after assessments. |
+| 3.6 | **docs_agent** | Critical | Creates chapter overview doc at plan time (all sessions, concepts, video links). Appends per session after tutoring. Organizes in Drive: EduFlow/Math/Grade N/. |
+| 3.8 | **tutor_agent** | High | Teaches concepts with code_executor. Grade-band persona + YAML topic concepts injected into context for cohesive experience. |
 | 3.9 | **assessment_agent** | High | Uses quiz questions from YAML curriculum, evaluates answers, stores results in DB, triggers progress update. |
 | 3.10 | **response_formatter** | High | Reuse `make_response_formatter()` factory pattern from AI Tutor. |
-| 3.11 | **Pipeline wiring** | Critical | SequentialAgent pipelines (planning, scheduling, tutoring, notes, assessment) + AgentTool wrappers. |
+| 3.11 | **Pipeline wiring** | Critical | SequentialAgent pipelines (planning, scheduling, notes, tutoring, assessment) + AgentTool wrappers. Orchestrator calls planning → scheduling → notes in one turn at plan time. |
 
 ### Phase 4: Frontend (Days 7-8)
 > **Goal:** Polished Streamlit UI with video embedding and progress dashboard.
@@ -984,7 +960,7 @@ See `DEMO_SCRIPT.md` for full per-segment inputs, expected outputs, and detailed
 | C. Planning | YAML read → sessions planned → Calendar events + parent email created |
 | D. Grade teaching | `get_grade_band()` correct → persona applied → YouTube differs by grade |
 | E. Voice + Hindi | `st.audio_input` → Gemini detects Hindi → response in Hindi |
-| F. Integrations | Calendar, Tasks, Docs, Drive, Gmail all show real AI-created content |
+| F. Integrations | Calendar events (with tutor prompt), Study Notes Doc in Drive, Gmail — all show real AI-created content |
 
 ---
 
@@ -997,7 +973,7 @@ See `DEMO_SCRIPT.md` for full per-segment inputs, expected outputs, and detailed
 |---|---|---|
 | **YAML curriculum quality** | High | Author Math Grade 7-10 YAML on Day 1 before any agent work. Validate with Pydantic schema. Test `curriculum_planner_agent` with grade-8 YAML before moving to next phase. All agents depend on this — it is the critical path. |
 | **`gws mcp` deployment on Cloud Run** | High | Run `gws mcp` as a 4th Cloud Run service. Test Cloud Run → `gws mcp` connectivity in Phase 2 before building agents that depend on it. Fallback: direct Google API function tools (pre-built backup per demo fallback plan). |
-| **Workspace MCP OAuth2 + `gws` stability** | High | Pin `@googleworkspace/cli` to a specific version. Test `gws auth login` + all 5 services (Calendar, Tasks, Gmail, Docs, Drive) end-to-end in Phase 2. Pre-authorize OAuth refresh token before demo day. |
+| **Workspace MCP OAuth2 + `gws` stability** | High | Pin `@googleworkspace/cli` to a specific version. Test `gws auth login` + all 4 services (Calendar, Gmail, Docs, Drive) end-to-end in Phase 2. Pre-authorize OAuth refresh token before demo day. |
 | **7-day timeline (was 10-day plan)** | High | Prioritize core flow first: planner → calendar → tutor → assessment. Docs/Tasks/email agents are additive — demo still works without them. Cut Phase 4 video embedding if behind schedule. |
 | **Vertex AI rate limits** | High | Use API key (not Vertex AI) for demo — proven from AI Tutor project. Request quota increase by Day 5. |
 | **`study_sessions` / ADK `sessions` table collision** | Medium | Setup script must never manually create a `sessions` table — ADK owns that name. Add explicit check in `setup_alloydb.sh`. ADK auto-creates its tables on first run via `DatabaseSessionService`. |
@@ -1016,9 +992,9 @@ See `DEMO_SCRIPT.md` for full per-segment inputs, expected outputs, and detailed
 wiring, AlloyDB cluster (new DB/schema), Cloud Run + Dockerfile patterns, FastAPI backend,
 Streamlit SSE streaming, `response_formatter` factory, `code_executor` on tutor agent.
 
-**New for EduFlow:** Google Workspace MCP (`gws`) — Calendar, Tasks, Gmail, Docs, Drive;
+**New for EduFlow:** Google Workspace MCP (`gws`) — Calendar, Gmail, Docs, Drive;
 YAML curriculum files (replaces DB syllabus); YouTube search tool; curriculum planner agent;
-tasks agent; docs agent; multi-step workflow orchestration; grade-aware teaching personas
+docs agent; multi-step workflow orchestration; grade-aware teaching personas
 (Section 14); voice input + multilingual (Section 15); parent notification system.
 
 ---
@@ -1045,9 +1021,9 @@ cp eduflow_agents/.env.example eduflow_agents/.env   # fill in API keys
 # Linux/macOS:
 bash scripts/infra/start_toolbox.sh
 
-# Start Google Workspace MCP server (Calendar, Tasks, Gmail, Docs, Drive)
+# Start Google Workspace MCP server (Calendar, Gmail, Docs, Drive)
 gws auth login                              # one-time OAuth setup
-gws mcp -s calendar,tasks,gmail,docs,drive  # runs over stdio (ADK spawns per-agent subprocesses)
+gws mcp -s calendar,gmail,docs,drive  # runs over stdio (ADK spawns per-agent subprocesses)
 
 # Run agents locally
 adk web   # select 'eduflow_agents' from dropdown

@@ -8,7 +8,6 @@ from .tools.profile_tool import set_user_profile
 from .subagents.curriculum_planner import curriculum_planner_agent
 from .subagents.content_agent import content_agent
 from .subagents.calendar_agent import calendar_agent
-from .subagents.tasks_agent import tasks_agent
 from .subagents.email_agent import email_agent
 from .subagents.docs_agent import docs_agent
 from .subagents.tutor_agent import tutor_agent
@@ -72,10 +71,10 @@ planning_pipeline = SequentialAgent(
 scheduling_pipeline = SequentialAgent(
     name="scheduling_pipeline",
     description=(
-        "Handles all scheduling and communication: creates Google Calendar events, "
-        "Google Tasks list, and sends emails to student + parent."
+        "Handles all scheduling and communication: creates Google Calendar events "
+        "and sends emails to student + parent."
     ),
-    sub_agents=[calendar_agent, tasks_agent, email_agent],
+    sub_agents=[calendar_agent, email_agent],
 )
 
 tutoring_pipeline = SequentialAgent(
