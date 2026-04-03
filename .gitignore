@@ -32,7 +32,7 @@ gcloud/
 eduflow_agents/.adk/
 
 # ── Local testing artifacts ───────────────────────────────────────────────────
-testing/
+
 
 # ── Node / gws ───────────────────────────────────────────────────────────────
 node_modules/

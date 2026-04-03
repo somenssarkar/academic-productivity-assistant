@@ -4,9 +4,9 @@ Connects to the FastAPI backend via SSE streaming.
 """
 
 import os
+import re
 import uuid
 import json
-import time
 import httpx
 import streamlit as st
 from dotenv import load_dotenv
@@ -38,8 +38,10 @@ def _init_session():
         st.session_state.sid = params.get("sid") or str(uuid.uuid4())
     if "messages" not in st.session_state:
         st.session_state.messages = []
-    if "profile_saved" not in st.session_state:
-        st.session_state.profile_saved = False
+    if "profile" not in st.session_state:
+        st.session_state.profile = {}
+    if "session_video_url" not in st.session_state:
+        st.session_state.session_video_url = ""
     # Persist uid/sid in URL (survives page refresh)
     st.query_params.update({"uid": st.session_state.uid, "sid": st.session_state.sid})
 
@@ -47,29 +49,59 @@ def _init_session():
 _init_session()
 
 # ---------------------------------------------------------------------------
-# Backend health check (cached 30s to avoid hammering)
+# Backend health check (cached 30s)
 # ---------------------------------------------------------------------------
 
 @st.cache_data(ttl=30)
 def _backend_status(backend_url: str) -> bool:
     try:
+        # /health is exposed by ADK's get_fast_api_app
         r = httpx.get(f"{backend_url}/health", timeout=3.0)
         return r.status_code == 200
     except Exception:
-        return False
+        try:
+            r = httpx.get(f"{backend_url}/apps", timeout=3.0)
+            return r.status_code == 200
+        except Exception:
+            return False
 
 
 # ---------------------------------------------------------------------------
 # Profile state delta builder
 # ---------------------------------------------------------------------------
 
-def _build_state_delta(profile: dict) -> dict:
+def _build_state_delta(profile: dict) -> dict | None:
     """Convert profile form values to ADK user: state keys."""
-    return {
-        f"user:{k}": v
-        for k, v in profile.items()
-        if v
-    }
+    if not profile:
+        return None
+    delta = {f"user:{k}": v for k, v in profile.items() if v}
+    return delta or None
+
+
+# ---------------------------------------------------------------------------
+# Fetch ADK session state from backend (for video URL, plan state, etc.)
+# ---------------------------------------------------------------------------
+
+def _fetch_adk_state() -> dict:
+    """Query the backend for current ADK session state after each response."""
+    try:
+        url = (
+            f"{BACKEND_URL}/apps/{APP_NAME}"
+            f"/users/{st.session_state.uid}"
+            f"/sessions/{st.session_state.sid}"
+        )
+        r = httpx.get(url, timeout=5.0)
+        if r.status_code == 200:
+            return r.json().get("state", {})
+    except Exception:
+        pass
+    return {}
+
+
+def _extract_youtube_url(text: str) -> str:
+    """Pull the first YouTube URL out of a text response."""
+    match = re.search(r"https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[\w\-]+", text)
+    return match.group(0) if match else ""
 
 
 # ---------------------------------------------------------------------------
@@ -93,7 +125,7 @@ def _stream_agent_response(message: str, state_delta: dict | None = None):
             "POST",
             f"{BACKEND_URL}/run_sse",
             json=payload,
-            timeout=120.0,
+            timeout=180.0,
             headers={"Accept": "text/event-stream"},
         ) as resp:
             resp.raise_for_status()
@@ -105,7 +137,6 @@ def _stream_agent_response(message: str, state_delta: dict | None = None):
                     break
                 try:
                     event = json.loads(data_str)
-                    # ADK SSE format: content → parts → text
                     for part in event.get("content", {}).get("parts", []):
                         chunk = part.get("text", "")
                         if chunk:
@@ -120,6 +151,23 @@ def _stream_agent_response(message: str, state_delta: dict | None = None):
         yield "_EduFlow is warming up — please try again in a moment._"
 
 
+def _handle_message(message: str):
+    """Send a message, stream the response, then sync state from backend."""
+    # Always inject profile so backend state stays current
+    state_delta = _build_state_delta(st.session_state.profile)
+
+    with st.chat_message("assistant"):
+        response = st.write_stream(_stream_agent_response(message, state_delta))
+
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+    # Sync video URL from ADK state (content_agent writes session_video_url)
+    adk_state = _fetch_adk_state()
+    video_url = adk_state.get("session_video_url") or _extract_youtube_url(response)
+    if video_url:
+        st.session_state.session_video_url = video_url
+
+
 # ---------------------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------------------
@@ -132,21 +180,32 @@ with st.sidebar:
     # Student profile form
     st.subheader("Your Profile")
     with st.form("profile_form"):
-        name = st.text_input("Name", placeholder="Your name")
-        email = st.text_input("Email", placeholder="student@email.com")
-        parent_email = st.text_input("Parent Email", placeholder="parent@email.com")
-        grade = st.selectbox("Grade", ["Grade 7", "Grade 8", "Grade 9", "Grade 10"])
-        language = st.selectbox("Language", ["English", "Hindi", "Tamil", "Telugu",
-                                              "Kannada", "Malayalam", "Bengali"])
-        save_profile = st.form_submit_button("Save Profile")
+        name = st.text_input("Name", value=st.session_state.profile.get("name", ""),
+                             placeholder="Your name")
+        email = st.text_input("Email", value=st.session_state.profile.get("email", ""),
+                              placeholder="student@gmail.com")
+        parent_email = st.text_input("Parent Email",
+                                     value=st.session_state.profile.get("parent_email", ""),
+                                     placeholder="parent@gmail.com")
+        grade_options = ["Grade 7", "Grade 8", "Grade 9", "Grade 10"]
+        current_grade = st.session_state.profile.get("grade_level", "Grade 8")
+        grade = st.selectbox("Grade", grade_options,
+                             index=grade_options.index(current_grade) if current_grade in grade_options else 1)
+        lang_options = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam", "Bengali"]
+        current_lang = st.session_state.profile.get("preferred_language", "English")
+        language = st.selectbox("Language", lang_options,
+                                index=lang_options.index(current_lang) if current_lang in lang_options else 0)
+        save_profile = st.form_submit_button("Save Profile", use_container_width=True)
 
     if save_profile:
         st.session_state.profile = {
-            "name": name, "email": email, "parent_email": parent_email,
-            "grade_level": grade, "preferred_language": language,
+            "name": name,
+            "email": email,
+            "parent_email": parent_email,
+            "grade_level": grade,
+            "preferred_language": language,
         }
-        st.session_state.profile_saved = True
-        st.success("Profile saved!")
+        st.success(f"Profile saved! Welcome, {name or 'Student'}!")
 
     st.divider()
 
@@ -163,44 +222,44 @@ with st.sidebar:
 
     st.divider()
 
-    # Backend status indicator
+    # Backend status
     is_online = _backend_status(BACKEND_URL)
-    status_icon = "🟢" if is_online else "🔴"
-    status_text = "Backend connected" if is_online else "Backend offline"
-    st.caption(f"{status_icon} {status_text}")
+    st.caption(f"{'🟢 Backend connected' if is_online else '🔴 Backend offline'}")
 
 # ---------------------------------------------------------------------------
-# Main content
+# Main content — session video embed
 # ---------------------------------------------------------------------------
 
-# Video embed area (shown when session_video_url is in state)
-if video_url := st.session_state.get("session_video_url"):
-    st.video(video_url)
+if st.session_state.session_video_url:
+    st.subheader("📺 Session Video")
+    st.video(st.session_state.session_video_url)
     st.divider()
 
+# ---------------------------------------------------------------------------
 # Chat history
+# ---------------------------------------------------------------------------
+
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+# ---------------------------------------------------------------------------
 # Handle quick action buttons
+# ---------------------------------------------------------------------------
+
 if quick_action := st.session_state.pop("quick_action", None):
     st.session_state.messages.append({"role": "user", "content": quick_action})
     with st.chat_message("user"):
         st.markdown(quick_action)
-    with st.chat_message("assistant"):
-        state_delta = _build_state_delta(st.session_state.get("profile", {}))
-        response = st.write_stream(_stream_agent_response(quick_action, state_delta))
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    _handle_message(quick_action)
     st.rerun()
 
+# ---------------------------------------------------------------------------
 # Chat input
+# ---------------------------------------------------------------------------
+
 if prompt := st.chat_input("Ask EduFlow anything about your studies..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-    with st.chat_message("assistant"):
-        state_delta = _build_state_delta(st.session_state.get("profile", {})) \
-            if not st.session_state.profile_saved else None
-        response = st.write_stream(_stream_agent_response(prompt, state_delta))
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    _handle_message(prompt)

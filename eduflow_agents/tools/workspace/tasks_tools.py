@@ -14,13 +14,16 @@ def create_task_list(title: str) -> str:
     Returns:
         JSON string with task_list_id for storage in AlloyDB.
     """
-    service = build("tasks", "v1", credentials=get_credentials())
-    result = service.tasklists().insert(body={"title": title}).execute()
-    return json.dumps({
-        "task_list_id": result["id"],
-        "title": result["title"],
-        "status": "created",
-    })
+    try:
+        service = build("tasks", "v1", credentials=get_credentials())
+        result = service.tasklists().insert(body={"title": title}).execute()
+        return json.dumps({
+            "task_list_id": result["id"],
+            "title": result["title"],
+            "status": "created",
+        })
+    except Exception as e:
+        return json.dumps({"status": "error", "error": str(e)})
 
 
 def create_task(
@@ -44,7 +47,10 @@ def create_task(
     Returns:
         JSON string with task_id for storage in AlloyDB.
     """
-    service = build("tasks", "v1", credentials=get_credentials())
+    try:
+        service = build("tasks", "v1", credentials=get_credentials())
+    except Exception as e:
+        return json.dumps({"status": "error", "error": str(e)})
     body = {"title": title, "status": "needsAction"}
     if notes:
         body["notes"] = notes
@@ -53,12 +59,15 @@ def create_task(
     if video_url:
         body["links"] = [{"type": "related", "description": video_title or "Video tutorial", "link": video_url}]
 
-    result = service.tasks().insert(tasklist=task_list_id, body=body).execute()
-    return json.dumps({
-        "task_id": result["id"],
-        "title": result["title"],
-        "status": "created",
-    })
+    try:
+        result = service.tasks().insert(tasklist=task_list_id, body=body).execute()
+        return json.dumps({
+            "task_id": result["id"],
+            "title": result["title"],
+            "status": "created",
+        })
+    except Exception as e:
+        return json.dumps({"status": "error", "error": str(e)})
 
 
 def complete_task(task_list_id: str, task_id: str) -> str:

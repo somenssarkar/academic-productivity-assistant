@@ -1,3 +1,4 @@
+from datetime import date
 from google.adk.agents import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 
@@ -22,6 +23,9 @@ def _build_instruction(context: ReadonlyContext) -> str:
     header += f"- Grade: {grade_level} | Band: {grade_band}\n"
     if session_topic:
         header += f"- Current Topic: {session_topic}\n"
+
+    today = date.today().isoformat()
+    header += f"- Today's Date: {today}\n"
 
     return CALENDAR_AGENT_INSTRUCTION + f"\n\n{header}"
 

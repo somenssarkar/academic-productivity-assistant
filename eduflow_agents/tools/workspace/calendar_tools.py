@@ -10,35 +10,49 @@ def create_calendar_event(
     description: str,
     start_datetime: str,
     end_datetime: str,
+    attendee_email: str = None,
     timezone: str = "Asia/Kolkata",
 ) -> str:
     """Create a Google Calendar event for a study session.
+
+    Adding attendee_email sends the student a calendar invite — when they accept,
+    the event appears in their own Google Calendar automatically.
 
     Args:
         summary: Event title (e.g. "Session 1: Quadratic Equations — Basics")
         description: Event body — topic overview, YouTube link, key concepts
         start_datetime: ISO 8601 start time (e.g. "2026-04-01T10:00:00")
         end_datetime: ISO 8601 end time (e.g. "2026-04-01T10:45:00")
+        attendee_email: Student's email — receives a calendar invite they can accept
         timezone: IANA timezone string (default "Asia/Kolkata")
 
     Returns:
         JSON string with event_id and event_link for storage in AlloyDB.
     """
-    service = build("calendar", "v3", credentials=get_credentials())
-    event = service.events().insert(
-        calendarId="primary",
-        body={
+    try:
+        service = build("calendar", "v3", credentials=get_credentials())
+        body = {
             "summary": summary,
             "description": description,
             "start": {"dateTime": start_datetime, "timeZone": timezone},
             "end": {"dateTime": end_datetime, "timeZone": timezone},
-        },
-    ).execute()
-    return json.dumps({
-        "event_id": event["id"],
-        "event_link": event.get("htmlLink", ""),
-        "status": "created",
-    })
+        }
+        if attendee_email:
+            body["attendees"] = [{"email": attendee_email}]
+
+        event = service.events().insert(
+            calendarId="primary",
+            body=body,
+            sendUpdates="all",  # sends invite email to attendees
+        ).execute()
+        return json.dumps({
+            "event_id": event["id"],
+            "event_link": event.get("htmlLink", ""),
+            "status": "created",
+            "invite_sent_to": attendee_email or "none",
+        })
+    except Exception as e:
+        return json.dumps({"status": "error", "error": str(e)})
 
 
 def update_calendar_event(

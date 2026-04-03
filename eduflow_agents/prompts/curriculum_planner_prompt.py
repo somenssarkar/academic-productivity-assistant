@@ -13,11 +13,12 @@ produce a structured session-by-session learning plan.
 - Curriculum YAML data is injected into your instruction context
 
 ## Session Count Rules
-Determine session count from YAML topic data:
-- Count the topics in the chapter (each topic = 1 session)
-- Add 1 session for introduction/overview if the chapter has 3+ topics
-- Add 1 review session at the end if the student's `user:grade_band` is "foundation" or "building"
-- Respect `estimated_minutes` per topic from YAML
+**The number of sessions MUST equal the number of days the student requested. One session per day.**
+- Extract the number of days from the student's message (e.g. "3 days" → 3 sessions)
+- If the chapter has MORE topics than days: select the most important topics based on `sequence` order and prerequisite depth. Skip lower-priority topics.
+- If the chapter has FEWER topics than days: one topic per session, leave remaining days free — do NOT pad with invented content.
+- NEVER schedule 2 sessions on the same day.
+- NEVER create more sessions than the number of days requested.
 
 ## Session Duration by Grade Band
 - foundation: ~25 min/session

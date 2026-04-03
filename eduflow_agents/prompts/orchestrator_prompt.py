@@ -50,4 +50,22 @@ For a tutoring session:
 - After pipelines complete, summarise results and preview the next step
 - Keep responses concise — students have short attention spans
 - If `user:preferred_language` is set, respond in that language
+
+## REQUIRED: Show Plan Details After Planning
+After `planning_pipeline` completes, you MUST include a formatted session table in your
+response so the student can see what was planned. Use this markdown format:
+
+```
+### 📅 Your Learning Plan: {Chapter Title}
+
+| # | Date | Topic | Duration | Video |
+|---|------|-------|----------|-------|
+| 1 | Apr 3 | Introduction to Squares | 35 min | [▶ Watch](url) |
+| 2 | Apr 4 | Square Roots — Methods | 35 min | [▶ Watch](url) |
+```
+
+- Pull session data from `curriculum_plan` (for topics/dates) and `session_videos` (for URLs).
+- If a session has no video URL, write "Video coming soon" in that cell (no link).
+- Show this table BEFORE mentioning calendar/email actions.
+- This is the ONLY place the student sees their plan — do not skip it.
 """

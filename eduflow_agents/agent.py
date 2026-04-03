@@ -1,7 +1,9 @@
 from google.adk.agents import LlmAgent, SequentialAgent
+from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.tools.agent_tool import AgentTool
 
 from .prompts.orchestrator_prompt import ORCHESTRATOR_INSTRUCTION
+from .tools.curriculum_loader import get_grade_band
 from .tools.profile_tool import set_user_profile
 from .subagents.curriculum_planner import curriculum_planner_agent
 from .subagents.content_agent import content_agent
@@ -14,6 +16,45 @@ from .subagents.assessment_agent import assessment_agent
 from .subagents.response_formatter import make_response_formatter
 
 MODEL = "gemini-2.5-flash"
+
+
+def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
+    """Inject student profile into orchestrator prompt so it never asks for known info."""
+    name = context.state.get("user:name", "")
+    email = context.state.get("user:email", "")
+    parent_email = context.state.get("user:parent_email", "")
+    grade_level = context.state.get("user:grade_level", "")
+    language = context.state.get("user:preferred_language", "")
+    grade_band = context.state.get("user:grade_band", "")
+
+    if grade_level and not grade_band:
+        grade_band = get_grade_band(grade_level)
+
+    profile_lines = []
+    if name:
+        profile_lines.append(f"- Name: {name}")
+    if email:
+        profile_lines.append(f"- Email: {email}")
+    if parent_email:
+        profile_lines.append(f"- Parent Email: {parent_email}")
+    if grade_level:
+        profile_lines.append(f"- Grade: {grade_level} (Band: {grade_band})")
+    if language:
+        profile_lines.append(f"- Language: {language}")
+
+    if profile_lines:
+        profile_section = (
+            "\n\n## Known Student Profile (already in state — DO NOT ask for these)\n"
+            + "\n".join(profile_lines)
+        )
+    else:
+        profile_section = (
+            "\n\n## Known Student Profile\n"
+            "No profile saved yet. Ask for grade first, then proceed."
+        )
+
+    return ORCHESTRATOR_INSTRUCTION + profile_section
+
 
 # ---------------------------------------------------------------------------
 # Pipelines (SequentialAgent — run silently, only orchestrator output is shown)
@@ -70,7 +111,7 @@ assessment_pipeline = SequentialAgent(
 root_agent = LlmAgent(
     name="orchestrator_agent",
     model=MODEL,
-    instruction=ORCHESTRATOR_INSTRUCTION,
+    instruction=_build_orchestrator_instruction,
     tools=[
         set_user_profile,
         AgentTool(agent=planning_pipeline),

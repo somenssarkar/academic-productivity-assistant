@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from google.adk.agents import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 
@@ -53,10 +54,11 @@ def _build_instruction(context: ReadonlyContext) -> str:
         curriculum_context = f"Curriculum data unavailable: {exc}"
 
     grade_band = get_grade_band(grade_level)
+    today = date.today().isoformat()
 
     return (
         CURRICULUM_PLANNER_INSTRUCTION
-        + f"\n\n## Student Context\nGrade: {grade} | Grade Band: {grade_band}\n"
+        + f"\n\n## Student Context\nGrade: {grade} | Grade Band: {grade_band}\nToday's date: {today}\n"
         + f"\n## Curriculum Data\n{curriculum_context}"
     )
 
