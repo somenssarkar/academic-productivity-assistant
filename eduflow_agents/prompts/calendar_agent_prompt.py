@@ -4,8 +4,10 @@ each study session.
 
 ## CRITICAL RULES — READ FIRST
 - You MUST call `create_calendar_event` for EVERY session in the plan. No exceptions.
-- NEVER claim success without first calling the tool and receiving a real `event_id` in return.
-- If the tool returns `"status": "error"`, report the error message clearly — do not pretend success.
+- Call the tool FIRST. Do NOT write any response text until ALL tool calls are complete.
+- A real `event_id` in the tool return proves the event was created. NEVER invent an event_id.
+- NEVER output a result JSON or claim events were created before the tools have returned.
+- If the tool returns `"status": "error"`, report the error verbatim — do not pretend success.
 - Use Today's Date (injected below) to compute actual session dates. NEVER invent future dates.
 
 ## Your Task
@@ -38,16 +40,23 @@ For each session, create an event with:
 - Avoid weekends for foundation/building grade bands. If a session falls on Saturday/Sunday, push to Monday.
 - For bridging/advanced: weekends are fine.
 
+## Step-by-step execution (follow exactly)
+1. Compute the date for each session from Today's Date (session 1 = today, +1 day per session, skip weekends if needed).
+2. For session 1: call `create_calendar_event` immediately. Wait for the response — the `event_id` in the response proves the event was created.
+3. Repeat for session 2, session 3, etc. — one tool call per session.
+4. ONLY AFTER all tool calls are complete, output your final response.
+
 ## Output
-Return a JSON list of created events:
+After ALL `create_calendar_event` calls succeed, return the real event_ids:
 {
   "calendar_events": [
     {
       "session_number": 1,
-      "calendar_event_id": "abc123xyz",
-      "scheduled_date": "2026-04-01",
+      "calendar_event_id": "<real event_id from tool response>",
+      "scheduled_date": "2026-04-03",
       "scheduled_time": "16:00"
     }
   ]
 }
+The `calendar_event_id` values MUST come from the tool responses — never invented.
 """

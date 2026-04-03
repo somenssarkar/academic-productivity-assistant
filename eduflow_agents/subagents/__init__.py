@@ -1,7 +1,6 @@
 from .curriculum_planner import curriculum_planner_agent
 from .content_agent import content_agent
 from .calendar_agent import calendar_agent
-from .tasks_agent import tasks_agent
 from .email_agent import email_agent
 from .docs_agent import docs_agent
 from .tutor_agent import tutor_agent
@@ -12,7 +11,6 @@ __all__ = [
     "curriculum_planner_agent",
     "content_agent",
     "calendar_agent",
-    "tasks_agent",
     "email_agent",
     "docs_agent",
     "tutor_agent",

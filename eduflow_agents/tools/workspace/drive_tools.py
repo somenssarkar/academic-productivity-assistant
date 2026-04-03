@@ -37,3 +37,38 @@ def get_or_create_folder(name: str, parent_id: str = None) -> str:
 
     folder = service.files().create(body=body, fields="id").execute()
     return json.dumps({"folder_id": folder["id"], "name": name, "status": "created"})
+
+
+def share_file_with_student(file_id: str, student_email: str) -> str:
+    """Share a Google Drive file (doc or folder) with the student as a reader.
+
+    The student receives an email notification and the file appears in their
+    'Shared with me' in Google Drive — no separate Drive account needed.
+
+    Args:
+        file_id: The Drive file or folder ID to share
+        student_email: Student's Google account email (e.g. student@gmail.com)
+
+    Returns:
+        JSON string confirming the share permission was granted.
+    """
+    try:
+        service = build("drive", "v3", credentials=get_credentials())
+        permission = {
+            "type": "user",
+            "role": "reader",
+            "emailAddress": student_email,
+        }
+        service.permissions().create(
+            fileId=file_id,
+            body=permission,
+            sendNotificationEmail=False,  # email is sent separately by email_agent
+            fields="id",
+        ).execute()
+        return json.dumps({
+            "status": "shared",
+            "file_id": file_id,
+            "shared_with": student_email,
+        })
+    except Exception as e:
+        return json.dumps({"status": "error", "error": str(e)})

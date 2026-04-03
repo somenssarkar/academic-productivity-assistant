@@ -2,7 +2,6 @@ from .orchestrator_prompt import ORCHESTRATOR_INSTRUCTION
 from .curriculum_planner_prompt import CURRICULUM_PLANNER_INSTRUCTION
 from .content_agent_prompt import CONTENT_AGENT_INSTRUCTION
 from .calendar_agent_prompt import CALENDAR_AGENT_INSTRUCTION
-from .tasks_agent_prompt import TASKS_AGENT_INSTRUCTION
 from .email_agent_prompt import EMAIL_AGENT_INSTRUCTION
 from .docs_agent_prompt import DOCS_AGENT_INSTRUCTION
 from .tutor_agent_prompt import TUTOR_AGENT_INSTRUCTION

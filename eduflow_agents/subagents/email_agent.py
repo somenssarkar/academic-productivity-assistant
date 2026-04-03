@@ -1,3 +1,4 @@
+from datetime import date
 from google.adk.agents import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 
@@ -16,10 +17,14 @@ def _build_instruction(context: ReadonlyContext) -> str:
     session_topic = context.state.get("session_topic", "")
     doc_url = context.state.get("doc_url", "")
     assessment_result = context.state.get("assessment_result", "")
+    calendar_events = context.state.get("calendar_events", "")
 
     session_videos = context.state.get("session_videos", "")
 
+    today = date.today().isoformat()
+
     header = f"## Active Student Context\n"
+    header += f"- Today's Date: {today} (use this year and date for session scheduling in email)\n"
     header += f"- Name: {student_name}\n"
     header += f"- Student Email: {student_email}\n"
     header += f"- Parent Email: {parent_email}\n"
@@ -28,6 +33,8 @@ def _build_instruction(context: ReadonlyContext) -> str:
         header += f"- Current Topic: {session_topic}\n"
     if doc_url:
         header += f"- Study Notes Doc: {doc_url}\n"
+    if calendar_events:
+        header += f"- Calendar Events Created: {calendar_events}\n"
     if assessment_result:
         header += f"- Assessment Result: {assessment_result}\n"
 
