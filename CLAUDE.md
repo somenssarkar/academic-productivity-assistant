@@ -7,7 +7,7 @@ when working in this repository. Read this before making any changes.
 
 ## 1. Project Overview
 
-A multi-agent AI system built on **Google ADK** (Agent Development Kit) with **Gemini 2.5 Flash**
+A multi-agent AI system built on **Google ADK** (Agent Development Kit) with **Gemini 2.5 Pro**
 that helps students manage their learning lifecycle — from planning study sessions to tracking
 progress and keeping parents informed. Students describe a learning goal (e.g., "learn quadratic
 equations in 1 week") and the system plans sessions, schedules calendar events, finds video
@@ -26,7 +26,7 @@ graphs). Together they prove multi-subject capability without scope creep.
 | Requirement | EduFlow implementation |
 |---|---|
 | Primary agent coordinating sub-agents | Orchestrator coordinates 8 sub-agents via 5 pipelines |
-| Store and retrieve structured data | YAML curriculum files (syllabus, questions) + AlloyDB (plans, progress, assessments) |
+| Store and retrieve structured data | YAML curriculum files (syllabus, questions) + Cloud SQL PostgreSQL 15 (plans, progress, assessments) |
 | Multiple tools via MCP | Calendar, Gmail, Docs/Drive (via `gws` MCP) + Database (MCP Toolbox) |
 | Multi-step workflows | Plan → Schedule → Notes → Teach → Assess → Report |
 | API-based deployment | FastAPI on Cloud Run (3 services) |
@@ -36,19 +36,20 @@ graphs). Together they prove multi-subject capability without scope creep.
 | Component | Technology |
 |---|---|
 | Agent Framework | Google ADK (`google-adk`) |
-| LLM | `gemini-2.5-flash` (default for all agents) |
+| LLM (agents) | `gemini-2.5-pro` (all 8 agents — planning, teaching, assessment; hackathon project quota for gemini-2.5-flash is exhausted; gemini-2.5-pro has 1M tokens/min quota in us-central1) |
+| LLM (audio) | `gemini-2.5-flash-lite` (transcription only — separate quota from agents; `gemini-live-2.5-flash-native-audio` requires Live API/websockets, not usable for batch transcription) |
 | Code Execution | `BuiltInCodeExecutor` (sandboxed Python, math/physics only) |
 | Web Search | `GoogleSearchTool` (Gemini-native grounding) |
 | Curriculum Data | YAML files in `data/curricula/` (syllabus, questions — static) |
-| Database | AlloyDB (PostgreSQL-compatible — runtime state only: plans, progress, assessments) |
+| Database | Cloud SQL PostgreSQL 15 (runtime state only: plans, progress, assessments) |
 | Database MCP | MCP Toolbox for Databases (`tools.yaml`) |
-| Workspace MCP | Google Workspace CLI (`gws mcp`) — Calendar, Gmail, Docs, Drive |
+| Workspace Tools | Python function tools via `google-api-python-client` + OAuth2 — Calendar, Gmail, Docs, Drive (located in `eduflow_agents/tools/workspace/`) |
 | Video Search | YouTube Data API v3 (function tool) |
 | Frontend | Streamlit (streaming chat + video embed + progress dashboard) |
 | Backend API | FastAPI (`get_fast_api_app()` + `DatabaseSessionService`) |
 | Runtime | Python 3.12+ |
 | Dev runner | `adk web` (local dev), Cloud Run (production) |
-| Deployment | Google Cloud Run (3 services) + AlloyDB |
+| Deployment | Google Cloud Run (3 services) + Cloud SQL PostgreSQL 15 |
 
 ---
 
@@ -133,9 +134,12 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 │   │   Breaks "learn X in Y days" into structured sessions
 │   │   Uses YAML curriculum data injected into instruction at construction
 │   │   Determines session count based on topic depth + prerequisites
-│   └── content_agent               (LlmAgent — youtube_search tool)
-│       Finds YouTube videos per topic
-│       Generates session summaries and study material outlines
+│   ├── content_agent               (LlmAgent — youtube_search tool)
+│   │   Finds YouTube videos per topic
+│   │   Generates session summaries and study material outlines
+│   └── plan_saver_agent            (LlmAgent — database MCP, gemini-2.5-flash-lite)
+│       Saves learning plan + study sessions to Cloud SQL
+│       Uses flash-lite: Pro's thinking mode suppresses output_key on pure tool-call sequences
 │
 ├── scheduling_pipeline (SequentialAgent)
 │   ├── calendar_agent              (LlmAgent — Workspace MCP: Calendar)
@@ -144,7 +148,6 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 │   │   e.g. "Start your session: Ask EduFlow → 'Teach me Perfect Squares'"
 │   └── email_agent                 (LlmAgent — Workspace MCP: Gmail)
 │       Sends learning plan to student + parent (with Study Notes doc link)
-│       Sends progress reports after assessments
 │
 │   NOTE: tasks_agent removed — Google Tasks API has restrictions on free personal
 │   accounts that make it unsuitable for demo. Calendar + Docs + Gmail provide
@@ -162,28 +165,36 @@ orchestrator_agent (LlmAgent — root, understands intent, coordinates workflow)
 │       Creates/updates formatted Google Doc study notes per chapter
 │       Organizes in Drive folders: EduFlow/{Subject}/{Grade}/
 │       Appends session summaries, key concepts, YouTube links
+│       notes_saved_topics in state prevents duplicate insertions across sessions
 │
-└── assessment_pipeline (SequentialAgent)
-    └── assessment_agent            (LlmAgent — YAML questions + database MCP)
-        Uses quiz questions from YAML curriculum or AI-generated
-        Evaluates answers (deterministic + LLM)
-        Stores scores and weak areas in DB via database MCP
-        Triggers email_agent for progress report to parent
+├── assessment_pipeline (SequentialAgent)
+│   └── assessment_agent            (LlmAgent — YAML questions + database MCP)
+│       Quiz questions injected from YAML into instruction at runtime (no tool call needed)
+│       Fuzzy case-insensitive topic matching across all chapters
+│       Evaluates answers, stores scores + weak areas in DB via database MCP
+│
+└── report_pipeline (SequentialAgent)
+    └── report_email_agent          (LlmAgent — Workspace MCP: Gmail)
+        Separate email_agent instance (ADK one-parent rule — make_email_agent factory)
+        Reads assessment_result from state
+        Sends progress report to student + parent after quiz completion
 ```
 
 ### 3.2 Agent Roles
 
-| Agent | Type | MCP/Tools | Role |
+| Agent | Model | MCP/Tools | Role |
 |---|---|---|---|
-| `orchestrator_agent` | LlmAgent | — | Understands student intent, routes to correct pipeline, manages multi-step workflow state |
-| `curriculum_planner_agent` | LlmAgent | YAML curriculum (in context) | Reads syllabus from YAML, creates structured multi-session learning plans |
-| `content_agent` | LlmAgent | `youtube_search` | Finds relevant educational videos per topic, generates summaries |
-| `calendar_agent` | LlmAgent | Workspace MCP (Calendar) | Creates Google Calendar events with topic, video link, and tutor starter prompt |
-| `email_agent` | LlmAgent | Workspace MCP (Gmail) | Sends plans (with doc link), reminders, progress reports to student and parent |
-| `docs_agent` | LlmAgent | Workspace MCP (Docs+Drive) | Creates formatted study notes, organizes in Drive folders |
-| `tutor_agent` | LlmAgent | `code_executor` | Teaches concepts, explains step-by-step, answers follow-up questions |
-| `assessment_agent` | LlmAgent | YAML questions + Database MCP | Uses questions from YAML curriculum, evaluates answers, stores scores in DB |
-| `response_formatter` | LlmAgent | — | Pure formatting of tutor output (no tools, `include_contents='none'`) |
+| `orchestrator_agent` | gemini-2.5-pro | — | Understands student intent, routes to correct pipeline, manages multi-step workflow state |
+| `curriculum_planner_agent` | gemini-2.5-pro | YAML curriculum (in context) | Reads syllabus from YAML, creates structured multi-session learning plans |
+| `content_agent` | gemini-2.5-pro | `youtube_search` | Finds relevant educational videos per topic, generates summaries |
+| `calendar_agent` | gemini-2.5-pro | Workspace function tools (Calendar) | Creates Google Calendar events with topic, video link, and tutor starter prompt |
+| `email_agent` | gemini-2.5-pro | Workspace function tools (Gmail) | Sends plans (with doc link) to student and parent via `scheduling_pipeline` |
+| `report_email_agent` | gemini-2.5-pro | Workspace function tools (Gmail) | Sends progress reports after assessment via `report_pipeline` (separate instance due to one-parent rule) |
+| `docs_agent` | gemini-2.5-pro | Workspace function tools (Docs+Drive) | Creates formatted study notes, organizes in Drive folders; skips if topic already in notes_saved_topics |
+| `tutor_agent` | gemini-2.5-pro | `code_executor` | Teaches concepts, explains step-by-step, answers follow-up questions |
+| `assessment_agent` | gemini-2.5-pro | Database MCP | YAML questions injected into context; evaluates answers, stores scores in DB |
+| `plan_saver_agent` | gemini-2.5-flash-lite | Database MCP | Saves learning plan + sessions to Cloud SQL; flash-lite avoids Pro thinking-mode output suppression |
+| `response_formatter` | gemini-2.5-pro | — | Pure formatting of tutor output (no tools, `include_contents='none'`) |
 
 ### 3.3 Orchestration Pattern
 
@@ -293,7 +304,9 @@ Student: "I want to learn Squares and Square Roots in 3 days"
 | `drive_folder_id` | docs_agent | docs_agent | Drive folder ID (EduFlow/{Subject}/{Grade}/) |
 | `tutor_solution` | tutor_agent | response_formatter | Raw tutor output (same pattern as AI Tutor project) |
 | `formatted_response` | response_formatter | orchestrator | Formatted tutor output |
-| `assessment_result` | assessment_agent | orchestrator, email | Quiz score + feedback |
+| `assessment_result` | assessment_agent | orchestrator, report_email_agent | Quiz score + feedback |
+| `notes_saved_topics` | `set_user_profile(notes_saved=...)` | orchestrator | List of topics already appended to Google Doc; prevents duplicate insertions |
+| `email_sent` | email_agent / report_email_agent | — | Confirmation that email was sent (output_key) |
 
 ---
 
@@ -301,17 +314,19 @@ Student: "I want to learn Squares and Square Roots in 3 days"
 
 ### 4.1 Tool Assignment by Agent
 
-| Agent | Database MCP | Workspace MCP (Cal) | Workspace MCP (Gmail) | Workspace MCP (Docs/Drive) | `youtube_search` | `code_executor` |
+| Agent | Database MCP | Workspace (Cal) | Workspace (Gmail) | Workspace (Docs/Drive) | `youtube_search` | `code_executor` |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `orchestrator_agent` | — | — | — | — | — | — |
 | `curriculum_planner_agent` | — | — | — | — | — | — |
 | `content_agent` | — | — | — | — | ✓ | — |
+| `plan_saver_agent` | ✓ | — | — | — | — | — |
 | `calendar_agent` | — | ✓ | — | — | — | — |
 | `email_agent` | — | — | ✓ | — | — | — |
+| `report_email_agent` | — | — | ✓ | — | — | — |
 | `docs_agent` | — | — | — | ✓ | — | — |
 | `tutor_agent` | — | — | — | — | — | ✓ |
 | `assessment_agent` | ✓ | — | — | — | — | — |
 | `response_formatter` | — | — | — | — | — | — |
-| `orchestrator_agent` | — | — | — | — | — | — |
 
 > **Constraint carried from AI Tutor project:** `code_executor` (Gemini built-in) cannot coexist
 > with function-calling tools (MCP tools) in the same agent. This is why `tutor_agent` uses ONLY
@@ -363,7 +378,7 @@ Reuses the exact pattern from the AI Tutor project. `tools.yaml` defines paramet
 | `save-learning-plan` | Insert a new learning plan | `INSERT INTO learning_plans ...` |
 | `save-study-session` | Insert a study session within a plan | `INSERT INTO study_sessions ...` |
 | `update-study-session` | Update session status/integration IDs | `UPDATE study_sessions SET status=$1 ...` |
-| `save-assessment` | Store quiz result + weak areas | `INSERT INTO assessments ...` |
+| `save-assessment` | Store quiz result + weak areas | `INSERT INTO assessments ...` — session_id uses `NULLIF($1, '')::uuid` to handle empty `current_session_id` gracefully |
 | `get-student-progress` | Fetch progress for adaptation | `SELECT ... FROM progress WHERE user_id=$1` |
 | `update-progress` | Update mastery level after assessment | `UPDATE progress SET mastery_level=$1 ...` |
 
@@ -752,10 +767,14 @@ Carried forward from AI Tutor project:
 5. **`include_contents='none'` on response_formatter** — same pattern as AI Tutor project.
 6. **`before_agent_callback` requires documented reason** — same discipline as AI Tutor project.
 7. **Each formatter instance via `make_response_formatter(name)`** — one-parent rule.
+8. **Each email_agent instance via `make_email_agent(name)`** — one-parent rule. `scheduling_pipeline` uses `email_agent` (default name); `report_pipeline` uses `make_email_agent("report_email_agent")`. Never add the same instance to two pipelines.
+9. **plan_saver_agent uses `gemini-2.5-flash-lite`** — gemini-2.5-pro's thinking mode produces no final text after pure tool-call sequences, so `output_key` is never written. Flash-lite outputs the UUID correctly. Do not change this model for plan_saver.
 
 ### 6.3 Model
 
-Default: `gemini-2.5-flash` for all agents. Do not hardcode in multiple places.
+Default: `gemini-2.5-pro` for all agents except `plan_saver_agent` (uses `gemini-2.5-flash-lite` — see rule 9 above).
+
+**Why Pro:** Hackathon Vertex AI project (genai-apac-hackathon) has no usable RPM quota for `gemini-2.5-flash`. Available models with real quota: `gemini-2.5-pro` (1M tokens/min in us-central1). Flash-lite has 5 RPM — only used for plan_saver where output is simple (a UUID).
 
 ---
 
@@ -832,7 +851,7 @@ Cloud Run: eduflow-backend (FastAPI + ADK agents)
     ├─► MCP Toolbox ─── Cloud Run: eduflow-toolbox
     │                       │
     │                       ▼
-    │                   AlloyDB (asia-southeast1)
+    │                   Cloud SQL PostgreSQL 15 (asia-southeast1)
     │                       ├── ADK: sessions, events, user_states (auto)
     │                       └── Custom: learning_plans, study_sessions,
     │                           assessments, progress
@@ -857,7 +876,7 @@ Google APIs (YouTube Data API v3)
 | `GOOGLE_OAUTH_REFRESH_TOKEN` | backend | Pre-authorized token for demo |
 | `BACKEND_URL` | frontend | URL to backend Cloud Run service |
 
-### 8.3 Known Gotchas (Carried from AI Tutor)
+### 8.3 Known Gotchas (Carried from AI Tutor + EduFlow-specific)
 
 - **`GOOGLE_CLOUD_LOCATION`**: Must be `us-central1`, not `asia-southeast1` (Gemini DNS fails in SEA)
 - **MCP Toolbox IAM**: Needs `allUsers` invoker — ADK MCPToolset uses plain httpx with no auth
@@ -865,6 +884,11 @@ Google APIs (YouTube Data API v3)
 - **`PORT` is reserved**: Never set as env var on Cloud Run
 - **AlloyDB `@` in password**: URL-encode as `%40`
 - **Cold start**: Handle empty SSE response gracefully in frontend
+- **ADK one-parent rule**: Each LlmAgent instance can only belong to one SequentialAgent parent. Use factory functions (`make_response_formatter`, `make_email_agent`) when the same agent logic is needed in multiple pipelines.
+- **MCP Toolbox restart required**: Toolbox reads `tools.yaml` at startup only. Any change to `tools.yaml` requires a full Toolbox restart to take effect.
+- **Pro thinking mode + output_key**: `gemini-2.5-pro` generates thought tokens before tool calls but often produces no final text after pure tool-call sequences. `output_key` is never written in these cases. Use `gemini-2.5-flash-lite` for agents whose only job is tool invocation (e.g. `plan_saver_agent`).
+- **InMemorySessionService on restart**: Local dev uses `InMemorySessionService` — all session state (including `user:` prefixed profile) is lost on backend restart. Students must re-enter their profile. Production uses `DatabaseSessionService` which persists state.
+- **save-assessment empty session_id**: `current_session_id` is empty unless a study session was explicitly started. SQL uses `NULLIF($1, '')::uuid` so empty string becomes NULL rather than crashing the INSERT.
 
 ---
 
@@ -899,32 +923,53 @@ Google APIs (YouTube Data API v3)
 | 2.7 | **Curriculum loader** | High | ✅ Done | Pydantic-validated. All 4 grades load correctly. |
 
 ### Phase 3: Agent Implementation (Days 5-6)
-> **Goal:** All 9 agents + 1 formatter implemented and working in `adk web`.
+> **Goal:** All agents implemented and tested via Streamlit + uvicorn (not adk web).
+> **Status legend:** ✅ Tested & confirmed | 🔧 Implemented, needs test | ⏳ Not started
 
-| # | Item | Priority | Notes |
-|---|------|----------|-------|
-| 3.1 | **orchestrator_agent** | Critical | Root agent with AgentTool-wrapped pipelines. Routing logic for plan/teach/assess/schedule/notes intents. |
-| 3.2 | **curriculum_planner_agent** | Critical | Uses YAML curriculum in context, determines session count based on topic depth, writes plan to DB. |
-| 3.3 | **content_agent** | Critical | Uses youtube_search to find videos per topic. Returns video URLs + titles. |
-| 3.4 | **calendar_agent** | Critical | Creates Google Calendar events with topic, video link, and tutor starter prompt per session. |
-| 3.5 | **email_agent** | Critical | Sends learning plan email (with doc link) + parent progress reports after assessments. |
-| 3.6 | **docs_agent** | Critical | Creates chapter overview doc at plan time (all sessions, concepts, video links). Appends per session after tutoring. Organizes in Drive: EduFlow/Math/Grade N/. |
-| 3.8 | **tutor_agent** | High | Teaches concepts with code_executor. Grade-band persona + YAML topic concepts injected into context for cohesive experience. |
-| 3.9 | **assessment_agent** | High | Uses quiz questions from YAML curriculum, evaluates answers, stores results in DB, triggers progress update. |
-| 3.10 | **response_formatter** | High | Reuse `make_response_formatter()` factory pattern from AI Tutor. |
-| 3.11 | **Pipeline wiring** | Critical | SequentialAgent pipelines (planning, scheduling, notes, tutoring, assessment) + AgentTool wrappers. Orchestrator calls planning → scheduling → notes in one turn at plan time. |
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 3.1 | **orchestrator_agent** | Critical | ✅ Tested | Dynamic instruction with profile + lesson injection. session_topic set before planning. |
+| 3.2 | **curriculum_planner_agent** | Critical | ✅ Tested | Matched-chapter path (~500 tokens) triggered when orchestrator sets session_topic. |
+| 3.3 | **content_agent** | Critical | ✅ Tested | youtube_search returning real URLs. Grade-band query modifiers working. |
+| 3.4 | **calendar_agent** | Critical | ✅ Tested | Calendar events created with real video links and tutor starter prompts. |
+| 3.5 | **email_agent** | Critical | ✅ Tested | Plan email with HTML table confirmed received. Doc link fix implemented (separate turn) — needs re-test. |
+| 3.6 | **docs_agent** | Critical | ✅ Tested | MODE A (plan overview) and MODE B (tutor notes append) confirmed in GDrive. Markdown stripping implemented — needs re-test. |
+| 3.7 | **plan_saver_agent** | Critical | ✅ Tested | Uses gemini-2.5-flash-lite (Pro thinking mode suppresses output_key on pure tool-call sequences). learning_plans + study_sessions rows confirmed in DB. |
+| 3.8 | **tutor_agent** | High | ✅ Tested | All concepts covered (4-section structure). Grade-band personas working (Grade 8 building). Code verification ✅ Verified note shown. |
+| 3.9 | **assessment_agent** | High | ✅ Tested | YAML questions injected into context (no tool call). Fuzzy case-insensitive topic matching. Quiz completed (100% score confirmed). DB write pending (see 3B.6). |
+| 3.10 | **response_formatter** | High | ✅ Tested | Clean output confirmed in UI. |
+| 3.11 | **Pipeline wiring** | Critical | ✅ Tested | All 6 pipelines wired: planning, scheduling, tutoring, notes, assessment, report. |
+| 3.12 | **report_pipeline** | Critical | 🔧 Implemented | New pipeline with report_email_agent (make_email_agent factory). Reads assessment_result + sends parent email. Needs end-to-end test. |
+
+### Phase 3B: DB Persistence + Voice Input (Added Apr 4)
+> **Goal:** Persist plans/assessments to Cloud SQL. Enable microphone input for students.
+> **Prerequisite for DB tests:** MCP Toolbox must be running — `.\scripts\infra\start_toolbox.ps1`
+
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 3B.1 | **user:id in state_delta** | Critical | ✅ Tested | Streamlit sends `user:id = st.session_state.uid` with every message so DB agents have the user key. |
+| 3B.2 | **plan_saver_agent** | Critical | ✅ Tested | `eduflow_agents/subagents/plan_saver_agent.py` — gemini-2.5-flash-lite, confirmed rows in learning_plans + study_sessions. |
+| 3B.3 | **MCP_TOOLBOX_URL env var** | Critical | ✅ Tested | plan_saver_agent + assessment_agent both use `os.environ.get("MCP_TOOLBOX_URL", "http://localhost:5000/mcp")`. Toolbox running confirmed. |
+| 3B.4 | **Microphone / audio input** | High | ✅ Tested | `st.audio_input()` → `gemini-2.5-flash-lite` transcribes → clean text forwarded to orchestrator. Voice input + Hindi response confirmed working. |
+| 3B.5 | **Test: plan saved to DB** | Critical | ✅ Done | planning_pipeline + Toolbox → learning_plans + study_sessions rows confirmed. |
+| 3B.6 | **Test: assessment saved to DB** | Critical | 🔧 Pending retest | progress table: rows confirmed. assessments table: was 0 rows (save-assessment used `$1::uuid` which fails on empty current_session_id). Fixed to `NULLIF($1, '')::uuid` in tools.yaml — needs Toolbox restart + retest. |
+| 3B.7 | **Test: audio input** | High | ✅ Done | Voice question → transcript shown → EduFlow responded correctly. |
+| 3B.8 | **Notes deduplication** | High | 🔧 Implemented | notes_saved_topics list in state + set_user_profile(notes_saved=<topic>) prevents duplicate Docs insertions. Needs test. |
+| 3B.9 | **Post-assessment parent email** | Critical | 🔧 Implemented | report_pipeline + report_email_agent reads assessment_result → emails score + weak areas. Needs end-to-end test. |
+| 3B.10 | **Streamlit read timeout** | High | ✅ Fixed | Changed from `timeout=180.0` to `httpx.Timeout(connect=10.0, read=360.0, write=30.0, pool=10.0)` to handle Pro model's slower generation. |
 
 ### Phase 4: Frontend (Days 7-8)
 > **Goal:** Polished Streamlit UI with video embedding and progress dashboard.
 
-| # | Item | Priority | Notes |
-|---|------|----------|-------|
-| 4.1 | **FastAPI backend** | Critical | `main.py` with `get_fast_api_app()` + `DatabaseSessionService`. Reuse pattern. |
-| 4.2 | **Streamlit chat UI** | Critical | Streaming SSE chat. Reuse `_stream_agent_response()` pattern. |
-| 4.3 | **Student profile form** | Critical | Name, email, parent email, grade, language. Sidebar. |
-| 4.4 | **Video embedding** | High | `st.video()` for YouTube URLs in session header. |
-| 4.5 | **Plan progress tracker** | High | Sidebar panel showing session statuses within active plan. |
-| 4.6 | **Quick actions** | High | "Plan a Study Session", "Start Next Session", "Take a Quiz", "View Progress" |
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 4.1 | **FastAPI backend** | Critical | ✅ Tested | `main.py` with `get_fast_api_app()` + InMemorySessionService. Working. |
+| 4.2 | **Streamlit chat UI** | Critical | ✅ Tested | Streaming SSE chat confirmed working. |
+| 4.3 | **Student profile form** | Critical | ✅ Tested | Name, email, parent email, grade, language. Sidebar working. |
+| 4.4 | **Microphone input** | High | 🔧 Implemented | `st.audio_input()` → `_transcribe_audio()` → `gemini-2.0-flash-exp-audio` → transcript text to orchestrator. `base64` removed from streamlit_app.py. Needs test. |
+| 4.5 | **Video embedding** | High | ⏳ Pending | `session_video_url` tracked in state; `st.video()` panel validation needed. |
+| 4.6 | **Plan progress tracker** | Medium | ⏳ Pending | Sidebar panel showing ✅/🔵/⏳ per session. Nice-to-have for demo polish. |
+| 4.7 | **Quick actions** | High | ✅ Tested | Buttons wired and working in sidebar. |
 
 ### Phase 5: Deployment + Demo (Days 9-10)
 > **Goal:** Live on Cloud Run. Demo video recorded. Submission ready.
@@ -1169,48 +1214,91 @@ Same system. Same agent. Different grade. **Different teacher.**
 > Students can speak in their native language and receive tutor responses in the same
 > language. Removes two barriers at once: typing difficulty and language.
 
-### 15.1 Approach: Gemini Native Audio (Multimodal)
+### 15.1 Two-Model Audio Architecture (Quota-Optimised)
 
-Gemini 2.5 Flash accepts audio input natively — no separate speech-to-text or translation
-service needed. It auto-detects the spoken language and responds accordingly.
+**Problem:** Sending raw audio bytes to `gemini-2.5-flash` burns the main agents' quota
+on transcription work — a simple task that doesn't need the most capable model.
 
-**Supported:** 70+ languages including Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam,
+**Solution:** A dedicated pre-transcription step using `gemini-2.0-flash-exp-audio`, which
+has its own independent quota pool (4M tokens/min). The main orchestrator (`gemini-2.5-flash`)
+only ever receives clean text — its quota is fully preserved for planning/teaching/assessment.
+
+```
+Student speaks (WAV)
+      │
+      ▼  streamlit_app.py — _transcribe_audio()
+gemini-2.0-flash-exp-audio   ← dedicated 4M tokens/min quota
+      │  (transcription only, auto-detects language)
+      ▼
+  "मुझे द्विघात समीकरण समझाओ"   (plain text transcript)
+      │
+      ▼  /run_sse endpoint
+gemini-2.5-flash orchestrator  ← quota preserved for agents
+      │
+      ▼
+  Tutor response in Hindi
+```
+
+**Available audio models (GCP quota page — GenAI-APAC-Hackathon project):**
+
+| Model | Type | Use |
+|---|---|---|
+| `gemini-2.5-flash-lite` | Batch (generate_content) | ✅ Our transcription model — lighter 2.5-gen, separate quota, supports audio input |
+| `gemini-live-2.5-flash-native-audio` | Live API (websocket) | ❌ Cannot use for batch transcription — requires real-time streaming connection |
+| `gemini-2.5-flash` | Batch (generate_content) | ❌ Avoid for audio — shares quota with all 8 agents |
+
+**Supported languages:** 70+ including Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam,
 Marathi, Punjabi, Urdu, Gujarati, Vietnamese, Thai, Indonesian, and more.
 
-**Flow:**
-1. `st.audio_input("Speak your answer", sample_rate=16000)` captures WAV in Streamlit
-2. Audio bytes sent to backend via `/run_sse` as part of request
-3. Backend passes audio as multimodal input to Gemini alongside conversation context
-4. Gemini auto-detects language, transcribes, understands, and responds in same language
-5. Tutor prompt includes: "Respond in {user:preferred_language}"
+**Fallback:** If transcription fails (network/model error), the student sees
+"🎤 [Voice message — could not transcribe, please repeat or type]" — text input always available.
 
-**Fallback:** Text chat input always available. Both input modes coexist.
+### 15.2 Flow (Implemented)
 
-### 15.2 Multilingual Tutor Behaviour
+1. `st.audio_input()` captures WAV in Streamlit
+2. `_transcribe_audio(audio_bytes)` calls `gemini-2.0-flash-exp-audio` synchronously
+3. Transcript displayed in chat with 🎤 prefix (student can verify what was heard)
+4. Audio playback widget shown alongside transcript
+5. Clean transcript text forwarded to `_handle_message()` → orchestrator
+6. Orchestrator + agents respond in `user:preferred_language` (already in tutor prompt)
+
+**Key change:** `streamlit_app.py` no longer passes `audio_bytes` to `_stream_agent_response`
+or the `/run_sse` endpoint — audio bytes are consumed entirely in Streamlit, never touching
+the ADK backend.
+
+### 15.3 Multilingual Tutor Behaviour
 
 | Scenario | Behaviour |
 |---|---|
-| Student speaks Hindi | Gemini detects Hindi, responds in Hindi |
-| Student mixes Hindi + English | Gemini handles code-switching naturally |
+| Student speaks Hindi | `gemini-2.0-flash-exp-audio` detects Hindi, transcribes in Hindi → orchestrator responds in Hindi |
+| Student mixes Hindi + English | Audio model handles code-switching naturally in transcript |
 | `preferred_language` set to Tamil | All tutor responses in Tamil, regardless of input language |
-| Language not set | Gemini mirrors the student's spoken/typed language |
+| Language not set | Orchestrator mirrors the language in the transcript |
 
-The grade-band personas (Section 14) work across languages — Gemini adapts vocabulary
-complexity within the target language.
+### 15.4 Implementation (in `streamlit_app.py`)
 
-### 15.3 Implementation Effort
+```python
+@st.cache_resource
+def _get_genai_client():
+    # Vertex AI or API key based on GOOGLE_GENAI_USE_VERTEXAI env var
+    ...
 
-| Item | Effort | Notes |
-|---|---|---|
-| `st.audio_input` in Streamlit | ~5 lines | Built-in widget, no extra package |
-| Pass audio bytes to backend | ~10 lines | Add to `/run_sse` request payload |
-| Gemini multimodal input handling | ~10 lines | Convert WAV to `types.Blob` for Gemini |
-| Language preference in tutor prompt | Already exists | `user:preferred_language` session state key |
+def _transcribe_audio(audio_bytes) -> str:
+    # Calls gemini-2.0-flash-exp-audio, returns transcript or ""
+    ...
+```
 
-### 15.4 Demo Moment
+**Dependencies added to `requirements-ui.txt`:** `google-genai>=0.8.0`, `google-auth>=2.29.0`
+(needed for Vertex AI ADC in the Streamlit container).
+
+**Local dev prerequisite:** `gcloud auth application-default login` must be run once
+when `GOOGLE_GENAI_USE_VERTEXAI=1` (uses ADC for Vertex AI authentication).
+
+### 15.5 Demo Moment
 
 "A Grade 7 student in rural India speaks in Hindi: 'मुझे द्विघात समीकरण समझाओ'
-(Explain quadratic equations to me). EduFlow responds with a friendly, grade-appropriate
-explanation in Hindi, with a YouTube video link."
+(Explain quadratic equations to me). The transcript appears in the chat. EduFlow responds
+with a friendly, grade-appropriate explanation in Hindi, with a YouTube video link.
+Meanwhile, the planning and teaching agents ran entirely on their own quota — untouched."
 
 **Same system. Any language. Any grade. Accessible education for all.**

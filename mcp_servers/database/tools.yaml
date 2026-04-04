@@ -143,7 +143,7 @@ tools:
         (session_id, user_id, topic_key, score, total_questions,
          correct_answers, weak_areas, feedback)
       VALUES
-        ($1::uuid, $2, $3, $4::numeric, $5, $6,
+        (NULLIF($1, '')::uuid, $2, $3, $4::numeric, $5, $6,
          string_to_array($7, ','), $8)
       RETURNING id::text
 

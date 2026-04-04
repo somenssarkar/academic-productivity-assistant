@@ -3,7 +3,7 @@ from google.adk.agents.readonly_context import ReadonlyContext
 
 from ..prompts.response_formatter_prompt import RESPONSE_FORMATTER_INSTRUCTION
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_formatter_instruction(context: ReadonlyContext) -> str:

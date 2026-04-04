@@ -5,7 +5,7 @@ from ..prompts.docs_agent_prompt import DOCS_AGENT_INSTRUCTION
 from ..tools.curriculum_loader import get_grade_band
 from ..tools.workspace import create_study_notes_doc, append_session_to_doc, append_to_doc, get_or_create_folder, share_file_with_student
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_instruction(context: ReadonlyContext) -> str:

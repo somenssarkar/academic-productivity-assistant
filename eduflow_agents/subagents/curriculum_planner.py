@@ -11,7 +11,7 @@ from ..tools.curriculum_loader import (
     get_grade_band,
 )
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_instruction(context: ReadonlyContext) -> str:

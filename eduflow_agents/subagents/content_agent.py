@@ -5,7 +5,7 @@ from ..prompts.content_agent_prompt import CONTENT_AGENT_INSTRUCTION
 from ..tools.curriculum_loader import get_grade_band
 from ..tools.youtube_search import youtube_search
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_instruction(context: ReadonlyContext) -> str:

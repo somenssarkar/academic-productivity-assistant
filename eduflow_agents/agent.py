@@ -7,14 +7,15 @@ from .tools.curriculum_loader import get_grade_band
 from .tools.profile_tool import set_user_profile
 from .subagents.curriculum_planner import curriculum_planner_agent
 from .subagents.content_agent import content_agent
+from .subagents.plan_saver_agent import plan_saver_agent
 from .subagents.calendar_agent import calendar_agent
-from .subagents.email_agent import email_agent
+from .subagents.email_agent import email_agent, make_email_agent
 from .subagents.docs_agent import docs_agent
 from .subagents.tutor_agent import tutor_agent
 from .subagents.assessment_agent import assessment_agent
 from .subagents.response_formatter import make_response_formatter
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
@@ -26,6 +27,7 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
     language = context.state.get("user:preferred_language", "")
     grade_band = context.state.get("user:grade_band", "")
     formatted_response = context.state.get("formatted_response", "")
+    notes_saved_topics = context.state.get("notes_saved_topics", [])
 
     if grade_level and not grade_band:
         grade_band = get_grade_band(grade_level)
@@ -53,6 +55,16 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
             "No profile saved yet. Ask for grade first, then proceed."
         )
 
+    # Inject topics already saved to Google Docs so orchestrator can skip duplicates.
+    notes_section = (
+        f"\n\n## Topics Already Saved to Google Docs\n"
+        f"notes_saved_topics = {notes_saved_topics}\n"
+        "Before calling notes_pipeline after tutoring, check if the current topic is "
+        "already in this list. If it IS — skip notes_pipeline entirely. "
+        "If it is NOT — call notes_pipeline, then call "
+        "set_user_profile(notes_saved=<current_topic>) to mark it as saved."
+    )
+
     # Inject the formatted lesson so the orchestrator can reproduce it verbatim.
     # This is set by response_formatter after every tutoring_pipeline call.
     lesson_section = ""
@@ -64,7 +76,7 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
             f"{formatted_response}"
         )
 
-    return ORCHESTRATOR_INSTRUCTION + profile_section + lesson_section
+    return ORCHESTRATOR_INSTRUCTION + profile_section + notes_section + lesson_section
 
 
 # ---------------------------------------------------------------------------
@@ -75,9 +87,10 @@ planning_pipeline = SequentialAgent(
     name="planning_pipeline",
     description=(
         "Plans a complete learning schedule: reads YAML curriculum, "
-        "determines sessions, finds YouTube videos per topic."
+        "determines sessions, finds YouTube videos per topic, "
+        "and persists the plan to the database."
     ),
-    sub_agents=[curriculum_planner_agent, content_agent],
+    sub_agents=[curriculum_planner_agent, content_agent, plan_saver_agent],
 )
 
 scheduling_pipeline = SequentialAgent(
@@ -115,6 +128,15 @@ assessment_pipeline = SequentialAgent(
     sub_agents=[assessment_agent],
 )
 
+report_pipeline = SequentialAgent(
+    name="report_pipeline",
+    description=(
+        "Sends a progress report email to student and parent after an assessment is complete. "
+        "Reads assessment_result from state and emails score, weak areas, and study notes link."
+    ),
+    sub_agents=[make_email_agent("report_email_agent")],
+)
+
 # ---------------------------------------------------------------------------
 # Root agent (orchestrator)
 # ---------------------------------------------------------------------------
@@ -130,6 +152,7 @@ root_agent = LlmAgent(
         AgentTool(agent=tutoring_pipeline),
         AgentTool(agent=notes_pipeline),
         AgentTool(agent=assessment_pipeline),
+        AgentTool(agent=report_pipeline),
     ],
     description=(
         "EduFlow orchestrator — understands student intent, coordinates multi-agent "

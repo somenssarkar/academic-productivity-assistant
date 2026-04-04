@@ -6,7 +6,7 @@ from google.adk.code_executors import BuiltInCodeExecutor
 from ..prompts.tutor_agent_prompt import TUTOR_AGENT_INSTRUCTION
 from ..tools.curriculum_loader import get_grade_band
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_instruction(context: ReadonlyContext) -> str:

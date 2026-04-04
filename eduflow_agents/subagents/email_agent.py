@@ -5,7 +5,7 @@ from google.adk.agents.readonly_context import ReadonlyContext
 from ..prompts.email_agent_prompt import EMAIL_AGENT_INSTRUCTION
 from ..tools.workspace import send_email
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
 
 
 def _build_instruction(context: ReadonlyContext) -> str:
@@ -57,14 +57,30 @@ def _build_instruction(context: ReadonlyContext) -> str:
     return EMAIL_AGENT_INSTRUCTION + f"\n\n{header}" + videos_section
 
 
-email_agent = LlmAgent(
-    name="email_agent",
-    model=MODEL,
-    instruction=_build_instruction,
-    tools=[send_email],
-    description=(
-        "Sends learning plan emails to student + parent. "
-        "Sends progress reports after assessments."
-    ),
-    output_key="email_sent",
-)
+def make_email_agent(name: str = "email_agent") -> LlmAgent:
+    """Factory that creates a fresh email_agent instance.
+
+    ADK enforces the one-parent rule: each agent instance can only belong to one
+    SequentialAgent. Use this factory when the same email_agent logic is needed
+    in multiple pipelines (e.g. scheduling_pipeline and report_pipeline).
+
+    Args:
+        name: Unique name for this email_agent instance.
+
+    Returns:
+        A new LlmAgent configured as an email agent.
+    """
+    return LlmAgent(
+        name=name,
+        model=MODEL,
+        instruction=_build_instruction,
+        tools=[send_email],
+        description=(
+            "Sends learning plan emails to student + parent. "
+            "Sends progress reports after assessments."
+        ),
+        output_key="email_sent",
+    )
+
+
+email_agent = make_email_agent("email_agent")

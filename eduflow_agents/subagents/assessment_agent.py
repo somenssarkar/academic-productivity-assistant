@@ -1,3 +1,4 @@
+import os
 import re
 
 from google.adk.agents import LlmAgent
@@ -12,15 +13,15 @@ from ..tools.curriculum_loader import (
     get_grade_band,
 )
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.5-pro"
+
+# MCP Toolbox URL — use env var so it works both locally and on Cloud Run
+_TOOLBOX_URL = os.environ.get("MCP_TOOLBOX_URL", "http://localhost:5000/mcp")
 
 # Database MCP (MCP Toolbox) — for saving assessment results
 _db_mcp = MCPToolset(
-    connection_params=StreamableHTTPConnectionParams(
-        url="http://localhost:5000/mcp",
-    ),
+    connection_params=StreamableHTTPConnectionParams(url=_TOOLBOX_URL),
     tool_filter=["save-assessment", "update-progress", "get-student-progress"],
-    # toolset: eduflow-tools (defined in mcp_servers/database/tools.yaml)
 )
 
 
@@ -49,14 +50,15 @@ def _build_instruction(context: ReadonlyContext) -> str:
     if session_topic:
         try:
             cf = load_curriculum("cbse", "math", grade)
-            # Fuzzy match topic across all chapters
+            session_topic_lower = session_topic.lower()
+            # Fuzzy match topic across all chapters (case-insensitive)
             matched_topic = None
             for chapter in cf.chapters:
                 for topic in chapter.topics:
-                    if (session_topic in topic.title.lower()
-                            or session_topic in topic.id.lower()
-                            or topic.title.lower() in session_topic
-                            or topic.id.lower() in session_topic):
+                    if (session_topic_lower in topic.title.lower()
+                            or session_topic_lower in topic.id.lower()
+                            or topic.title.lower() in session_topic_lower
+                            or topic.id.lower() in session_topic_lower):
                         matched_topic = topic
                         break
                 if matched_topic:
