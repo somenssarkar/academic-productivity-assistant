@@ -21,24 +21,30 @@ def _build_instruction(context: ReadonlyContext) -> str:
     curriculum_plan = context.state.get("curriculum_plan", "")
     session_videos = context.state.get("session_videos", "")
 
-    # Determine mode explicitly so the LLM doesn't have to guess
-    if curriculum_plan and not doc_url:
+    # Determine mode using doc_url as the primary signal.
+    # doc_url present = doc already exists = NEVER create a new one.
+    # doc_url absent  = doc not yet created = MODE A.
+    if not doc_url:
         mode = "A"
         mode_instruction = (
-            "MODE A — create the chapter overview doc now. "
-            "No doc exists yet. Follow MODE A steps in full."
+            "MODE A — no doc exists yet. Create the chapter overview doc now. "
+            "Follow MODE A steps in full."
         )
-    elif doc_url and formatted_response:
+    elif formatted_response:
         mode = "B"
         mode_instruction = (
-            f"MODE B — append tutor notes to the existing doc. "
-            f"Existing doc URL: {doc_url} — do NOT create a new doc."
+            f"MODE B — doc already exists at {doc_url}. "
+            "Append the tutor session notes to it using append_to_doc. "
+            "Do NOT call create_study_notes_doc — that would create a duplicate."
         )
     else:
-        mode = "A"
+        # doc_url exists but no tutor notes to append (e.g. called without tutoring).
+        # Just return the existing URL — do nothing.
+        mode = "B_IDLE"
         mode_instruction = (
-            "MODE A — create the chapter overview doc. "
-            "curriculum_plan and session_videos are below."
+            f"MODE B-IDLE — doc already exists at {doc_url}. "
+            "No tutor notes to append right now. "
+            "Do NOT create a new doc. Return the existing doc URL immediately."
         )
 
     header = f"## Active Student Context\n"
@@ -68,10 +74,9 @@ def _build_instruction(context: ReadonlyContext) -> str:
 
     tutor_section = ""
     if formatted_response:
-        preview = formatted_response[:600] + ("..." if len(formatted_response) > 600 else "")
         tutor_section = (
-            f"\n\n## Tutor Session Content (MODE B — append this to existing doc)\n"
-            f"{preview}\n"
+            f"\n\n## Tutor Session Content (MODE B — append the FULL content below to the doc)\n"
+            f"{formatted_response}\n"
         )
 
     return DOCS_AGENT_INSTRUCTION + f"\n\n{header}" + plan_section + videos_section + tutor_section

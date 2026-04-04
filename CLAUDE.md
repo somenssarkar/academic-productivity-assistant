@@ -229,13 +229,19 @@ Student: "I want to learn Squares and Square Roots in 3 days"
   ├─► Stage 4 — TUTOR
   │       tutor_agent teaches using:
   │         - Grade 8 "building" band persona (formal but approachable)
-  │         - YAML concepts for the session topic injected into context
-  │           (same concepts as in the Study Notes doc — cohesive experience)
-  │         - HOOK → EXPLAIN → EXAMPLE → SPARK structure
-  │         - code_executor: live Python verification (9=3², 81=9², etc.)
-  │       response_formatter renders clean output in Streamlit chat
-  │       docs_agent appends session notes to existing Drive doc
-  │       Output: formatted lesson in UI + doc updated
+  │         - YAML concepts for the session topic injected via _build_instruction
+  │           (reads curriculum_plan from state → matches topic → extracts concepts)
+  │         - HOOK → EXPLAIN (ALL concepts) → EXAMPLE → SPARK structure enforced
+  │         - code_executor: live Python verification (e.g. print(2**3), print(a**m))
+  │         - Writes raw lesson to tutor_solution (output_key)
+  │       response_formatter:
+  │         - Reads tutor_solution from state via _build_formatter_instruction
+  │         - include_contents='none' (no conversation history — only injected content)
+  │         - Adds bold section headers: 🎯 Hook, 📖 Explanation, ✏️ Example, 💡 Spark
+  │         - Writes formatted lesson to formatted_response (output_key)
+  │       orchestrator displays formatted_response VERBATIM (never summarises)
+  │       notes_pipeline (MODE B): docs_agent appends formatted_response to Drive doc
+  │       Output: full formatted lesson in UI + session notes appended to Drive doc
   │
   └─► Stage 5 — ASSESS + REPORT
           assessment_agent serves YAML quiz questions for the session topic

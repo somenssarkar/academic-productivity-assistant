@@ -1,8 +1,33 @@
 """Google Docs function tools for ADK agents."""
 
+import re
 import json
 from googleapiclient.discovery import build
 from .auth import get_credentials
+
+
+def _strip_markdown(text: str) -> str:
+    """Convert markdown/LaTeX formatted text to clean plain text for Google Docs.
+
+    Google Docs insertText writes literal characters — markdown symbols like **,
+    $, ``` all appear verbatim. This helper strips them before insertion.
+    """
+    # Remove fenced code blocks — keep only the code lines, drop the fences
+    text = re.sub(r"```(?:python|)\n(.*?)```", lambda m: m.group(1).strip(), text, flags=re.DOTALL)
+    # Remove inline code backticks
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    # Remove LaTeX math delimiters $...$ and $$...$$
+    text = re.sub(r"\$\$([^$]+)\$\$", r"\1", text, flags=re.DOTALL)
+    text = re.sub(r"\$([^$\n]+)\$", r"\1", text)
+    # Remove bold/italic: **text** → text, *text* → text
+    text = re.sub(r"\*\*\*(.+?)\*\*\*", r"\1", text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.+?)\*", r"\1", text)
+    # Remove markdown headings: ## Heading → Heading
+    text = re.sub(r"^#{1,6}\s+", "", text, flags=re.MULTILINE)
+    # Remove emoji section headers like 🎯 Hook, 📖 Explanation, ✏️ Worked Example
+    text = re.sub(r"^[^\w\s]*\s*(Hook|Explanation|Worked Example|Spark)\s*$", r"\1", text, flags=re.MULTILINE | re.IGNORECASE)
+    return text.strip()
 
 
 def create_study_notes_doc(title: str, folder_id: str = None, chapter_title: str = "") -> str:
@@ -201,8 +226,10 @@ def append_to_doc(doc_id: str, heading: str, content: str) -> str:
     doc = docs_service.documents().get(documentId=doc_id).execute()
     end_index = doc["body"]["content"][-1]["endIndex"] - 1
 
-    full_text = f"\n{heading}\n{content}\n"
-    heading_end = end_index + len(f"\n{heading}\n")
+    # Strip markdown/LaTeX so symbols don't appear literally in Google Docs plain text
+    clean_content = _strip_markdown(content)
+    full_text = f"\n{heading}\n{clean_content}\n"
+    heading_end = end_index + len(f"\n{heading}\n")  # heading spans \n + heading text + \n
 
     requests = [
         {"insertText": {"location": {"index": end_index}, "text": full_text}},

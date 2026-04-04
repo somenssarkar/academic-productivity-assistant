@@ -18,13 +18,14 @@ MODEL = "gemini-2.5-flash"
 
 
 def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
-    """Inject student profile into orchestrator prompt so it never asks for known info."""
+    """Inject student profile and latest tutor lesson into orchestrator prompt."""
     name = context.state.get("user:name", "")
     email = context.state.get("user:email", "")
     parent_email = context.state.get("user:parent_email", "")
     grade_level = context.state.get("user:grade_level", "")
     language = context.state.get("user:preferred_language", "")
     grade_band = context.state.get("user:grade_band", "")
+    formatted_response = context.state.get("formatted_response", "")
 
     if grade_level and not grade_band:
         grade_band = get_grade_band(grade_level)
@@ -52,7 +53,18 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
             "No profile saved yet. Ask for grade first, then proceed."
         )
 
-    return ORCHESTRATOR_INSTRUCTION + profile_section
+    # Inject the formatted lesson so the orchestrator can reproduce it verbatim.
+    # This is set by response_formatter after every tutoring_pipeline call.
+    lesson_section = ""
+    if formatted_response:
+        lesson_section = (
+            "\n\n## Latest Tutor Lesson (MUST be shown to student)\n"
+            "The tutoring_pipeline just produced this lesson. "
+            "Copy it WORD FOR WORD into your response — do not summarise or shorten it:\n\n"
+            f"{formatted_response}"
+        )
+
+    return ORCHESTRATOR_INSTRUCTION + profile_section + lesson_section
 
 
 # ---------------------------------------------------------------------------

@@ -10,12 +10,13 @@ def set_user_profile(
     parent_email: str = "",
     grade_level: str = "",
     preferred_language: str = "",
+    session_topic: str = "",
 ) -> dict:
-    """Save student profile fields to persistent user state.
+    """Save student profile fields and/or the current session topic to state.
 
     Call this as soon as any profile detail is known from conversation
-    (e.g. student mentions their grade). Only pass fields that are known —
-    omit or leave blank any fields not yet collected.
+    (e.g. student mentions their grade). Also call it BEFORE planning_pipeline
+    to set session_topic so the curriculum planner can match the right chapter.
 
     Args:
         name: Student's first name or full name.
@@ -23,6 +24,9 @@ def set_user_profile(
         parent_email: Parent's email address for progress reports.
         grade_level: Grade as a string, e.g. "Grade 8" or "Grade 10".
         preferred_language: Response language, e.g. "English", "Hindi".
+        session_topic: The chapter or topic the student wants to learn,
+            extracted from their message (e.g. "Exponents", "Quadratic Equations").
+            This helps the curriculum planner find the right chapter in the YAML.
 
     Returns:
         Dict confirming which fields were saved.
@@ -51,5 +55,10 @@ def set_user_profile(
     if preferred_language:
         tool_context.state["user:preferred_language"] = preferred_language
         saved["preferred_language"] = preferred_language
+
+    if session_topic:
+        # Session-scoped (no user: prefix) — used by curriculum_planner to match chapter
+        tool_context.state["session_topic"] = session_topic
+        saved["session_topic"] = session_topic
 
     return {"saved": saved, "status": "profile updated"}

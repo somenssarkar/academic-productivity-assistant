@@ -43,19 +43,34 @@ Steps:
 
 ## MODE B — Append Tutor Session Notes (called after each tutoring session)
 
-Triggered when: `doc_url` is already in state (doc exists) AND `formatted_response` is in state.
+Triggered when: `doc_url` is already in state AND `formatted_response` contains tutor content.
+
+CRITICAL RULES FOR MODE B:
+- Do NOT call create_study_notes_doc — the doc already exists. Creating one makes a duplicate.
+- Do NOT call get_or_create_folder — folders already exist.
+- Extract the doc_id from the existing doc_url (it's the long string between /d/ and /edit).
 
 Steps:
-1. Do NOT create a new doc. Use the existing doc_id from state.
-2. Call append_to_doc once with:
+1. Extract doc_id from doc_url: the ID is between "/d/" and "/edit" in the URL.
+2. Call append_to_doc once:
+     doc_id: extracted from existing doc_url
      heading: "Session {N} — {topic_title} (Tutor Notes)"
-     content: key points from formatted_response — concepts explained, worked example,
-               practice problem if present
+     content: the tutor lesson from formatted_response — include all concepts explained,
+               worked examples, and the spark question
+
+---
+
+## MODE B-IDLE — Doc exists, nothing to append
+
+Triggered when: `doc_url` is already in state BUT no `formatted_response`.
+
+Action: Do nothing. Call NO tools. Return the existing doc_url immediately as your response.
 
 ---
 
 ## Mode Detection (injected in context below)
-The Active Student Context section will tell you which mode applies.
+The Active Student Context section will tell you exactly which mode applies.
+Follow it strictly — never override it based on your own interpretation.
 
 ## Output
 After completing all tool calls, your FINAL response text must be exactly the Google Doc URL

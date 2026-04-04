@@ -151,19 +151,30 @@ def get_grade_band(grade_level: str) -> str:
 
 
 def curriculum_to_toc_string(curriculum: CurriculumFile) -> str:
-    """Return a compact table of contents for all chapters (no topic detail).
+    """Return a compact chapter + topic index used as a fallback when session_topic
+    is not set in state (i.e. the orchestrator did not call set_user_profile first).
 
-    Used when the specific chapter is not yet identified — keeps token count low.
+    This TOC is intentionally compact (~800 tokens for Grade 8) to avoid overwhelming
+    the curriculum_planner. It provides enough for the planner to identify the chapter
+    and generate a basic plan; the orchestrator should ideally set session_topic before
+    planning so the full chapter data path (curriculum_to_context_string) is used.
     """
     meta = curriculum.curriculum
     lines = [
         f"Board: {meta.board} | Subject: {meta.subject} | Grade: {meta.grade}",
         "",
-        "Available chapters:",
+        "Available chapters (find the one matching the student's request):",
     ]
     for chapter in sorted(curriculum.chapters, key=lambda c: c.sequence):
-        topic_ids = ", ".join(t.id for t in sorted(chapter.topics, key=lambda t: t.sequence))
-        lines.append(f"  {chapter.sequence}. {chapter.title} (id: {chapter.id}) — topics: {topic_ids}")
+        lines.append(f"\n{chapter.sequence}. {chapter.title} (chapter_id: {chapter.id})")
+        for topic in sorted(chapter.topics, key=lambda t: t.sequence):
+            hint = topic.youtube_search_hints[0] if topic.youtube_search_hints else ""
+            lines.append(
+                f"   T{topic.sequence}: {topic.title} | "
+                f"topic_key: {chapter.id}.{topic.id} | "
+                f"{topic.estimated_minutes} min | "
+                f"hint: {hint}"
+            )
     return "\n".join(lines)
 
 
