@@ -936,10 +936,10 @@ Google APIs (YouTube Data API v3)
 | 3.6 | **docs_agent** | Critical | ✅ Tested | MODE A (plan overview) and MODE B (tutor notes append) confirmed in GDrive. Markdown stripping implemented — needs re-test. |
 | 3.7 | **plan_saver_agent** | Critical | ✅ Tested | Uses gemini-2.5-flash-lite (Pro thinking mode suppresses output_key on pure tool-call sequences). learning_plans + study_sessions rows confirmed in DB. |
 | 3.8 | **tutor_agent** | High | ✅ Tested | All concepts covered (4-section structure). Grade-band personas working (Grade 8 building). Code verification ✅ Verified note shown. |
-| 3.9 | **assessment_agent** | High | ✅ Tested | YAML questions injected into context (no tool call). Fuzzy case-insensitive topic matching. Quiz completed (100% score confirmed). DB write pending (see 3B.6). |
+| 3.9 | **assessment_agent** | High | ✅ Tested | YAML questions injected into context (no tool call). Fuzzy case-insensitive topic matching. Quiz completed (100% score confirmed). Both save-assessment + update-progress confirmed in DB (see 3B.6). |
 | 3.10 | **response_formatter** | High | ✅ Tested | Clean output confirmed in UI. |
 | 3.11 | **Pipeline wiring** | Critical | ✅ Tested | All 6 pipelines wired: planning, scheduling, tutoring, notes, assessment, report. |
-| 3.12 | **report_pipeline** | Critical | 🔧 Implemented | New pipeline with report_email_agent (make_email_agent factory). Reads assessment_result + sends parent email. Needs end-to-end test. |
+| 3.12 | **report_pipeline** | Critical | ✅ Tested | New pipeline with report_email_agent (make_email_agent factory). Parent progress report email confirmed received with score, weak areas, doc link. |
 
 ### Phase 3B: DB Persistence + Voice Input (Added Apr 4)
 > **Goal:** Persist plans/assessments to Cloud SQL. Enable microphone input for students.
@@ -952,10 +952,10 @@ Google APIs (YouTube Data API v3)
 | 3B.3 | **MCP_TOOLBOX_URL env var** | Critical | ✅ Tested | plan_saver_agent + assessment_agent both use `os.environ.get("MCP_TOOLBOX_URL", "http://localhost:5000/mcp")`. Toolbox running confirmed. |
 | 3B.4 | **Microphone / audio input** | High | ✅ Tested | `st.audio_input()` → `gemini-2.5-flash-lite` transcribes → clean text forwarded to orchestrator. Voice input + Hindi response confirmed working. |
 | 3B.5 | **Test: plan saved to DB** | Critical | ✅ Done | planning_pipeline + Toolbox → learning_plans + study_sessions rows confirmed. |
-| 3B.6 | **Test: assessment saved to DB** | Critical | 🔧 Pending retest | progress table: rows confirmed. assessments table: was 0 rows (save-assessment used `$1::uuid` which fails on empty current_session_id). Fixed to `NULLIF($1, '')::uuid` in tools.yaml — needs Toolbox restart + retest. |
+| 3B.6 | **Test: assessment saved to DB** | Critical | ✅ Done | assessments table row confirmed after fixing: (1) NULLIF($1,'')::uuid in tools.yaml, (2) assessment_agent prompt made MANDATORY for both save-assessment + update-progress — Pro was skipping save-assessment silently. |
 | 3B.7 | **Test: audio input** | High | ✅ Done | Voice question → transcript shown → EduFlow responded correctly. |
-| 3B.8 | **Notes deduplication** | High | 🔧 Implemented | notes_saved_topics list in state + set_user_profile(notes_saved=<topic>) prevents duplicate Docs insertions. Needs test. |
-| 3B.9 | **Post-assessment parent email** | Critical | 🔧 Implemented | report_pipeline + report_email_agent reads assessment_result → emails score + weak areas. Needs end-to-end test. |
+| 3B.8 | **Notes deduplication** | High | ✅ Done | notes_saved_topics dedup confirmed — same topic taught twice does not duplicate Google Doc section. |
+| 3B.9 | **Post-assessment parent email** | Critical | ✅ Done | Parent received progress report email with score, weak areas, Google Doc link. report_pipeline + report_email_agent confirmed working. |
 | 3B.10 | **Streamlit read timeout** | High | ✅ Fixed | Changed from `timeout=180.0` to `httpx.Timeout(connect=10.0, read=360.0, write=30.0, pool=10.0)` to handle Pro model's slower generation. |
 
 ### Phase 4: Frontend (Days 7-8)
@@ -966,10 +966,9 @@ Google APIs (YouTube Data API v3)
 | 4.1 | **FastAPI backend** | Critical | ✅ Tested | `main.py` with `get_fast_api_app()` + InMemorySessionService. Working. |
 | 4.2 | **Streamlit chat UI** | Critical | ✅ Tested | Streaming SSE chat confirmed working. |
 | 4.3 | **Student profile form** | Critical | ✅ Tested | Name, email, parent email, grade, language. Sidebar working. |
-| 4.4 | **Microphone input** | High | 🔧 Implemented | `st.audio_input()` → `_transcribe_audio()` → `gemini-2.0-flash-exp-audio` → transcript text to orchestrator. `base64` removed from streamlit_app.py. Needs test. |
-| 4.5 | **Video embedding** | High | ⏳ Pending | `session_video_url` tracked in state; `st.video()` panel validation needed. |
-| 4.6 | **Plan progress tracker** | Medium | ⏳ Pending | Sidebar panel showing ✅/🔵/⏳ per session. Nice-to-have for demo polish. |
-| 4.7 | **Quick actions** | High | ✅ Tested | Buttons wired and working in sidebar. |
+| 4.4 | **Microphone input** | High | ✅ Tested | `st.audio_input()` → `_transcribe_audio()` → `gemini-2.5-flash-lite` → transcript text to orchestrator. Voice + Hindi confirmed working. Note: flash-lite has 5 RPM — use sparingly in demo. |
+| 4.5 | **Plan progress tracker** | Medium | ⏳ Skipped | Nice-to-have, cut for time. Not needed for demo. |
+| 4.6 | **Quick actions** | High | ✅ Tested | Buttons wired and working in sidebar. |
 
 ### Phase 5: Deployment + Demo (Days 9-10)
 > **Goal:** Live on Cloud Run. Demo video recorded. Submission ready.
