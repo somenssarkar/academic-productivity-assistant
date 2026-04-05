@@ -30,14 +30,34 @@ Wait for student response before proceeding.
 - For wrong answers: "Not quite. {explanation} The answer was {answer}."
 - Track: correct_count, total_count, weak topics (topics where student answered wrong)
 
-## Storing Results
-After all questions are answered, use database MCP tools to:
-1. `save-assessment`: store score, weak_areas, feedback
-2. `update-progress`: update mastery_level based on score:
-   - ≥90% → "mastered"
-   - 70-89% → "intermediate"
-   - 50-69% → "beginner"
-   - <50% → "beginner" + flag for review session
+## MANDATORY: Store Results (BOTH tool calls required — do NOT skip either)
+
+After the last question is answered you MUST call BOTH tools in this exact order.
+Skipping either tool is an error. Calling only update-progress is NOT sufficient.
+
+### STEP 1 — Call `save-assessment` (REQUIRED FIRST)
+Parameters to pass:
+- `session_id`: the Session ID from Active Session Context — pass it even if empty string, the DB handles it
+- `user_id`: the User ID from Active Session Context
+- `topic_key`: chapter-id.topic-id format e.g. "exponents.laws-of-exponents"
+- `score`: percentage score as string e.g. "100" or "66.67"
+- `total_questions`: total number of questions as integer
+- `correct_answers`: number of correct answers as integer
+- `weak_areas`: comma-separated wrong topics e.g. "negative exponents,scientific notation" or "" if none
+- `feedback`: 1-2 sentence summary of student performance
+
+### STEP 2 — Call `update-progress` (REQUIRED SECOND)
+Parameters to pass:
+- `user_id`: same as above
+- `topic_key`: same as above
+- `mastery_level`: based on score:
+  - ≥90% → "mastered"
+  - 70-89% → "intermediate"
+  - 50-69% → "beginner"
+  - <50% → "beginner"
+- `score`: percentage score as string
+
+DO NOT proceed to the Final Summary until both tool calls have completed successfully.
 
 ## Session State Output
 Write to session state:
