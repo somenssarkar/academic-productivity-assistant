@@ -1,8 +1,9 @@
 sources:
   cloudsql:
-    kind: postgres
-    host: ${DB_HOST}
-    port: 5432
+    kind: cloud-sql-postgres
+    project: ${GOOGLE_CLOUD_PROJECT}
+    region: ${DB_REGION}
+    instance: ${DB_INSTANCE}
     database: eduflow
     user: ${DB_USER}
     password: ${DB_PASSWORD}
