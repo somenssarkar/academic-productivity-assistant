@@ -24,13 +24,19 @@ A student says: *"I want to learn Squares and Square Roots in 3 days"* — EduFl
 
 ### Agent Hierarchy
 
+**1 orchestrator + 10 specialist agents across 6 pipelines = 11 agents total.**
+
 ```
 orchestrator_agent  (LlmAgent — understands intent, coordinates workflow)
+│   Tools: set_user_profile (custom fn), AgentTool(x6 pipelines)
+│   Instruction: _build_orchestrator_instruction — dynamically injects student
+│                profile, notes_saved_topics, and latest formatted lesson each turn
 │
 ├── planning_pipeline  (SequentialAgent)
 │   ├── curriculum_planner_agent   — reads YAML syllabus, structures sessions
 │   ├── content_agent              — finds YouTube videos per topic
 │   └── plan_saver_agent           — persists plan + sessions to Cloud SQL
+│                                    (gemini-2.5-flash-lite — see Tech Stack)
 │
 ├── scheduling_pipeline  (SequentialAgent)
 │   ├── calendar_agent             — creates Google Calendar events
@@ -38,35 +44,43 @@ orchestrator_agent  (LlmAgent — understands intent, coordinates workflow)
 │
 ├── tutoring_pipeline  (SequentialAgent)
 │   ├── tutor_agent                — teaches concepts with live code execution
-│   └── response_formatter         — formats output for clean UI display
+│   └── tutoring_formatter         — formats output (make_response_formatter factory,
+│                                    include_contents='none', reads tutor_solution from state)
 │
 ├── notes_pipeline  (SequentialAgent)
 │   └── docs_agent                 — creates/appends Google Docs study notes
+│                                    (MODE A: chapter overview at plan time;
+│                                     MODE B: appends lesson notes after tutoring)
 │
 ├── assessment_pipeline  (SequentialAgent)
 │   └── assessment_agent           — serves YAML quiz questions, evaluates answers, stores scores in DB
 │
 └── report_pipeline  (SequentialAgent)
     └── report_email_agent         — sends progress report email to student + parent after assessment
+                                     (make_email_agent factory — ADK one-parent rule)
 ```
+
+**`set_user_profile` function tool** (on orchestrator): extracts student profile fields from conversation, sets `session_topic` before planning so `curriculum_planner_agent` can match the right YAML chapter, and appends to `notes_saved_topics` after each tutoring session to prevent duplicate Doc insertions.
 
 ### Tech Stack
 
 | Component | Technology |
 |---|---|
 | Agent Framework | Google ADK (`google-adk`) |
-| LLM (most agents) | `gemini-2.5-pro` — orchestrator, curriculum planner, content, calendar, email, docs, tutor, assessment |
-| LLM (plan saver) | `gemini-2.5-flash-lite` — simple MCP tool calls only; Pro's thinking mode suppresses output_key writes for pure tool-call sequences |
-| LLM (audio transcription) | `gemini-2.5-flash-lite` — separate quota, Streamlit layer only; never touches agent quota |
-| Code Execution | `BuiltInCodeExecutor` — sandboxed Python for math verification |
-| Curriculum Data | YAML files — syllabus + quiz questions (zero DB cost) |
-| Database | Cloud SQL PostgreSQL 15 — plans, sessions, assessments, progress |
-| Database MCP | MCP Toolbox for Databases |
-| Workspace Tools | Google API Python Client — Calendar, Gmail, Docs, Drive (OAuth2) |
+| LLM (most agents) | `gemini-2.5-pro` — orchestrator, curriculum planner, content, calendar, email, docs, tutor, response_formatter, assessment, report |
+| LLM (plan saver) | `gemini-2.5-flash-lite` — MCP tool calls only; Pro's thinking mode suppresses `output_key` writes on pure tool-call sequences |
+| LLM (audio transcription) | `gemini-2.5-flash-lite` — Streamlit layer only (separate quota pool); raw audio never reaches the ADK backend |
+| Code Execution | `BuiltInCodeExecutor` — sandboxed Python for live math/physics verification |
+| Custom Function Tool | `set_user_profile` — saves student profile to ADK `user:` state, sets `session_topic`, tracks `notes_saved_topics` |
+| Curriculum Data | YAML files (`data/curricula/cbse/math/grade-{7-10}.yaml`) — syllabus + quiz questions at zero DB cost |
+| Database | Cloud SQL PostgreSQL 15 — `learning_plans`, `study_sessions`, `assessments`, `progress` |
+| Database MCP | MCP Toolbox for Databases (`tools.yaml`) |
+| Workspace Tools | Google API Python Client — Calendar, Gmail, Docs, Drive (OAuth2 refresh token) |
 | Video Search | YouTube Data API v3 |
-| Frontend | Streamlit — streaming chat, video embed, voice input |
-| Backend API | FastAPI + ADK `get_fast_api_app()` |
-| Deployment | Google Cloud Run (3 services) |
+| Frontend | Streamlit — streaming SSE chat, voice input (`st.audio_input`), quick-action buttons |
+| Backend API | FastAPI + ADK `get_fast_api_app()` with `DatabaseSessionService` (Cloud Run) / `InMemorySessionService` (local) |
+| Session State | ADK `DatabaseSessionService` — `user:` prefix persists profile across sessions; no custom `students` table needed |
+| Deployment | Google Cloud Run (3 services) + Cloud SQL Unix socket via `--add-cloudsql-instances` |
 
 ---
 
@@ -84,6 +98,9 @@ Syllabus structure and quiz questions live in `data/curricula/cbse/math/grade-{7
 ### Google Workspace Integration
 Real Calendar events with tutor starter prompts, real Gmail delivery to student + parent, real Google Docs study notes that grow session-by-session in Google Drive.
 
+### Dynamic Orchestrator Context Injection
+`_build_orchestrator_instruction` rebuilds the orchestrator's system prompt on every turn, injecting: current student profile (name, grade, language, grade_band), `notes_saved_topics` list for dedup decisions, and the full `formatted_response` from the last tutoring session so the orchestrator can relay it verbatim to the student.
+
 ### Duplicate-Safe Notes
 `notes_saved_topics` in session state tracks which topics have already been appended to the study doc. If a student re-asks to learn the same topic, the orchestrator skips `notes_pipeline` — no duplicate sections in the doc.
 
@@ -96,8 +113,8 @@ After every quiz, `report_pipeline` automatically emails a structured progress r
 
 ```
 ├── eduflow_agents/          # ADK agent package
-│   ├── agent.py             # root_agent + all 5 pipelines
-│   ├── subagents/           # 8 individual agents
+│   ├── agent.py             # root_agent + all 6 pipelines
+│   ├── subagents/           # 10 agents (9 files + factory-cloned report_email_agent)
 │   ├── prompts/             # all instruction strings
 │   └── tools/               # YouTube search, curriculum loader, workspace tools
 ├── data/curricula/          # YAML curriculum files (CBSE Math Grade 7-10)
