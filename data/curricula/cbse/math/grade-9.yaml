@@ -1,0 +1,786 @@
+curriculum:
+  board: CBSE
+  subject: math
+  grade: 9
+  language: English
+
+chapters:
+
+  # -------------------------------------------------------------------------
+  - id: number-systems
+    title: Number Systems
+    sequence: 1
+    topics:
+      - id: irrational-numbers
+        title: Irrational Numbers and Real Numbers
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Rational numbers — p/q form, terminating/repeating decimals
+          - Irrational numbers — non-terminating, non-repeating decimals
+          - Real numbers — union of rationals and irrationals
+          - Locating irrational numbers on number line
+        youtube_search_hints:
+          - "irrational numbers real number system class 9 CBSE"
+        questions:
+          - question: "Which of the following is an irrational number?"
+            options: ["√4", "√9", "√7", "√16"]
+            answer: "√7"
+            explanation: "√7 cannot be expressed as p/q; it is irrational. √4=2, √9=3, √16=4 are rational."
+            difficulty: 1
+          - question: "The decimal expansion of an irrational number is:"
+            options: ["Terminating", "Non-terminating repeating", "Non-terminating non-repeating", "Always negative"]
+            answer: "Non-terminating non-repeating"
+            explanation: "Irrational numbers have decimal expansions that neither terminate nor repeat."
+            difficulty: 1
+
+      - id: operations-irrational
+        title: Operations on Real Numbers
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [irrational-numbers]
+        concepts:
+          - Adding, subtracting, multiplying and dividing surds
+          - Rationalising the denominator
+          - Identities — (√a+√b)(√a−√b) = a−b
+          - Simplifying expressions with surds
+        youtube_search_hints:
+          - "rationalising denominator surds class 9 CBSE operations"
+        questions:
+          - question: "Rationalise the denominator of 1/√5:"
+            options: ["√5", "√5/5", "5/√5", "1/5"]
+            answer: "√5/5"
+            explanation: "Multiply numerator and denominator by √5: (1×√5)/(√5×√5) = √5/5."
+            difficulty: 1
+          - question: "The value of (√5 + √3)(√5 − √3) is:"
+            options: ["2", "8", "√2", "4"]
+            answer: "2"
+            explanation: "(√5)² − (√3)² = 5 − 3 = 2."
+            difficulty: 1
+
+      - id: laws-of-exponents-real
+        title: Laws of Exponents for Real Numbers
+        sequence: 3
+        estimated_minutes: 35
+        prerequisites: [irrational-numbers]
+        concepts:
+          - aᵐ × aⁿ = aᵐ⁺ⁿ, aᵐ/aⁿ = aᵐ⁻ⁿ, (aᵐ)ⁿ = aᵐⁿ
+          - Fractional exponents — a^(1/n) = ⁿ√a
+          - a^(m/n) = (ⁿ√a)ᵐ
+          - Simplifying expressions with rational exponents
+        youtube_search_hints:
+          - "laws of exponents real numbers rational exponents class 9"
+        questions:
+          - question: "What is 27^(2/3)?"
+            options: ["3", "6", "9", "18"]
+            answer: "9"
+            explanation: "27^(2/3) = (27^(1/3))² = 3² = 9."
+            difficulty: 2
+          - question: "Simplify: 2^(1/2) × 2^(3/2)"
+            options: ["2", "4", "8", "2^2"]
+            answer: "4"
+            explanation: "2^(1/2+3/2) = 2^(4/2) = 2² = 4."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: polynomials
+    title: Polynomials
+    sequence: 2
+    topics:
+      - id: types-and-degree
+        title: Polynomials — Types and Degree
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Polynomial in one variable — terms, coefficients, degree
+          - Types by degree — constant, linear, quadratic, cubic
+          - Types by terms — monomial, binomial, trinomial
+          - Value of a polynomial at a given point
+        youtube_search_hints:
+          - "polynomials types degree class 9 CBSE introduction"
+        questions:
+          - question: "The degree of the polynomial 4x³ − 3x² + 7x − 1 is:"
+            options: ["1", "2", "3", "4"]
+            answer: "3"
+            explanation: "The highest power of x is 3, so the degree is 3."
+            difficulty: 1
+          - question: "The value of p(x) = x² − 3x + 2 at x = 2 is:"
+            options: ["0", "4", "−2", "2"]
+            answer: "0"
+            explanation: "p(2) = 4 − 6 + 2 = 0. So x=2 is a zero of p(x)."
+            difficulty: 1
+
+      - id: remainder-factor-theorem
+        title: Remainder Theorem and Factor Theorem
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [types-and-degree]
+        concepts:
+          - Remainder theorem — p(a) gives remainder when p(x) is divided by (x−a)
+          - Factor theorem — (x−a) is a factor iff p(a) = 0
+          - Using factor theorem to find factors
+          - Factorising a cubic using factor theorem
+        youtube_search_hints:
+          - "remainder theorem factor theorem class 9 CBSE"
+        questions:
+          - question: "The remainder when x³ − 2x² + x + 1 is divided by (x − 1) is:"
+            options: ["0", "1", "2", "−1"]
+            answer: "1"
+            explanation: "p(1) = 1 − 2 + 1 + 1 = 1. By remainder theorem, remainder = 1."
+            difficulty: 1
+          - question: "If (x − 2) is a factor of x² − kx + 4, then k ="
+            options: ["2", "4", "0", "−4"]
+            answer: "4"
+            explanation: "p(2) = 0. 4 − 2k + 4 = 0. 8 = 2k. k = 4."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: factorisation-polynomials
+    title: Factorisation of Polynomials
+    sequence: 3
+    topics:
+      - id: factor-using-identities
+        title: Factorisation Using Algebraic Identities
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: [polynomials.remainder-factor-theorem]
+        concepts:
+          - (a+b)² = a²+2ab+b², (a−b)² = a²−2ab+b²
+          - a²−b² = (a+b)(a−b)
+          - (a+b+c)² = a²+b²+c²+2ab+2bc+2ca
+          - (a+b)³ = a³+3a²b+3ab²+b³ and (a−b)³ = a³−3a²b+3ab²−b³
+        youtube_search_hints:
+          - "factorisation algebraic identities class 9 CBSE"
+        questions:
+          - question: "Expand (2x + 3y)³:"
+            options: ["8x³+27y³", "8x³+36x²y+54xy²+27y³", "8x³+12xy+27y³", "4x²+9y²"]
+            answer: "8x³+36x²y+54xy²+27y³"
+            explanation: "(a+b)³=a³+3a²b+3ab²+b³ with a=2x,b=3y: 8x³+3(4x²)(3y)+3(2x)(9y²)+27y³."
+            difficulty: 2
+
+      - id: sum-difference-cubes
+        title: Sum and Difference of Cubes
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [factor-using-identities]
+        concepts:
+          - a³+b³ = (a+b)(a²−ab+b²)
+          - a³−b³ = (a−b)(a²+ab+b²)
+          - Factorising cubic expressions
+          - Evaluating expressions using identities
+        youtube_search_hints:
+          - "sum difference of cubes factorisation class 9"
+        questions:
+          - question: "Factorise x³ − 8:"
+            options: ["(x−2)(x²+2x+4)", "(x+2)(x²−2x+4)", "(x−2)³", "(x−2)(x+2)"]
+            answer: "(x−2)(x²+2x+4)"
+            explanation: "a³−b³=(a−b)(a²+ab+b²). Here a=x, b=2: (x−2)(x²+2x+4)."
+            difficulty: 2
+          - question: "Evaluate 103³ − 3³ using identity:"
+            options: ["100(10609+309+9)", "100×10609", "(100)(103²+103×3+9)", "None of these"]
+            answer: "(100)(103²+103×3+9)"
+            explanation: "a³−b³=(a−b)(a²+ab+b²). 103³−3³=(103−3)(103²+309+9)=100×(10609+309+9)."
+            difficulty: 3
+
+  # -------------------------------------------------------------------------
+  - id: linear-equations-two-variables
+    title: Linear Equations in Two Variables
+    sequence: 4
+    topics:
+      - id: solution-of-equations
+        title: Solutions of Linear Equations
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Linear equation ax + by + c = 0
+          - Infinitely many solutions — points on the line
+          - Finding solutions by substitution
+          - Graphical representation — straight line
+        youtube_search_hints:
+          - "linear equations two variables solutions class 9 CBSE"
+        questions:
+          - question: "How many solutions does a linear equation in two variables have?"
+            options: ["Exactly one", "Exactly two", "Infinitely many", "None"]
+            answer: "Infinitely many"
+            explanation: "A linear equation in two variables represents a line — each point on it is a solution."
+            difficulty: 1
+          - question: "Which of the following is a solution of 2x + 3y = 12?"
+            options: ["(0,3)", "(3,2)", "(6,0)", "(2,3)"]
+            answer: "(3,2)"
+            explanation: "2(3)+3(2)=6+6=12. ✓"
+            difficulty: 1
+
+      - id: graph-of-linear-equation
+        title: Graph of a Linear Equation
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [solution-of-equations]
+        concepts:
+          - Plotting a linear equation by finding two solutions
+          - Equations of the form y = mx (passes through origin)
+          - Equations of the form x = a (vertical line) and y = b (horizontal line)
+          - Interpreting graphs of linear equations
+        youtube_search_hints:
+          - "graph linear equation two variables class 9 CBSE"
+        questions:
+          - question: "The graph of x = 5 is:"
+            options: ["A horizontal line", "A vertical line at x=5", "A line through origin", "A parabola"]
+            answer: "A vertical line at x=5"
+            explanation: "x = 5 is satisfied by all points (5, y) for any y — a vertical line."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: coordinate-geometry
+    title: Coordinate Geometry
+    sequence: 5
+    topics:
+      - id: cartesian-system
+        title: Cartesian Plane and Quadrants
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - x-axis, y-axis, origin
+          - Ordered pair (x, y) — abscissa and ordinate
+          - Four quadrants and sign conventions
+          - Points on axes
+        youtube_search_hints:
+          - "cartesian plane quadrants coordinate geometry class 9"
+        questions:
+          - question: "The point (−4, 3) lies in which quadrant?"
+            options: ["Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"]
+            answer: "Quadrant II"
+            explanation: "x negative, y positive → Quadrant II."
+            difficulty: 1
+          - question: "A point on the y-axis has its x-coordinate equal to:"
+            options: ["1", "−1", "0", "Any value"]
+            answer: "0"
+            explanation: "All points on the y-axis have x = 0."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: euclids-geometry
+    title: Introduction to Euclid's Geometry
+    sequence: 6
+    topics:
+      - id: axioms-postulates
+        title: Euclid's Axioms and Postulates
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Euclid's five postulates
+          - Difference between axiom and postulate
+          - Equivalent versions of the fifth postulate (Playfair's axiom)
+          - Euclid's definitions — point, line, plane
+        youtube_search_hints:
+          - "Euclid geometry axioms postulates class 9 CBSE"
+        questions:
+          - question: "Euclid's first postulate states that:"
+            options: ["All right angles are equal", "A straight line can be drawn between any two points",
+                      "A circle can be drawn with any centre and radius", "If equals are added to equals the wholes are equal"]
+            answer: "A straight line can be drawn between any two points"
+            explanation: "Euclid's first postulate: a straight line may be drawn from any point to any other point."
+            difficulty: 1
+          - question: "Playfair's axiom (equivalent to Euclid's 5th postulate) states:"
+            options: ["Two lines have at most one common point",
+                      "Through a point not on a line, exactly one parallel line can be drawn",
+                      "A line has infinitely many points",
+                      "All right angles are equal"]
+            answer: "Through a point not on a line, exactly one parallel line can be drawn"
+            explanation: "Playfair's axiom is a modern equivalent of Euclid's fifth (parallel) postulate."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: lines-and-angles
+    title: Lines and Angles
+    sequence: 7
+    topics:
+      - id: pairs-of-angles
+        title: Pairs of Angles
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Complementary and supplementary angles
+          - Linear pair of angles — sum = 180°
+          - Vertically opposite angles — equal
+          - Adjacent angles
+        youtube_search_hints:
+          - "pairs of angles linear pair vertically opposite class 9 CBSE"
+        questions:
+          - question: "If two lines intersect, vertically opposite angles are:"
+            options: ["Supplementary", "Complementary", "Equal", "Adjacent"]
+            answer: "Equal"
+            explanation: "Vertically opposite angles (formed by two intersecting lines) are always equal."
+            difficulty: 1
+
+      - id: parallel-lines-transversal
+        title: Parallel Lines and a Transversal
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [pairs-of-angles]
+        concepts:
+          - Corresponding angles — equal
+          - Alternate interior angles — equal
+          - Co-interior (same-side) angles — supplementary (sum = 180°)
+          - Converse — if alternate angles equal, lines are parallel
+        youtube_search_hints:
+          - "parallel lines transversal angles class 9 CBSE alternate corresponding"
+        questions:
+          - question: "When a transversal cuts two parallel lines, alternate interior angles are:"
+            options: ["Supplementary", "Complementary", "Equal", "Vertically opposite"]
+            answer: "Equal"
+            explanation: "Alternate interior angles formed by a transversal with parallel lines are equal."
+            difficulty: 1
+          - question: "Co-interior angles (same side of transversal, parallel lines) sum to:"
+            options: ["90°", "180°", "270°", "360°"]
+            answer: "180°"
+            explanation: "Co-interior (consecutive interior) angles are supplementary — they add up to 180°."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: triangles
+    title: Triangles
+    sequence: 8
+    topics:
+      - id: angle-sum-exterior
+        title: Angle Sum Property and Exterior Angle
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [lines-and-angles.parallel-lines-transversal]
+        concepts:
+          - Sum of angles in a triangle = 180°
+          - Exterior angle = sum of two non-adjacent interior angles
+          - Properties of equilateral, isosceles, and scalene triangles
+        youtube_search_hints:
+          - "triangle angle sum property exterior angle class 9 CBSE"
+        questions:
+          - question: "An exterior angle of a triangle is 110°. One of the non-adjacent interior angles is 60°. The other is:"
+            options: ["40°", "50°", "60°", "70°"]
+            answer: "50°"
+            explanation: "Exterior angle = sum of non-adjacent interior angles. 110° = 60° + x. x = 50°."
+            difficulty: 1
+
+      - id: inequalities-in-triangle
+        title: Inequalities in a Triangle
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [angle-sum-exterior]
+        concepts:
+          - Larger angle → opposite side is longer
+          - Triangle inequality — sum of any two sides > third side
+          - Difference of two sides < third side
+        youtube_search_hints:
+          - "triangle inequality theorem class 9 CBSE sides angles"
+        questions:
+          - question: "Which of the following can be the sides of a triangle?"
+            options: ["3, 4, 8", "1, 2, 3", "5, 6, 10", "2, 3, 6"]
+            answer: "5, 6, 10"
+            explanation: "5+6=11>10, 5+10>6, 6+10>5. All triangle inequalities satisfied."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: congruence-triangles
+    title: Congruence of Triangles and Inequalities
+    sequence: 9
+    topics:
+      - id: congruence-criteria
+        title: Congruence Criteria — SSS, SAS, ASA, AAS, RHS
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: [triangles.angle-sum-exterior]
+        concepts:
+          - SSS — all three corresponding sides equal
+          - SAS — two sides and included angle equal
+          - ASA — two angles and included side equal
+          - AAS — two angles and non-included side equal
+          - RHS — right angle, hypotenuse, one side
+        youtube_search_hints:
+          - "congruence of triangles SSS SAS ASA AAS RHS class 9 CBSE"
+        questions:
+          - question: "In △ABC and △PQR, AB=PQ, BC=QR, ∠B=∠Q. The congruence criterion is:"
+            options: ["SSS", "SAS", "ASA", "RHS"]
+            answer: "SAS"
+            explanation: "Two sides (AB=PQ, BC=QR) and the included angle (∠B=∠Q) → SAS."
+            difficulty: 1
+          - question: "In right triangles ABC and PQR, hypotenuse AB = PQ and BC = QR. They are congruent by:"
+            options: ["SAS", "SSS", "RHS", "AAS"]
+            answer: "RHS"
+            explanation: "Right angle + Hypotenuse + Side equal → RHS congruence criterion."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: quadrilaterals
+    title: Quadrilaterals
+    sequence: 10
+    topics:
+      - id: properties-of-quadrilaterals
+        title: Properties of Parallelograms
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [congruence-triangles.congruence-criteria]
+        concepts:
+          - Opposite sides and angles of a parallelogram are equal
+          - Diagonals of a parallelogram bisect each other
+          - Conditions for a quadrilateral to be a parallelogram
+          - Rectangle, rhombus, square as special parallelograms
+        youtube_search_hints:
+          - "properties of parallelogram class 9 CBSE proof"
+        questions:
+          - question: "In parallelogram ABCD, if ∠A = 75°, then ∠C ="
+            options: ["105°", "75°", "15°", "285°"]
+            answer: "75°"
+            explanation: "Opposite angles in a parallelogram are equal. ∠C = ∠A = 75°."
+            difficulty: 1
+
+      - id: midpoint-theorem
+        title: Mid-Point Theorem
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [properties-of-quadrilaterals]
+        concepts:
+          - Mid-point theorem — segment joining midpoints of two sides is parallel to third side and half its length
+          - Converse of mid-point theorem
+          - Applications in proofs
+        youtube_search_hints:
+          - "midpoint theorem class 9 CBSE proof"
+        questions:
+          - question: "In △ABC, D and E are midpoints of AB and AC. If BC = 8 cm, then DE ="
+            options: ["4 cm", "8 cm", "16 cm", "2 cm"]
+            answer: "4 cm"
+            explanation: "By mid-point theorem, DE ∥ BC and DE = BC/2 = 8/2 = 4 cm."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: areas-parallelograms-triangles
+    title: Areas of Parallelograms and Triangles
+    sequence: 11
+    topics:
+      - id: same-base-same-parallels
+        title: Figures on Same Base and Between Same Parallels
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [quadrilaterals.properties-of-quadrilaterals]
+        concepts:
+          - Parallelograms on same base and between same parallels have equal area
+          - Triangles on same base and between same parallels have equal area
+          - Area of triangle = half area of parallelogram (same base, same parallels)
+          - Median of a triangle divides it into two equal area triangles
+        youtube_search_hints:
+          - "areas parallelogram triangle same base same parallels class 9 CBSE"
+        questions:
+          - question: "A triangle and a parallelogram are on the same base and between the same parallel lines. Area of triangle = k × Area of parallelogram. k ="
+            options: ["1", "2", "1/2", "1/4"]
+            answer: "1/2"
+            explanation: "Triangle's area = half the parallelogram's area when on same base between same parallels."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: circles
+    title: Circles
+    sequence: 12
+    topics:
+      - id: chord-properties
+        title: Chord Properties
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Perpendicular from centre bisects the chord
+          - Equal chords are equidistant from centre
+          - Longer chord is closer to centre
+          - Perpendicular bisector of a chord passes through centre
+        youtube_search_hints:
+          - "chord properties circles class 9 CBSE perpendicular bisector"
+        questions:
+          - question: "The perpendicular from the centre of a circle to a chord:"
+            options: ["Bisects the chord", "Is equal to the chord", "Passes through the endpoint", "Is parallel to the chord"]
+            answer: "Bisects the chord"
+            explanation: "The perpendicular from the centre to a chord bisects the chord."
+            difficulty: 1
+
+      - id: angle-subtended-arc
+        title: Angle Subtended by an Arc
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [chord-properties]
+        concepts:
+          - Angle at centre = 2 × angle at circumference (same arc)
+          - Angles in the same segment are equal
+          - Angle in a semicircle = 90°
+          - Cyclic quadrilateral — opposite angles supplementary
+        youtube_search_hints:
+          - "angle subtended arc centre circumference class 9 CBSE theorem"
+        questions:
+          - question: "If an arc subtends 80° at the centre, the angle subtended at the circumference is:"
+            options: ["160°", "80°", "40°", "20°"]
+            answer: "40°"
+            explanation: "Angle at circumference = half the angle at centre = 80°/2 = 40°."
+            difficulty: 1
+          - question: "ABCD is a cyclic quadrilateral. If ∠A = 80°, then ∠C ="
+            options: ["80°", "100°", "180°", "260°"]
+            answer: "100°"
+            explanation: "Opposite angles of a cyclic quadrilateral are supplementary. ∠A + ∠C = 180°. ∠C = 100°."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: geometrical-constructions
+    title: Geometrical Constructions
+    sequence: 13
+    topics:
+      - id: basic-constructions
+        title: Basic Geometric Constructions
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Bisecting a given angle
+          - Perpendicular bisector of a line segment
+          - Constructing angles of 60°, 90°, 120°
+          - Constructing a triangle given base, base angle and sum/difference of other sides
+        youtube_search_hints:
+          - "geometric constructions class 9 CBSE angle bisector perpendicular"
+        questions:
+          - question: "To construct a 90° angle, we first construct a 60° angle and then:"
+            options: ["Bisect it", "Double it", "Add 30° to it", "Subtract 30° from 120°"]
+            answer: "Add 30° to it"
+            explanation: "60° + 30° = 90°. Construct 60° then bisect the remaining 60° to get 30°, total = 90°."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: areas-triangles-quadrilaterals
+    title: Areas of Triangles and Quadrilaterals
+    sequence: 14
+    topics:
+      - id: herons-formula
+        title: Heron's Formula
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - s = (a+b+c)/2 (semi-perimeter)
+          - Area = √[s(s−a)(s−b)(s−c)]
+          - Area of quadrilateral using Heron's formula (divide into triangles)
+          - Application in real-world problems
+        youtube_search_hints:
+          - "Heron's formula area triangle class 9 CBSE"
+        questions:
+          - question: "Area of triangle with sides 5, 12, 13 cm using Heron's formula:"
+            options: ["30 cm²", "60 cm²", "15 cm²", "78 cm²"]
+            answer: "30 cm²"
+            explanation: "s=15. Area=√(15×10×3×2)=√900=30 cm². (Also a right triangle: ½×5×12=30.)"
+            difficulty: 2
+          - question: "The semi-perimeter of a triangle with sides 7, 8, 9 cm is:"
+            options: ["12", "24", "48", "6"]
+            answer: "12"
+            explanation: "s = (7+8+9)/2 = 24/2 = 12."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: volume-surface-area
+    title: Volume and Surface Area of Solids
+    sequence: 15
+    topics:
+      - id: cuboid-cube-cylinder
+        title: Surface Area and Volume — Cuboid, Cube, Cylinder
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: []
+        concepts:
+          - TSA of cuboid = 2(lb+bh+hl); Volume = lbh
+          - TSA of cube = 6a²; Volume = a³
+          - CSA of cylinder = 2πrh; TSA = 2πr(r+h); Volume = πr²h
+        youtube_search_hints:
+          - "surface area volume cuboid cube cylinder class 9 CBSE"
+        questions:
+          - question: "Lateral surface area of a cube with side 5 cm:"
+            options: ["100 cm²", "150 cm²", "25 cm²", "125 cm²"]
+            answer: "100 cm²"
+            explanation: "Lateral SA of cube = 4a² = 4 × 25 = 100 cm²."
+            difficulty: 1
+          - question: "Volume of a cylinder with r=7 cm, h=10 cm (π=22/7):"
+            options: ["1540 cm³", "440 cm³", "2200 cm³", "770 cm³"]
+            answer: "1540 cm³"
+            explanation: "V = πr²h = (22/7)×49×10 = 1540 cm³."
+            difficulty: 1
+
+      - id: cone-sphere-hemisphere
+        title: Surface Area and Volume — Cone, Sphere, Hemisphere
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [cuboid-cube-cylinder]
+        concepts:
+          - Cone — CSA=πrl, TSA=πr(r+l), V=(1/3)πr²h, slant l=√(r²+h²)
+          - Sphere — SA=4πr², V=(4/3)πr³
+          - Hemisphere — CSA=2πr², TSA=3πr², V=(2/3)πr³
+        youtube_search_hints:
+          - "surface area volume cone sphere hemisphere class 9 CBSE"
+        questions:
+          - question: "The slant height of a cone with r=6 cm and h=8 cm is:"
+            options: ["10 cm", "14 cm", "12 cm", "8 cm"]
+            answer: "10 cm"
+            explanation: "l = √(r²+h²) = √(36+64) = √100 = 10 cm."
+            difficulty: 1
+          - question: "Volume of a sphere with r=3 cm (π=3.14):"
+            options: ["113.04 cm³", "56.52 cm³", "150.72 cm³", "37.68 cm³"]
+            answer: "113.04 cm³"
+            explanation: "V = (4/3)×3.14×27 = (4/3)×84.78 = 113.04 cm³."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: data-tabular-form
+    title: Presentation of Data in Tabular Form
+    sequence: 16
+    topics:
+      - id: frequency-distribution
+        title: Frequency Distribution Tables
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Raw data vs grouped data
+          - Class interval, class width, class mark
+          - Tally marks and frequency
+          - Cumulative frequency table
+        youtube_search_hints:
+          - "frequency distribution table class 9 CBSE data"
+        questions:
+          - question: "The class mark of the interval 15–25 is:"
+            options: ["15", "25", "20", "10"]
+            answer: "20"
+            explanation: "Class mark = (lower limit + upper limit)/2 = (15+25)/2 = 20."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: bar-graph-histogram
+    title: Bar Graph, Histogram and Frequency Polygon
+    sequence: 17
+    topics:
+      - id: histogram-frequency-polygon
+        title: Histogram and Frequency Polygon
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [data-tabular-form.frequency-distribution]
+        concepts:
+          - Difference between bar graph and histogram (no gaps in histogram)
+          - Drawing a histogram for grouped continuous data
+          - Frequency polygon — joining midpoints of top of bars
+          - Reading and interpreting histograms
+        youtube_search_hints:
+          - "histogram frequency polygon class 9 CBSE"
+        questions:
+          - question: "A histogram differs from a bar graph because:"
+            options: ["It uses circles", "There are no gaps between bars", "It is drawn horizontally", "It shows percentages"]
+            answer: "There are no gaps between bars"
+            explanation: "In a histogram, bars are adjacent (no gaps) since class intervals are continuous."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: mean-median-mode-ungrouped
+    title: Mean, Median and Mode of Ungrouped Data
+    sequence: 18
+    topics:
+      - id: mean-ungrouped
+        title: Mean of Ungrouped Data
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Arithmetic mean = sum of observations / number of observations
+          - Finding missing observation given mean
+          - Effect of adding/subtracting a constant on mean
+          - Effect of multiplying by a constant on mean
+        youtube_search_hints:
+          - "mean ungrouped data class 9 CBSE arithmetic mean"
+        questions:
+          - question: "Mean of 5, 8, 10, 12, 15 is:"
+            options: ["9", "10", "11", "12"]
+            answer: "10"
+            explanation: "Sum = 50. Mean = 50/5 = 10."
+            difficulty: 1
+          - question: "Mean of 10 numbers is 12. If one number 20 is excluded, the new mean is:"
+            options: ["10", "11", "11.1", "12"]
+            answer: "11.1"
+            explanation: "Total sum = 120. New sum = 120−20=100. New mean = 100/9 ≈ 11.1."
+            difficulty: 2
+
+      - id: median-mode-ungrouped
+        title: Median and Mode of Ungrouped Data
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [mean-ungrouped]
+        concepts:
+          - Median — middle value of sorted data; average of middle two for even n
+          - Mode — value appearing most frequently
+          - Relationship between mean, median, mode
+          - When to use each measure
+        youtube_search_hints:
+          - "median mode ungrouped data class 9 CBSE"
+        questions:
+          - question: "Find median of 4, 8, 2, 6, 10, 1, 9:"
+            options: ["4", "6", "8", "5"]
+            answer: "6"
+            explanation: "Sorted: 1,2,4,6,8,9,10. Middle value (4th of 7) = 6."
+            difficulty: 1
+          - question: "Mode of 3, 5, 7, 5, 9, 3, 5, 7 is:"
+            options: ["3", "5", "7", "9"]
+            answer: "5"
+            explanation: "5 appears 3 times (most frequently). Mode = 5."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: probability
+    title: Probability
+    sequence: 19
+    topics:
+      - id: basic-probability
+        title: Probability — Basic Concepts
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Experiment, trial, outcome, sample space
+          - P(event) = number of favourable outcomes / total outcomes
+          - 0 ≤ P(E) ≤ 1
+          - Complementary event — P(E) + P(Ē) = 1
+        youtube_search_hints:
+          - "probability basic concepts class 9 CBSE"
+        questions:
+          - question: "A die is thrown once. Probability of getting an even number:"
+            options: ["1/6", "2/6", "3/6", "4/6"]
+            answer: "3/6"
+            explanation: "Even numbers: {2,4,6} — 3 outcomes out of 6. P = 3/6 = 1/2."
+            difficulty: 1
+          - question: "A bag contains 4 red and 6 blue balls. P(drawing a red ball):"
+            options: ["4/6", "2/5", "3/5", "4/10"]
+            answer: "4/10"
+            explanation: "P(red) = 4/(4+6) = 4/10 = 2/5."
+            difficulty: 1
+
+      - id: probability-applications
+        title: Probability Applications
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [basic-probability]
+        concepts:
+          - Card experiments — suits, ranks, face cards
+          - Coin experiments — single and multiple coins
+          - Mutually exclusive events
+          - Empirical (experimental) probability
+        youtube_search_hints:
+          - "probability cards coins experiments class 9 CBSE"
+        questions:
+          - question: "A card is drawn from 52 cards. P(a black face card):"
+            options: ["3/26", "6/52", "1/4", "3/13"]
+            answer: "3/26"
+            explanation: "Black face cards = {J♠,Q♠,K♠,J♣,Q♣,K♣} = 6. P = 6/52 = 3/26."
+            difficulty: 2
+          - question: "Three coins are tossed. P(exactly 2 heads):"
+            options: ["1/8", "2/8", "3/8", "4/8"]
+            answer: "3/8"
+            explanation: "Sample space = 8. Favourable: {HHT,HTH,THH} = 3. P = 3/8."
+            difficulty: 2

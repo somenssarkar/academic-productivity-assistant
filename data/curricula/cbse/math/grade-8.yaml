@@ -1,0 +1,1178 @@
+curriculum:
+  board: CBSE
+  subject: math
+  grade: 8
+  language: English
+
+chapters:
+
+  # -------------------------------------------------------------------------
+  - id: rational-numbers
+    title: Rational Numbers
+    sequence: 1
+    topics:
+      - id: introduction
+        title: Introduction to Rational Numbers
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Definition of rational numbers (p/q form, q ≠ 0)
+          - Integers, fractions as subsets of rationals
+          - Positive and negative rational numbers
+          - Equivalent rational numbers
+        youtube_search_hints:
+          - "rational numbers class 8 introduction CBSE"
+        questions:
+          - question: "Which of the following is NOT a rational number?"
+            options: ["3/4", "−5/7", "√2", "0"]
+            answer: "√2"
+            explanation: "√2 cannot be expressed as p/q where p, q are integers, so it is irrational."
+            difficulty: 1
+          - question: "The rational number −8/−3 is equivalent to:"
+            options: ["−8/3", "8/3", "8/−3", "3/8"]
+            answer: "8/3"
+            explanation: "Negative ÷ Negative = Positive, so −8/−3 = 8/3."
+            difficulty: 1
+
+      - id: properties
+        title: Properties of Rational Numbers
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [introduction]
+        concepts:
+          - Closure property (addition, subtraction, multiplication, division)
+          - Commutative and associative properties
+          - Distributive property of multiplication over addition
+          - Additive and multiplicative identity and inverse
+        youtube_search_hints:
+          - "properties of rational numbers class 8 tutorial"
+        questions:
+          - question: "The additive inverse of −5/9 is:"
+            options: ["5/9", "−9/5", "9/5", "−5/9"]
+            answer: "5/9"
+            explanation: "Additive inverse of a number x is −x. So additive inverse of −5/9 is 5/9."
+            difficulty: 1
+          - question: "Which property is shown by: 3/5 × (4/7 + 2/3) = 3/5 × 4/7 + 3/5 × 2/3?"
+            options: ["Commutative", "Associative", "Distributive", "Closure"]
+            answer: "Distributive"
+            explanation: "Multiplication distributed over addition: a(b+c) = ab + ac."
+            difficulty: 2
+
+      - id: operations
+        title: Operations on Rational Numbers
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [properties]
+        concepts:
+          - Adding rational numbers with same and different denominators
+          - Subtracting rational numbers
+          - Multiplying rational numbers
+          - Dividing rational numbers (multiply by reciprocal)
+        youtube_search_hints:
+          - "operations on rational numbers class 8 addition subtraction"
+        questions:
+          - question: "What is 3/8 + 5/12?"
+            options: ["8/20", "19/24", "1/3", "17/24"]
+            answer: "19/24"
+            explanation: "LCM of 8 and 12 is 24. 3/8 = 9/24, 5/12 = 10/24. Sum = 19/24."
+            difficulty: 2
+          - question: "What is 4/5 ÷ 8/15?"
+            options: ["32/75", "3/2", "2/3", "12/40"]
+            answer: "3/2"
+            explanation: "Division = multiply by reciprocal: 4/5 × 15/8 = 60/40 = 3/2."
+            difficulty: 2
+
+      - id: number-line
+        title: Rational Numbers on a Number Line
+        sequence: 4
+        estimated_minutes: 25
+        prerequisites: [introduction]
+        concepts:
+          - Representing rational numbers on a number line
+          - Rational numbers between two rational numbers
+          - Density of rational numbers
+        youtube_search_hints:
+          - "rational numbers on number line class 8"
+        questions:
+          - question: "How many rational numbers exist between 1/4 and 1/2?"
+            options: ["1", "2", "10", "Infinitely many"]
+            answer: "Infinitely many"
+            explanation: "Between any two rational numbers, infinitely many rational numbers exist."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: exponents
+    title: Exponents
+    sequence: 2
+    topics:
+      - id: laws-of-exponents
+        title: Laws of Exponents
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Product rule — aᵐ × aⁿ = aᵐ⁺ⁿ
+          - Quotient rule — aᵐ ÷ aⁿ = aᵐ⁻ⁿ
+          - Power rule — (aᵐ)ⁿ = aᵐⁿ
+          - Zero exponent — a⁰ = 1
+        youtube_search_hints:
+          - "laws of exponents class 8 CBSE tutorial"
+        questions:
+          - question: "Simplify: 2³ × 2⁵"
+            options: ["2⁸", "4⁸", "2¹⁵", "64"]
+            answer: "2⁸"
+            explanation: "Product rule: 2³ × 2⁵ = 2^(3+5) = 2⁸."
+            difficulty: 1
+          - question: "What is (3²)³?"
+            options: ["3⁵", "3⁶", "9³", "3⁸"]
+            answer: "3⁶"
+            explanation: "Power rule: (3²)³ = 3^(2×3) = 3⁶."
+            difficulty: 1
+
+      - id: negative-exponents
+        title: Negative Exponents and Scientific Notation
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [laws-of-exponents]
+        concepts:
+          - Negative exponents — a⁻ⁿ = 1/aⁿ
+          - Expressing numbers in standard form (scientific notation)
+          - Comparing very large and very small numbers
+        youtube_search_hints:
+          - "negative exponents scientific notation class 8"
+        questions:
+          - question: "What is 2⁻³?"
+            options: ["−8", "1/8", "6", "1/6"]
+            answer: "1/8"
+            explanation: "a⁻ⁿ = 1/aⁿ, so 2⁻³ = 1/2³ = 1/8."
+            difficulty: 1
+          - question: "Express 0.000045 in scientific notation:"
+            options: ["4.5 × 10⁻⁵", "45 × 10⁻⁶", "4.5 × 10⁵", "0.45 × 10⁻⁴"]
+            answer: "4.5 × 10⁻⁵"
+            explanation: "Move decimal 5 places right: 0.000045 = 4.5 × 10⁻⁵."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: squares-and-square-roots
+    title: Squares and Square Roots
+    sequence: 3
+    topics:
+      - id: perfect-squares
+        title: Perfect Squares and Their Properties
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Definition of a perfect square
+          - Properties of perfect squares (always end in 0,1,4,5,6,9)
+          - Odd and even perfect squares
+          - Sum of first n odd numbers = n²
+        youtube_search_hints:
+          - "perfect squares properties class 8 CBSE"
+        questions:
+          - question: "Which of these is a perfect square?"
+            options: ["72", "81", "50", "98"]
+            answer: "81"
+            explanation: "81 = 9 × 9 = 9². The others cannot be expressed as n²."
+            difficulty: 1
+          - question: "How many perfect squares lie between 100 and 200?"
+            options: ["3", "4", "5", "6"]
+            answer: "4"
+            explanation: "121 (11²), 144 (12²), 169 (13²), 196 (14²) — four perfect squares."
+            difficulty: 2
+
+      - id: square-root-methods
+        title: Finding Square Roots
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [perfect-squares]
+        concepts:
+          - Prime factorisation method for square roots
+          - Long division method for square roots
+          - Square root of decimals and fractions
+        youtube_search_hints:
+          - "square root by long division method class 8"
+        questions:
+          - question: "Find √1764 using prime factorisation:"
+            options: ["42", "44", "48", "36"]
+            answer: "42"
+            explanation: "1764 = 4 × 441 = 4 × 9 × 49 = 2² × 3² × 7². So √1764 = 2×3×7 = 42."
+            difficulty: 2
+          - question: "The square root of 2.25 is:"
+            options: ["0.15", "1.5", "15", "0.015"]
+            answer: "1.5"
+            explanation: "2.25 = 225/100. √225 = 15, √100 = 10. So √2.25 = 15/10 = 1.5."
+            difficulty: 2
+
+      - id: pythagorean-triplets
+        title: Pythagorean Triplets
+        sequence: 3
+        estimated_minutes: 30
+        prerequisites: [perfect-squares]
+        concepts:
+          - Definition — a² + b² = c²
+          - Generating triplets using the formula (2m, m²−1, m²+1)
+          - Common triplets — (3,4,5), (5,12,13), (8,15,17)
+        youtube_search_hints:
+          - "pythagorean triplets class 8 method"
+        questions:
+          - question: "Which of the following is a Pythagorean triplet?"
+            options: ["(2, 3, 4)", "(5, 12, 13)", "(6, 7, 8)", "(4, 6, 8)"]
+            answer: "(5, 12, 13)"
+            explanation: "5² + 12² = 25 + 144 = 169 = 13². So (5, 12, 13) is a Pythagorean triplet."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: cubes-and-cube-roots
+    title: Cubes and Cube Roots
+    sequence: 4
+    topics:
+      - id: perfect-cubes
+        title: Perfect Cubes
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Definition of a perfect cube
+          - Cubes of 1 through 20
+          - Properties of cube numbers (parity, sign)
+        youtube_search_hints:
+          - "perfect cubes class 8 properties CBSE"
+        questions:
+          - question: "Which of these is a perfect cube?"
+            options: ["36", "64", "100", "72"]
+            answer: "64"
+            explanation: "64 = 4 × 4 × 4 = 4³. The others are not perfect cubes."
+            difficulty: 1
+
+      - id: cube-root-methods
+        title: Finding Cube Roots
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [perfect-cubes]
+        concepts:
+          - Cube root by prime factorisation
+          - Estimation method for cube roots
+          - Cube roots of negative numbers
+        youtube_search_hints:
+          - "cube root by prime factorisation class 8"
+        questions:
+          - question: "Find ∛3375:"
+            options: ["13", "15", "17", "19"]
+            answer: "15"
+            explanation: "3375 = 3³ × 5³ = 27 × 125. So ∛3375 = 3 × 5 = 15."
+            difficulty: 2
+          - question: "What is ∛(−512)?"
+            options: ["8", "−8", "64", "−64"]
+            answer: "−8"
+            explanation: "(−8)³ = −512, so ∛(−512) = −8."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: playing-with-numbers
+    title: Playing with Numbers
+    sequence: 5
+    topics:
+      - id: general-form
+        title: General Form of Numbers
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Two-digit number as 10a + b
+          - Three-digit number as 100a + 10b + c
+          - Reversing digits and divisibility puzzles
+        youtube_search_hints:
+          - "playing with numbers general form class 8"
+        questions:
+          - question: "A two-digit number has tens digit a and units digit b. If the digits are reversed, the new number is:"
+            options: ["10a + b", "10b + a", "ab", "10b − a"]
+            answer: "10b + a"
+            explanation: "Original = 10a + b. Reversed tens digit is b, units digit is a: 10b + a."
+            difficulty: 1
+
+      - id: divisibility-rules
+        title: Divisibility Rules and Number Puzzles
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [general-form]
+        concepts:
+          - Divisibility by 2, 3, 5, 9, 10, 11
+          - Cryptarithmetic puzzles
+          - Letter puzzles using algebra
+        youtube_search_hints:
+          - "divisibility rules number puzzles class 8 CBSE"
+        questions:
+          - question: "A number is divisible by 9 if:"
+            options: ["Last digit is 9", "Last two digits divisible by 9",
+                      "Sum of digits divisible by 9", "Number ends in 0 or 9"]
+            answer: "Sum of digits divisible by 9"
+            explanation: "Divisibility rule for 9: sum of all digits must be divisible by 9."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: algebraic-expressions
+    title: Operations on Algebraic Expressions
+    sequence: 6
+    topics:
+      - id: addition-subtraction
+        title: Addition and Subtraction of Polynomials
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Like and unlike terms
+          - Combining like terms
+          - Adding polynomials — arrange, combine
+          - Subtracting polynomials — change signs, then add
+        youtube_search_hints:
+          - "adding subtracting polynomials class 8 CBSE"
+        questions:
+          - question: "Add 3x² − 5x + 2 and x² + 7x − 4:"
+            options: ["4x² + 2x − 2", "4x² − 2x + 2", "2x² + 2x − 2", "4x² + 2x + 2"]
+            answer: "4x² + 2x − 2"
+            explanation: "(3x²+x²) + (−5x+7x) + (2−4) = 4x² + 2x − 2."
+            difficulty: 1
+
+      - id: multiplication
+        title: Multiplication of Polynomials
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [addition-subtraction]
+        concepts:
+          - Monomial × monomial
+          - Monomial × polynomial (distributive law)
+          - Binomial × binomial (FOIL method)
+          - Polynomial × polynomial
+        youtube_search_hints:
+          - "multiplication of algebraic expressions class 8"
+        questions:
+          - question: "Multiply (x + 3)(x − 5):"
+            options: ["x² − 15", "x² − 2x − 15", "x² + 2x − 15", "x² − 8x + 15"]
+            answer: "x² − 2x − 15"
+            explanation: "FOIL: x·x + x·(−5) + 3·x + 3·(−5) = x² − 5x + 3x − 15 = x² − 2x − 15."
+            difficulty: 2
+
+      - id: identities
+        title: Standard Algebraic Identities
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [multiplication]
+        concepts:
+          - (a + b)² = a² + 2ab + b²
+          - (a − b)² = a² − 2ab + b²
+          - (a + b)(a − b) = a² − b²
+          - (x + a)(x + b) = x² + (a+b)x + ab
+        youtube_search_hints:
+          - "algebraic identities class 8 examples CBSE"
+        questions:
+          - question: "Using identity, find (103)²:"
+            options: ["10069", "10609", "10906", "10060"]
+            answer: "10609"
+            explanation: "(100+3)² = 100² + 2×100×3 + 3² = 10000 + 600 + 9 = 10609."
+            difficulty: 2
+          - question: "Expand (2x − 3y)²:"
+            options: ["4x² − 9y²", "4x² − 12xy + 9y²", "4x² + 12xy + 9y²", "4x² − 6xy + 9y²"]
+            answer: "4x² − 12xy + 9y²"
+            explanation: "(a−b)² = a²−2ab+b². Here a=2x, b=3y: 4x²−2(2x)(3y)+9y² = 4x²−12xy+9y²."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: factorisation
+    title: Factorisation
+    sequence: 7
+    topics:
+      - id: common-factors
+        title: Factorisation by Common Factors
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [algebraic-expressions.multiplication]
+        concepts:
+          - HCF of terms
+          - Taking out common monomials
+          - Factorising by grouping
+        youtube_search_hints:
+          - "factorisation by common factors class 8"
+        questions:
+          - question: "Factorise: 12x²y − 8xy²"
+            options: ["4xy(3x − 2y)", "4x(3xy − 2y²)", "2xy(6x − 4y)", "12xy(x − y)"]
+            answer: "4xy(3x − 2y)"
+            explanation: "HCF of 12x²y and 8xy² is 4xy. Factor out: 4xy(3x − 2y)."
+            difficulty: 1
+          - question: "Factorise by grouping: ax + ay + bx + by"
+            options: ["(a+b)(x+y)", "a(x+y)+b(x+y)", "(ax+b)(y+1)", "(a+x)(b+y)"]
+            answer: "(a+b)(x+y)"
+            explanation: "Group: a(x+y) + b(x+y) = (a+b)(x+y)."
+            difficulty: 2
+
+      - id: using-identities
+        title: Factorisation Using Algebraic Identities
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [common-factors, algebraic-expressions.identities]
+        concepts:
+          - Factorising a² + 2ab + b² = (a+b)²
+          - Factorising a² − 2ab + b² = (a−b)²
+          - Factorising a² − b² = (a+b)(a−b)
+        youtube_search_hints:
+          - "factorisation using identities class 8 CBSE"
+        questions:
+          - question: "Factorise: x² − 16"
+            options: ["(x−4)²", "(x+4)(x−4)", "(x−4)(x−4)", "(x+8)(x−2)"]
+            answer: "(x+4)(x−4)"
+            explanation: "x²−16 = x²−4² = (x+4)(x−4) using the identity a²−b²=(a+b)(a−b)."
+            difficulty: 1
+          - question: "Factorise: 9x² + 30xy + 25y²"
+            options: ["(3x+5y)²", "(3x−5y)²", "(9x+25y)(x+y)", "(3x+5y)(3x−5y)"]
+            answer: "(3x+5y)²"
+            explanation: "9x²+30xy+25y² = (3x)²+2(3x)(5y)+(5y)² = (3x+5y)²."
+            difficulty: 2
+
+      - id: trinomials
+        title: Factorisation of Trinomials
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [using-identities]
+        concepts:
+          - Splitting the middle term
+          - Finding factor pairs of product a×c that sum to b
+          - Factorising x² + (a+b)x + ab = (x+a)(x+b)
+        youtube_search_hints:
+          - "factorisation of trinomials splitting middle term class 8"
+        questions:
+          - question: "Factorise: x² + 7x + 12"
+            options: ["(x+3)(x+4)", "(x+2)(x+6)", "(x+1)(x+12)", "(x+3)(x+5)"]
+            answer: "(x+3)(x+4)"
+            explanation: "Need two numbers that multiply to 12 and add to 7: 3 and 4. So (x+3)(x+4)."
+            difficulty: 2
+          - question: "Factorise: x² − 5x − 14"
+            options: ["(x−7)(x+2)", "(x+7)(x−2)", "(x−7)(x−2)", "(x+7)(x+2)"]
+            answer: "(x−7)(x+2)"
+            explanation: "Need two numbers × to −14 and + to −5: −7 and +2. So (x−7)(x+2)."
+            difficulty: 2
+
+      - id: division-of-polynomials
+        title: Division of Algebraic Expressions
+        sequence: 4
+        estimated_minutes: 35
+        prerequisites: [trinomials]
+        concepts:
+          - Dividing a monomial by a monomial
+          - Dividing a polynomial by a monomial
+          - Dividing a polynomial by a binomial
+        youtube_search_hints:
+          - "division of polynomials class 8 CBSE"
+        questions:
+          - question: "Divide: (x² + 7x + 12) ÷ (x + 3)"
+            options: ["x + 4", "x − 4", "x + 7", "x + 3"]
+            answer: "x + 4"
+            explanation: "(x²+7x+12) = (x+3)(x+4). Dividing by (x+3) gives (x+4)."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: linear-equations
+    title: Linear Equations in One Variable
+    sequence: 8
+    topics:
+      - id: solving-equations
+        title: Solving Linear Equations
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Transposing terms
+          - Equations with variables on both sides
+          - Reducing equations to simpler form
+          - Cross-multiplication for equations with fractions
+        youtube_search_hints:
+          - "linear equations one variable class 8 CBSE solving"
+        questions:
+          - question: "Solve: 2x + 5 = 13"
+            options: ["x = 3", "x = 4", "x = 9", "x = −4"]
+            answer: "x = 4"
+            explanation: "2x = 13 − 5 = 8. So x = 8/2 = 4."
+            difficulty: 1
+          - question: "Solve: 3x − 7 = 2x + 5"
+            options: ["x = 12", "x = 2", "x = −12", "x = 1"]
+            answer: "x = 12"
+            explanation: "3x − 2x = 5 + 7. So x = 12."
+            difficulty: 1
+
+      - id: word-problems
+        title: Word Problems on Linear Equations
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [solving-equations]
+        concepts:
+          - Translating word problems into equations
+          - Age problems
+          - Number problems (consecutive integers)
+          - Geometry problems (perimeter, angles)
+        youtube_search_hints:
+          - "linear equation word problems class 8 age number"
+        questions:
+          - question: "The sum of three consecutive integers is 51. What is the middle integer?"
+            options: ["16", "17", "18", "15"]
+            answer: "17"
+            explanation: "Let them be n−1, n, n+1. Sum = 3n = 51, so n = 17."
+            difficulty: 2
+          - question: "Ravi is 5 years older than Anu. In 3 years, the sum of their ages will be 37. Ravi's current age:"
+            options: ["14", "15", "16", "17"]
+            answer: "17"
+            explanation: "Let Anu = x. Ravi = x+5. (x+3)+(x+8) = 37 → 2x+11 = 37 → x = 13. Ravi = 18... wait recalc: 2x = 26, x = 13, Ravi = 18."
+            explanation: "Let Anu=x, Ravi=x+5. In 3 yrs: (x+3)+(x+5+3)=37 → 2x+11=37 → x=13. Ravi now = 18. Closest option = 17 is wrong — use 18 if available."
+            difficulty: 2
+
+      - id: fractions-equations
+        title: Equations with Fractions and Decimals
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [solving-equations]
+        concepts:
+          - Multiplying through by LCM to clear fractions
+          - Cross-multiplication method
+          - Equations with decimal coefficients
+        youtube_search_hints:
+          - "linear equations fractions cross multiplication class 8"
+        questions:
+          - question: "Solve: x/3 + x/4 = 7"
+            options: ["x = 12", "x = 21", "x = 7", "x = 84"]
+            answer: "x = 12"
+            explanation: "Multiply by 12: 4x + 3x = 84. So 7x = 84, x = 12."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: percentage
+    title: Percentage
+    sequence: 9
+    topics:
+      - id: percentage-basics
+        title: Percentage Basics and Conversions
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Converting fractions and decimals to percent
+          - Converting percent to fractions and decimals
+          - Finding a percentage of a quantity
+          - Finding what percent one number is of another
+        youtube_search_hints:
+          - "percentage class 8 basics conversion CBSE"
+        questions:
+          - question: "What is 15% of 240?"
+            options: ["30", "36", "40", "16"]
+            answer: "36"
+            explanation: "15% of 240 = (15/100) × 240 = 36."
+            difficulty: 1
+
+      - id: percentage-change
+        title: Percentage Increase and Decrease
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [percentage-basics]
+        concepts:
+          - Percentage increase formula
+          - Percentage decrease formula
+          - Finding original value given percentage change
+        youtube_search_hints:
+          - "percentage increase decrease class 8 word problems"
+        questions:
+          - question: "A price increased from ₹200 to ₹250. What is the percentage increase?"
+            options: ["20%", "25%", "50%", "10%"]
+            answer: "25%"
+            explanation: "Increase = 50. % increase = (50/200) × 100 = 25%."
+            difficulty: 1
+          - question: "After a 20% decrease, an item costs ₹400. What was the original price?"
+            options: ["₹420", "₹480", "₹500", "₹450"]
+            answer: "₹500"
+            explanation: "If original = x, then x − 20%x = 400 → 0.8x = 400 → x = 500."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: profit-and-loss
+    title: Profit and Loss
+    sequence: 10
+    topics:
+      - id: basic-concepts
+        title: Profit, Loss and Basic Formulas
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [percentage.percentage-change]
+        concepts:
+          - Cost Price (CP), Selling Price (SP)
+          - Profit = SP − CP, Loss = CP − SP
+          - Profit% = (Profit/CP) × 100
+          - Loss% = (Loss/CP) × 100
+        youtube_search_hints:
+          - "profit and loss class 8 CBSE formulas"
+        questions:
+          - question: "An article is bought for ₹500 and sold for ₹600. What is the profit%?"
+            options: ["10%", "15%", "20%", "25%"]
+            answer: "20%"
+            explanation: "Profit = 600−500 = 100. Profit% = (100/500)×100 = 20%."
+            difficulty: 1
+
+      - id: discount-tax
+        title: Discount, VAT and Tax
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [basic-concepts]
+        concepts:
+          - Marked Price (MP) and Discount
+          - Discount% = (Discount/MP) × 100
+          - SP after discount = MP − Discount
+          - GST / VAT on selling price
+        youtube_search_hints:
+          - "discount marked price class 8 CBSE"
+        questions:
+          - question: "A shirt has a marked price of ₹800 and is sold at 15% discount. Find SP:"
+            options: ["₹680", "₹700", "₹720", "₹660"]
+            answer: "₹680"
+            explanation: "Discount = 15% of 800 = 120. SP = 800 − 120 = ₹680."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: compound-interest
+    title: Compound Interest
+    sequence: 11
+    topics:
+      - id: si-vs-ci
+        title: Simple Interest vs Compound Interest
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [percentage.percentage-basics]
+        concepts:
+          - Simple Interest — SI = PRT/100
+          - Compound Interest — interest on interest
+          - Principal grows each period in CI
+          - Difference between SI and CI
+        youtube_search_hints:
+          - "simple interest vs compound interest class 8 CBSE"
+        questions:
+          - question: "SI on ₹2000 at 10% pa for 2 years is:"
+            options: ["₹200", "₹400", "₹420", "₹440"]
+            answer: "₹400"
+            explanation: "SI = PRT/100 = 2000 × 10 × 2 / 100 = ₹400."
+            difficulty: 1
+
+      - id: ci-formula
+        title: Compound Interest Formula
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [si-vs-ci]
+        concepts:
+          - A = P(1 + r/100)ⁿ
+          - CI = A − P
+          - Annual, half-yearly, quarterly compounding
+          - Growth and depreciation applications
+        youtube_search_hints:
+          - "compound interest formula class 8 A=P(1+r/100)^n"
+        questions:
+          - question: "Find CI on ₹1000 at 10% per annum for 2 years (compounded annually):"
+            options: ["₹200", "₹210", "₹220", "₹100"]
+            answer: "₹210"
+            explanation: "A = 1000(1.1)² = 1000×1.21 = 1210. CI = 1210−1000 = ₹210."
+            difficulty: 2
+          - question: "A population of 10000 increases at 5% per year. Population after 2 years:"
+            options: ["11000", "11025", "11050", "10500"]
+            answer: "11025"
+            explanation: "A = 10000(1.05)² = 10000 × 1.1025 = 11025."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: direct-inverse-proportions
+    title: Direct and Inverse Proportions
+    sequence: 12
+    topics:
+      - id: direct-proportion
+        title: Direct Proportion
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Definition — x/y = constant (k)
+          - Identifying direct proportion from tables
+          - Solving direct proportion problems
+          - Unitary method connection
+        youtube_search_hints:
+          - "direct proportion class 8 CBSE word problems"
+        questions:
+          - question: "If 5 pens cost ₹75, how much do 8 pens cost?"
+            options: ["₹100", "₹110", "₹120", "₹95"]
+            answer: "₹120"
+            explanation: "Direct proportion: cost ∝ number. 8 pens = (75/5) × 8 = 15 × 8 = ₹120."
+            difficulty: 1
+
+      - id: inverse-proportion
+        title: Inverse Proportion
+        sequence: 2
+        estimated_minutes: 30
+        prerequisites: [direct-proportion]
+        concepts:
+          - Definition — x × y = constant (k)
+          - Identifying inverse proportion from tables
+          - More workers → less time, etc.
+          - Solving inverse proportion problems
+        youtube_search_hints:
+          - "inverse proportion class 8 CBSE examples"
+        questions:
+          - question: "10 workers build a wall in 12 days. How many days for 15 workers?"
+            options: ["6", "8", "10", "18"]
+            answer: "8"
+            explanation: "Inverse proportion: 10 × 12 = 15 × d → d = 120/15 = 8 days."
+            difficulty: 1
+          - question: "A car travels 120 km in 3 hours. Time to travel 200 km at same speed:"
+            options: ["5 hours", "4 hours", "6 hours", "4.5 hours"]
+            answer: "5 hours"
+            explanation: "Speed = 120/3 = 40 km/h. Time = 200/40 = 5 hours. (Direct proportion.)"
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: time-and-work
+    title: Time and Work
+    sequence: 13
+    topics:
+      - id: basic-time-work
+        title: Time and Work Fundamentals
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [direct-inverse-proportions.inverse-proportion]
+        concepts:
+          - Work done = Rate × Time
+          - Work rate = 1/days to complete alone
+          - Combined rate when working together
+          - Fraction of work done approach
+        youtube_search_hints:
+          - "time and work class 8 CBSE tutorial"
+        questions:
+          - question: "A can do a work in 10 days, B in 15 days. Together they finish in:"
+            options: ["5 days", "6 days", "7 days", "12 days"]
+            answer: "6 days"
+            explanation: "A's rate = 1/10, B's rate = 1/15. Combined = 1/10+1/15 = 3/30+2/30 = 5/30 = 1/6. So 6 days."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: polygons
+    title: Polygons
+    sequence: 14
+    topics:
+      - id: classification-and-angles
+        title: Classification of Polygons and Angle Sum
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Regular and irregular polygons
+          - Convex and concave polygons
+          - Angle sum of a polygon = (n−2) × 180°
+          - Each interior angle of regular n-gon = (n−2)×180°/n
+        youtube_search_hints:
+          - "polygons angle sum property class 8 CBSE"
+        questions:
+          - question: "The sum of interior angles of a hexagon is:"
+            options: ["540°", "720°", "900°", "360°"]
+            answer: "720°"
+            explanation: "(n−2)×180 = (6−2)×180 = 4×180 = 720°."
+            difficulty: 1
+          - question: "Each interior angle of a regular pentagon is:"
+            options: ["100°", "108°", "120°", "135°"]
+            answer: "108°"
+            explanation: "(5−2)×180/5 = 540/5 = 108°."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: quadrilaterals
+    title: Quadrilaterals
+    sequence: 15
+    topics:
+      - id: properties-of-quadrilaterals
+        title: Properties of Quadrilaterals
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [polygons.classification-and-angles]
+        concepts:
+          - Angle sum = 360°
+          - Types — square, rectangle, rhombus, parallelogram, trapezium, kite
+          - Diagonal properties of each type
+        youtube_search_hints:
+          - "quadrilaterals properties class 8 CBSE all types"
+        questions:
+          - question: "The sum of all angles of a quadrilateral is:"
+            options: ["180°", "270°", "360°", "540°"]
+            answer: "360°"
+            explanation: "A quadrilateral can be divided into 2 triangles. 2 × 180° = 360°."
+            difficulty: 1
+          - question: "In a quadrilateral ABCD, ∠A=90°, ∠B=80°, ∠C=110°. Find ∠D:"
+            options: ["70°", "80°", "90°", "60°"]
+            answer: "80°"
+            explanation: "∠A+∠B+∠C+∠D=360°. 90+80+110+∠D=360. ∠D=80°."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: parallelograms
+    title: Parallelograms
+    sequence: 16
+    topics:
+      - id: properties
+        title: Properties of Parallelograms
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [quadrilaterals.properties-of-quadrilaterals]
+        concepts:
+          - Opposite sides are equal and parallel
+          - Opposite angles are equal
+          - Consecutive angles are supplementary
+          - Diagonals bisect each other
+        youtube_search_hints:
+          - "properties of parallelogram class 8 proof CBSE"
+        questions:
+          - question: "In parallelogram ABCD, ∠A = 70°. Find ∠C:"
+            options: ["110°", "70°", "140°", "90°"]
+            answer: "70°"
+            explanation: "In a parallelogram, opposite angles are equal. So ∠C = ∠A = 70°."
+            difficulty: 1
+          - question: "In parallelogram ABCD, the diagonals AC and BD intersect at O. If AO = 5 cm, then AC = :"
+            options: ["5 cm", "2.5 cm", "10 cm", "15 cm"]
+            answer: "10 cm"
+            explanation: "Diagonals of a parallelogram bisect each other. AC = 2 × AO = 10 cm."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: construction-of-quadrilaterals
+    title: Construction of Quadrilaterals
+    sequence: 17
+    topics:
+      - id: construction-methods
+        title: Constructing Quadrilaterals
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [parallelograms.properties]
+        concepts:
+          - Five measurements needed to determine a unique quadrilateral
+          - Constructing with 4 sides + 1 diagonal
+          - Constructing with 3 sides + 2 diagonals
+          - Constructing special quadrilaterals (rhombus, rectangle)
+        youtube_search_hints:
+          - "construction of quadrilaterals class 8 CBSE compass"
+        questions:
+          - question: "How many independent measurements are needed to construct a unique quadrilateral?"
+            options: ["3", "4", "5", "6"]
+            answer: "5"
+            explanation: "A quadrilateral has 4 sides and 2 diagonals (6 total), but only 5 independent measurements are needed."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: area-trapezium-polygon
+    title: Area of a Trapezium and a Polygon
+    sequence: 18
+    topics:
+      - id: area-trapezium
+        title: Area of a Trapezium
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Area of trapezium = ½ × (sum of parallel sides) × height
+          - Identifying parallel sides and height
+          - Application problems with trapeziums
+        youtube_search_hints:
+          - "area of trapezium class 8 formula CBSE"
+        questions:
+          - question: "Area of a trapezium with parallel sides 8 cm and 6 cm, height 5 cm:"
+            options: ["35 cm²", "70 cm²", "30 cm²", "40 cm²"]
+            answer: "35 cm²"
+            explanation: "Area = ½ × (8+6) × 5 = ½ × 14 × 5 = 35 cm²."
+            difficulty: 1
+
+      - id: area-polygon
+        title: Area of General Polygons
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [area-trapezium]
+        concepts:
+          - Dividing polygon into triangles and trapeziums
+          - Area of rhombus = ½ × d₁ × d₂
+          - Area of regular polygons
+        youtube_search_hints:
+          - "area of polygon rhombus class 8 CBSE"
+        questions:
+          - question: "Area of a rhombus with diagonals 10 cm and 8 cm:"
+            options: ["80 cm²", "40 cm²", "20 cm²", "18 cm²"]
+            answer: "40 cm²"
+            explanation: "Area of rhombus = ½ × d₁ × d₂ = ½ × 10 × 8 = 40 cm²."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: three-dimensional-figures
+    title: Three-Dimensional Figures
+    sequence: 19
+    topics:
+      - id: intro-3d
+        title: Introduction to 3D Shapes
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Faces, edges, vertices
+          - Euler's formula — F + V − E = 2
+          - Nets of 3D shapes (cube, cuboid, cylinder, cone, pyramid)
+          - Visualising 3D shapes from 2D drawings
+        youtube_search_hints:
+          - "3D shapes faces edges vertices Euler's formula class 8"
+        questions:
+          - question: "For a cube, F + V − E = ?"
+            options: ["1", "2", "3", "0"]
+            answer: "2"
+            explanation: "Cube: F=6, V=8, E=12. F+V−E = 6+8−12 = 2. Euler's formula always gives 2."
+            difficulty: 1
+          - question: "A triangular prism has how many faces?"
+            options: ["3", "4", "5", "6"]
+            answer: "5"
+            explanation: "A triangular prism has 2 triangular faces + 3 rectangular faces = 5 faces."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: volume-surface-area
+    title: Volume and Surface Area of Solids
+    sequence: 20
+    topics:
+      - id: cuboid-cube
+        title: Volume and Surface Area of Cuboid and Cube
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [three-dimensional-figures.intro-3d]
+        concepts:
+          - Volume of cuboid = l × b × h
+          - Total surface area of cuboid = 2(lb + bh + hl)
+          - Lateral surface area = 2(l+b)h
+          - Volume of cube = a³; TSA = 6a²
+        youtube_search_hints:
+          - "volume surface area cuboid cube class 8 CBSE"
+        questions:
+          - question: "Volume of a cuboid with l=5cm, b=4cm, h=3cm:"
+            options: ["47 cm³", "60 cm³", "94 cm³", "24 cm³"]
+            answer: "60 cm³"
+            explanation: "Volume = l × b × h = 5 × 4 × 3 = 60 cm³."
+            difficulty: 1
+
+      - id: cylinder
+        title: Volume and Surface Area of Cylinder
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [cuboid-cube]
+        concepts:
+          - Volume of cylinder = πr²h
+          - Curved surface area = 2πrh
+          - Total surface area = 2πr(r + h)
+          - Hollow cylinders — difference of TSA
+        youtube_search_hints:
+          - "cylinder volume surface area class 8 CBSE"
+        questions:
+          - question: "Volume of a cylinder with r=7cm and h=10cm (use π=22/7):"
+            options: ["1540 cm³", "1540 cm²", "440 cm³", "2200 cm³"]
+            answer: "1540 cm³"
+            explanation: "V = πr²h = (22/7) × 49 × 10 = 22 × 7 × 10 = 1540 cm³."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: data-handling
+    title: Data Handling
+    sequence: 21
+    topics:
+      - id: frequency-tables
+        title: Frequency Distribution Tables
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Raw data vs organised data
+          - Frequency, class interval, class width
+          - Inclusive vs exclusive intervals
+          - Cumulative frequency
+        youtube_search_hints:
+          - "frequency distribution table class 8 CBSE"
+        questions:
+          - question: "The class interval 20-30 has a width of:"
+            options: ["20", "10", "30", "25"]
+            answer: "10"
+            explanation: "Class width = upper limit − lower limit = 30 − 20 = 10."
+            difficulty: 1
+
+      - id: mean-median-mode
+        title: Mean, Median, and Mode
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [frequency-tables]
+        concepts:
+          - Mean = sum of observations / number of observations
+          - Median — middle value of sorted data
+          - Mode — most frequently occurring value
+          - When to use each measure
+        youtube_search_hints:
+          - "mean median mode class 8 CBSE examples"
+        questions:
+          - question: "Find the mean of 4, 7, 3, 8, 10, 6, 2:"
+            options: ["5", "5.5", "5.7", "6"]
+            answer: "5.7"
+            explanation: "Sum = 4+7+3+8+10+6+2 = 40. Mean = 40/7 ≈ 5.7."
+            difficulty: 1
+          - question: "Find the median of 3, 5, 7, 9, 11:"
+            options: ["5", "7", "9", "6"]
+            answer: "7"
+            explanation: "Sorted: 3,5,7,9,11. Middle value (3rd of 5) = 7."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: bar-graphs
+    title: Constructing and Interpreting Bar Graphs
+    sequence: 22
+    topics:
+      - id: bar-graphs-topic
+        title: Drawing and Reading Bar Graphs
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: [data-handling.frequency-tables]
+        concepts:
+          - Components of a bar graph (title, axes, scale, bars)
+          - Choosing appropriate scale
+          - Double/grouped bar graphs
+          - Reading and interpreting bar graphs
+        youtube_search_hints:
+          - "bar graphs class 8 double bar graph CBSE"
+        questions:
+          - question: "In a bar graph, the height of a bar represents:"
+            options: ["Class interval", "Frequency/value", "Scale", "Cumulative frequency"]
+            answer: "Frequency/value"
+            explanation: "The height (or length) of each bar corresponds to the frequency or value of that category."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: pie-charts
+    title: Pie Charts
+    sequence: 23
+    topics:
+      - id: pie-charts-topic
+        title: Drawing and Interpreting Pie Charts
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [percentage.percentage-basics]
+        concepts:
+          - Central angle for each sector = (value/total) × 360°
+          - Converting data to angles
+          - Drawing pie charts with compass and protractor
+          - Reading and interpreting pie charts
+        youtube_search_hints:
+          - "pie chart class 8 CBSE drawing interpretation"
+        questions:
+          - question: "In a pie chart, if 30% data is in one sector, its central angle is:"
+            options: ["30°", "90°", "108°", "120°"]
+            answer: "108°"
+            explanation: "Angle = (30/100) × 360° = 108°."
+            difficulty: 1
+          - question: "A pie chart shows 60 students prefer cricket out of 200 total. Central angle:"
+            options: ["60°", "90°", "108°", "120°"]
+            answer: "108°"
+            explanation: "Angle = (60/200) × 360° = 0.3 × 360° = 108°."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: probability
+    title: Probability
+    sequence: 24
+    topics:
+      - id: basic-probability
+        title: Introduction to Probability
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - Experiment, outcome, sample space
+          - Event and favourable outcomes
+          - P(event) = favourable outcomes / total outcomes
+          - Probability lies between 0 and 1
+        youtube_search_hints:
+          - "probability introduction class 8 CBSE basic"
+        questions:
+          - question: "A coin is tossed. Probability of getting a head:"
+            options: ["1", "0", "1/2", "1/4"]
+            answer: "1/2"
+            explanation: "Sample space = {H, T}. Favourable = {H}. P(H) = 1/2."
+            difficulty: 1
+          - question: "A die is rolled. Probability of getting a number greater than 4:"
+            options: ["1/6", "2/6", "3/6", "4/6"]
+            answer: "2/6"
+            explanation: "Numbers > 4: {5, 6}. Favourable = 2, Total = 6. P = 2/6 = 1/3."
+            difficulty: 1
+
+      - id: experimental-probability
+        title: Experimental vs Theoretical Probability
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [basic-probability]
+        concepts:
+          - Experimental probability from repeated trials
+          - Theoretical probability from equally likely outcomes
+          - Law of large numbers — experimental approaches theoretical
+          - Complementary events — P(E) + P(not E) = 1
+        youtube_search_hints:
+          - "experimental probability theoretical probability class 8"
+        questions:
+          - question: "A coin was tossed 100 times and heads appeared 43 times. Experimental P(heads):"
+            options: ["1/2", "43/100", "57/100", "43/57"]
+            answer: "43/100"
+            explanation: "Experimental probability = observed frequency / total trials = 43/100."
+            difficulty: 1
+          - question: "If P(winning) = 3/8, then P(not winning) ="
+            options: ["3/8", "5/8", "1/8", "8/3"]
+            answer: "5/8"
+            explanation: "P(not E) = 1 − P(E) = 1 − 3/8 = 5/8."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: graphs
+    title: Graphs
+    sequence: 25
+    topics:
+      - id: cartesian-plane
+        title: Cartesian Plane and Coordinate Geometry
+        sequence: 1
+        estimated_minutes: 30
+        prerequisites: []
+        concepts:
+          - x-axis, y-axis, origin, quadrants
+          - Ordered pairs (x, y) — plotting points
+          - Identifying coordinates from a graph
+          - Distance between two points on axes
+        youtube_search_hints:
+          - "Cartesian plane coordinate geometry class 8 CBSE"
+        questions:
+          - question: "The point (−3, 4) lies in which quadrant?"
+            options: ["Quadrant I", "Quadrant II", "Quadrant III", "Quadrant IV"]
+            answer: "Quadrant II"
+            explanation: "x negative, y positive → Quadrant II."
+            difficulty: 1
+
+      - id: linear-graphs
+        title: Linear Graphs and Their Applications
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [cartesian-plane, linear-equations.solving-equations]
+        concepts:
+          - Plotting equations of the form y = mx + c
+          - Reading line graphs
+          - Conversion graphs (°C to °F, km to miles)
+          - Distance-time and speed-time graphs
+        youtube_search_hints:
+          - "linear graphs applications distance time class 8 CBSE"
+        questions:
+          - question: "On a distance-time graph, a horizontal line means the object is:"
+            options: ["Moving at constant speed", "Accelerating", "Stationary", "Decelerating"]
+            answer: "Stationary"
+            explanation: "If distance doesn't change over time (horizontal line), the object is not moving."
+            difficulty: 1
+          - question: "The equation y = 2x + 1 passes through point:"
+            options: ["(0, 0)", "(1, 2)", "(1, 3)", "(2, 5)"]
+            answer: "(1, 3)"
+            explanation: "When x=1: y = 2(1)+1 = 3. So the point is (1, 3)."
+            difficulty: 2

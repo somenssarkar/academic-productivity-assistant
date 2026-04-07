@@ -1,0 +1,1015 @@
+curriculum:
+  board: CBSE
+  subject: math
+  grade: 10
+  language: English
+
+chapters:
+
+  # -------------------------------------------------------------------------
+  - id: real-numbers
+    title: Real Numbers
+    sequence: 1
+    topics:
+      - id: euclids-division-lemma
+        title: Euclid's Division Lemma and HCF
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: []
+        concepts:
+          - Euclid's Division Lemma — a = bq + r, 0 ≤ r < b
+          - Euclid's Division Algorithm for HCF
+          - HCF of two or more numbers using the algorithm
+        youtube_search_hints:
+          - "Euclid division lemma HCF class 10 CBSE"
+        questions:
+          - question: "Using Euclid's algorithm, the HCF of 56 and 98 is:"
+            options: ["7", "14", "28", "56"]
+            answer: "14"
+            explanation: "98 = 56×1 + 42; 56 = 42×1 + 14; 42 = 14×3 + 0. HCF = 14."
+            difficulty: 2
+          - question: "Euclid's Division Lemma states that for integers a and b (b>0), there exist unique q and r such that:"
+            options: ["a = bq + r, 0 < r ≤ b", "a = bq + r, 0 ≤ r < b", "b = aq + r, 0 ≤ r < a", "a = bq − r, 0 ≤ r < b"]
+            answer: "a = bq + r, 0 ≤ r < b"
+            explanation: "The lemma precisely states a = bq + r where remainder r satisfies 0 ≤ r < b."
+            difficulty: 1
+
+      - id: fundamental-theorem
+        title: Fundamental Theorem of Arithmetic
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [euclids-division-lemma]
+        concepts:
+          - Every composite number has a unique prime factorisation
+          - HCF and LCM using prime factorisation
+          - HCF × LCM = Product of two numbers
+          - Applications — HCF/LCM word problems
+        youtube_search_hints:
+          - "fundamental theorem of arithmetic class 10 HCF LCM"
+        questions:
+          - question: "The HCF of 96 and 404 is 4. Their LCM is:"
+            options: ["9494", "9696", "9696", "9898"]
+            answer: "9696"
+            explanation: "HCF × LCM = Product. LCM = (96 × 404)/4 = 38784/4 = 9696."
+            difficulty: 2
+          - question: "Which of the following is the prime factorisation of 3825?"
+            options: ["3² × 5² × 17", "3 × 5² × 51", "3² × 425", "5² × 153"]
+            answer: "3² × 5² × 17"
+            explanation: "3825 = 3 × 1275 = 3 × 3 × 425 = 9 × 25 × 17 = 3² × 5² × 17."
+            difficulty: 2
+
+      - id: irrational-numbers
+        title: Irrational Numbers and Decimal Expansions
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [fundamental-theorem]
+        concepts:
+          - Proof that √p is irrational for prime p
+          - Terminating decimals — denominator has only 2ⁿ5ᵐ factors
+          - Non-terminating repeating decimals — other prime factors in denominator
+          - Identifying rational vs irrational from decimal form
+        youtube_search_hints:
+          - "irrational numbers proof decimal expansion class 10 CBSE"
+        questions:
+          - question: "The decimal expansion of 17/8 is:"
+            options: ["Terminating", "Non-terminating repeating", "Non-terminating non-repeating", "Cannot be determined"]
+            answer: "Terminating"
+            explanation: "8 = 2³. Denominator has only factors of 2. So 17/8 = 2.125 (terminating)."
+            difficulty: 1
+          - question: "Which decimal expansion is non-terminating repeating?"
+            options: ["1/4", "7/25", "11/6", "3/8"]
+            answer: "11/6"
+            explanation: "6 = 2 × 3. Since 3 is a factor other than 2 and 5, 11/6 is non-terminating repeating."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: polynomials
+    title: Polynomials
+    sequence: 2
+    topics:
+      - id: zeros-of-polynomials
+        title: Zeros of a Polynomial
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Geometrical meaning of zeros — x-intercepts of the graph
+          - Linear polynomial — 1 zero
+          - Quadratic polynomial — at most 2 zeros
+          - Cubic polynomial — at most 3 zeros
+        youtube_search_hints:
+          - "zeros of polynomial geometrical meaning class 10 CBSE"
+        questions:
+          - question: "The number of zeros of the polynomial p(x) = (x−2)(x+3) is:"
+            options: ["0", "1", "2", "3"]
+            answer: "2"
+            explanation: "p(x) = 0 when x = 2 or x = −3. Two zeros."
+            difficulty: 1
+          - question: "A quadratic polynomial can have at most:"
+            options: ["1 zero", "2 zeros", "3 zeros", "infinitely many zeros"]
+            answer: "2 zeros"
+            explanation: "A degree-n polynomial has at most n zeros. Degree 2 → at most 2 zeros."
+            difficulty: 1
+
+      - id: relationship-zeros-coefficients
+        title: Relationship Between Zeros and Coefficients
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [zeros-of-polynomials]
+        concepts:
+          - For ax² + bx + c with zeros α, β — sum α+β = −b/a, product αβ = c/a
+          - Forming a quadratic from given zeros — x² − (sum)x + (product)
+          - For cubic ax³+bx²+cx+d with zeros α,β,γ — sum=−b/a, sum of products=c/a, product=−d/a
+        youtube_search_hints:
+          - "zeros coefficients relationship quadratic cubic class 10 CBSE"
+        questions:
+          - question: "For p(x) = 2x² − 5x + 3, the sum of zeros is:"
+            options: ["5/2", "−5/2", "3/2", "−3/2"]
+            answer: "5/2"
+            explanation: "Sum of zeros = −b/a = −(−5)/2 = 5/2."
+            difficulty: 1
+          - question: "A quadratic polynomial whose zeros are 3 and −4 is:"
+            options: ["x² − x − 12", "x² + x − 12", "x² − x + 12", "x² + x + 12"]
+            answer: "x² + x − 12"
+            explanation: "Sum = 3+(−4) = −1, Product = 3×(−4) = −12. Polynomial = x² −(−1)x + (−12) = x² + x − 12."
+            difficulty: 2
+
+      - id: division-algorithm
+        title: Division Algorithm for Polynomials
+        sequence: 3
+        estimated_minutes: 45
+        prerequisites: [relationship-zeros-coefficients]
+        concepts:
+          - Dividend = Divisor × Quotient + Remainder
+          - Performing long division of polynomials
+          - Finding remaining zeros when one zero is known
+          - Verification using the algorithm
+        youtube_search_hints:
+          - "division algorithm polynomials class 10 long division"
+        questions:
+          - question: "If on dividing x³ − 3x² + x + 2 by (x−2), the remainder is 0, then (x−2) is:"
+            options: ["A factor", "Not a factor", "The quotient", "A zero"]
+            answer: "A factor"
+            explanation: "Remainder = 0 means (x−2) divides the polynomial exactly — it is a factor."
+            difficulty: 1
+          - question: "Divide 3x² + x − 1 by (x + 1). The remainder is:"
+            options: ["0", "1", "−1", "3"]
+            answer: "1"
+            explanation: "By remainder theorem, substitute x = −1: 3(1)+(−1)−1 = 3−1−1 = 1."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: linear-equations-two-variables
+    title: Linear Equations in Two Variables
+    sequence: 3
+    topics:
+      - id: graphical-method
+        title: Graphical Method of Solution
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Representing a linear equation as a straight line
+          - Consistent system — unique solution (lines intersect)
+          - Inconsistent system — no solution (parallel lines)
+          - Dependent system — infinite solutions (coincident lines)
+        youtube_search_hints:
+          - "graphical method linear equations class 10 CBSE consistent inconsistent"
+        questions:
+          - question: "Lines 2x + y = 5 and 4x + 2y = 10 are:"
+            options: ["Intersecting", "Parallel", "Coincident", "Perpendicular"]
+            answer: "Coincident"
+            explanation: "Second equation = 2 × first equation. They represent the same line — infinitely many solutions."
+            difficulty: 2
+          - question: "A pair of linear equations has a unique solution when their lines are:"
+            options: ["Parallel", "Coincident", "Intersecting at one point", "Perpendicular only"]
+            answer: "Intersecting at one point"
+            explanation: "Unique solution means exactly one intersection point."
+            difficulty: 1
+
+      - id: algebraic-methods
+        title: Algebraic Methods — Substitution and Elimination
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [graphical-method]
+        concepts:
+          - Substitution method — express one variable in terms of the other
+          - Elimination method — multiply and add/subtract to eliminate a variable
+          - Cross-multiplication method
+          - Choosing the most efficient method
+        youtube_search_hints:
+          - "substitution elimination method linear equations class 10"
+        questions:
+          - question: "Solve by elimination: x + y = 14 and x − y = 4. Value of x:"
+            options: ["5", "9", "10", "7"]
+            answer: "9"
+            explanation: "Adding: 2x = 18, x = 9."
+            difficulty: 1
+          - question: "Solve by substitution: 2x + y = 11 and x + 2y = 10. Value of y:"
+            options: ["2", "3", "4", "5"]
+            answer: "3"
+            explanation: "From eq1: y = 11−2x. Sub in eq2: x + 2(11−2x) = 10 → x+22−4x=10 → −3x=−12 → x=4. y=11−8=3."
+            difficulty: 2
+
+      - id: word-problems-two-vars
+        title: Word Problems on Pair of Linear Equations
+        sequence: 3
+        estimated_minutes: 45
+        prerequisites: [algebraic-methods]
+        concepts:
+          - Framing two equations from word problems
+          - Age problems with two unknowns
+          - Speed, distance, time problems
+          - Digit problems (tens and units)
+        youtube_search_hints:
+          - "word problems linear equations two variables class 10 age speed"
+        questions:
+          - question: "A two-digit number is 3 more than 4 times the sum of its digits. If 18 is added, the digits reverse. The number is:"
+            options: ["35", "24", "15", "42"]
+            answer: "35"
+            explanation: "Let tens = x, units = y. 10x+y = 4(x+y)+3 → 6x−3y=3. Reversed: 10y+x = 10x+y+18 → 9y−9x=18 → y−x=2. Solving: x=3, y=5. Number = 35."
+            difficulty: 3
+
+  # -------------------------------------------------------------------------
+  - id: quadratic-equations
+    title: Quadratic Equations
+    sequence: 4
+    topics:
+      - id: standard-form
+        title: Quadratic Equations — Standard Form
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Standard form ax² + bx + c = 0, where a ≠ 0
+          - Identifying a, b, c coefficients
+          - Checking if a given value is a solution (root)
+          - Converting equations to standard form
+        youtube_search_hints:
+          - "quadratic equations standard form class 10 CBSE introduction"
+        questions:
+          - question: "In 3x² − 5x + 2 = 0, the value of 'a' is:"
+            options: ["−5", "2", "3", "1"]
+            answer: "3"
+            explanation: "In ax² + bx + c = 0, 'a' is the coefficient of x². Here a = 3."
+            difficulty: 1
+          - question: "Which of the following is a quadratic equation?"
+            options: ["x³ + 2x = 0", "x + 1/x = 2", "x² + 1/x = 5", "(x+1)(x−1) = x² + 5"]
+            answer: "x + 1/x = 2"
+            explanation: "x + 1/x = 2 → x² − 2x + 1 = 0 after multiplying by x. This is quadratic."
+            difficulty: 2
+
+      - id: factoring-method
+        title: Solving by Factorisation
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [standard-form]
+        concepts:
+          - Splitting the middle term
+          - Zero product property
+          - Factorising with common factors first
+          - Equations reducible to quadratic form
+        youtube_search_hints:
+          - "quadratic equations factorisation method class 10 CBSE splitting middle term"
+        questions:
+          - question: "Solve x² + 5x + 6 = 0 by factorisation:"
+            options: ["x = 2, 3", "x = −2, −3", "x = −2, 3", "x = 2, −3"]
+            answer: "x = −2, −3"
+            explanation: "x² + 5x + 6 = (x+2)(x+3) = 0. So x = −2 or x = −3."
+            difficulty: 1
+          - question: "Solve 2x² − 5x + 3 = 0:"
+            options: ["x = 1, 3/2", "x = −1, −3/2", "x = 1, −3/2", "x = 3, 1/2"]
+            answer: "x = 1, 3/2"
+            explanation: "2x²−5x+3 = (2x−3)(x−1) = 0. So x = 3/2 or x = 1."
+            difficulty: 2
+
+      - id: completing-the-square
+        title: Completing the Square Method
+        sequence: 3
+        estimated_minutes: 45
+        prerequisites: [factoring-method]
+        concepts:
+          - Converting ax² + bx + c to a(x + h)² + k form
+          - Steps — make coefficient of x² = 1, add (b/2a)² to both sides
+          - Solving equations by completing the square
+          - Deriving the quadratic formula
+        youtube_search_hints:
+          - "completing the square method quadratic class 10 CBSE"
+        questions:
+          - question: "Solve x² + 4x − 5 = 0 by completing the square:"
+            options: ["x = 1, −5", "x = −1, 5", "x = 1, 5", "x = −1, −5"]
+            answer: "x = 1, −5"
+            explanation: "(x+2)² = 9. x+2 = ±3. x = 1 or x = −5."
+            difficulty: 2
+          - question: "While completing the square for 2x² + 8x + 6, what number is added to both sides?"
+            options: ["4", "8", "16", "2"]
+            answer: "4"
+            explanation: "First divide by 2: x²+4x+3. Add (4/2)² = 4 to both sides."
+            difficulty: 2
+
+      - id: quadratic-formula
+        title: Quadratic Formula and Discriminant
+        sequence: 4
+        estimated_minutes: 45
+        prerequisites: [completing-the-square]
+        concepts:
+          - Quadratic formula — x = (−b ± √(b²−4ac)) / 2a
+          - Discriminant D = b² − 4ac
+          - Nature of roots — D > 0 (two distinct real), D = 0 (equal real), D < 0 (no real roots)
+          - Applications in word problems
+        youtube_search_hints:
+          - "quadratic formula discriminant nature of roots class 10 CBSE"
+        questions:
+          - question: "For 2x² − 4x + 3 = 0, the discriminant is:"
+            options: ["8", "−8", "16", "−16"]
+            answer: "−8"
+            explanation: "D = b²−4ac = (−4)²−4(2)(3) = 16−24 = −8."
+            difficulty: 1
+          - question: "The roots of x² − 6x + 9 = 0 are:"
+            options: ["Real and distinct", "Real and equal", "Not real", "Irrational"]
+            answer: "Real and equal"
+            explanation: "D = 36 − 36 = 0. Equal roots. Both roots = 3."
+            difficulty: 1
+          - question: "Using the quadratic formula, solve x² − 3x − 10 = 0:"
+            options: ["x = 5, −2", "x = −5, 2", "x = 5, 2", "x = −5, −2"]
+            answer: "x = 5, −2"
+            explanation: "D = 9+40=49. x = (3±7)/2. So x = 5 or x = −2."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: arithmetic-progressions
+    title: Arithmetic Progressions
+    sequence: 5
+    topics:
+      - id: intro-ap
+        title: Introduction to Arithmetic Progressions
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Definition — AP is a sequence with constant common difference d
+          - General form — a, a+d, a+2d, ...
+          - Finding common difference d
+          - nth term formula — aₙ = a + (n−1)d
+        youtube_search_hints:
+          - "arithmetic progression introduction nth term class 10 CBSE"
+        questions:
+          - question: "The 10th term of AP: 3, 7, 11, 15, ... is:"
+            options: ["39", "43", "47", "51"]
+            answer: "39"
+            explanation: "a=3, d=4. a₁₀ = 3 + 9×4 = 3 + 36 = 39."
+            difficulty: 1
+          - question: "Which term of AP 5, 11, 17, 23, ... is 95?"
+            options: ["14th", "15th", "16th", "17th"]
+            answer: "16th"
+            explanation: "aₙ = 5 + (n−1)×6 = 95. (n−1)×6 = 90. n−1 = 15. n = 16."
+            difficulty: 2
+
+      - id: sum-of-ap
+        title: Sum of First n Terms of an AP
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [intro-ap]
+        concepts:
+          - Sₙ = n/2 × [2a + (n−1)d]
+          - Sₙ = n/2 × (first term + last term)
+          - Relationship between aₙ and Sₙ — aₙ = Sₙ − Sₙ₋₁
+          - Word problems on sum of AP
+        youtube_search_hints:
+          - "sum of AP arithmetic progression class 10 CBSE formula word problems"
+        questions:
+          - question: "Sum of first 20 terms of AP: 1, 3, 5, 7, ... is:"
+            options: ["200", "400", "210", "420"]
+            answer: "400"
+            explanation: "a=1, d=2. S₂₀ = 20/2 × [2(1)+19(2)] = 10 × 40 = 400."
+            difficulty: 1
+          - question: "If Sₙ = 3n² + 5n, find the 10th term:"
+            options: ["57", "63", "65", "58"]
+            answer: "63"
+            explanation: "a₁₀ = S₁₀ − S₉ = (300+50) − (243+45) = 350 − 288 = 62. Note: a₁₀ = S₁₀ − S₉."
+            difficulty: 3
+
+  # -------------------------------------------------------------------------
+  - id: coordinate-geometry
+    title: Co-ordinate Geometry
+    sequence: 6
+    topics:
+      - id: distance-formula
+        title: Distance Formula
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Distance between (x₁,y₁) and (x₂,y₂) = √[(x₂−x₁)²+(y₂−y₁)²]
+          - Distance from origin to (x, y) = √(x²+y²)
+          - Proving collinearity of three points
+          - Type of triangle/quadrilateral from coordinates
+        youtube_search_hints:
+          - "distance formula coordinate geometry class 10 CBSE"
+        questions:
+          - question: "Distance between points (−3, 4) and (3, −4) is:"
+            options: ["8", "10", "6", "√80"]
+            answer: "10"
+            explanation: "d = √[(3−(−3))²+(−4−4)²] = √[36+64] = √100 = 10."
+            difficulty: 1
+          - question: "The points (1,1), (−2,7), (3,−3) are:"
+            options: ["Vertices of a triangle", "Collinear", "Form a right triangle", "Form an equilateral triangle"]
+            answer: "Collinear"
+            explanation: "Slope from (1,1) to (−2,7) = −2; from (1,1) to (3,−3) = −2. Same slope → collinear."
+            difficulty: 2
+
+      - id: section-formula
+        title: Section Formula and Midpoint
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [distance-formula]
+        concepts:
+          - Section formula (internal division) — ((m·x₂+n·x₁)/(m+n), (m·y₂+n·y₁)/(m+n))
+          - Midpoint formula — ((x₁+x₂)/2, (y₁+y₂)/2)
+          - Trisection of a line segment
+          - Centroid of a triangle = ((x₁+x₂+x₃)/3, (y₁+y₂+y₃)/3)
+        youtube_search_hints:
+          - "section formula midpoint coordinate geometry class 10 CBSE"
+        questions:
+          - question: "The midpoint of segment joining (2,3) and (4,7) is:"
+            options: ["(3,5)", "(6,10)", "(2,4)", "(3,4)"]
+            answer: "(3,5)"
+            explanation: "Midpoint = ((2+4)/2, (3+7)/2) = (3, 5)."
+            difficulty: 1
+
+      - id: area-of-triangle
+        title: Area of a Triangle Using Coordinates
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [section-formula]
+        concepts:
+          - Area = ½|x₁(y₂−y₃) + x₂(y₃−y₁) + x₃(y₁−y₂)|
+          - Area = 0 means collinear points
+          - Finding unknown coordinate given area
+        youtube_search_hints:
+          - "area of triangle coordinates class 10 CBSE formula"
+        questions:
+          - question: "Area of triangle with vertices (1,1), (4,1), (4,5):"
+            options: ["6 sq units", "4 sq units", "8 sq units", "3 sq units"]
+            answer: "6 sq units"
+            explanation: "Area = ½|1(1−5)+4(5−1)+4(1−1)| = ½|−4+16+0| = ½×12 = 6 sq units."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: triangles
+    title: Triangles
+    sequence: 7
+    topics:
+      - id: similarity
+        title: Similar Triangles and Criteria
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: []
+        concepts:
+          - Similarity criteria — AA, SSS, SAS
+          - Corresponding sides proportional, angles equal
+          - Basic Proportionality Theorem (Thales' theorem)
+          - Converse of BPT
+        youtube_search_hints:
+          - "similar triangles criteria AA SSS SAS class 10 CBSE"
+        questions:
+          - question: "In △ABC and △DEF, ∠A = ∠D and ∠B = ∠E. By which criterion are they similar?"
+            options: ["SSS", "SAS", "AA", "RHS"]
+            answer: "AA"
+            explanation: "Two pairs of equal angles → AA (Angle-Angle) similarity criterion."
+            difficulty: 1
+          - question: "In △ABC, DE ∥ BC where D is on AB and E is on AC. If AD/DB = 3/5, then AE/EC ="
+            options: ["5/3", "3/5", "3/8", "5/8"]
+            answer: "3/5"
+            explanation: "By BPT (Thales' theorem), AD/DB = AE/EC. So AE/EC = 3/5."
+            difficulty: 2
+
+      - id: pythagoras-theorem
+        title: Pythagoras Theorem
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [similarity]
+        concepts:
+          - Pythagoras theorem — In right triangle, c² = a² + b²
+          - Proof using similar triangles
+          - Converse of Pythagoras theorem
+          - Application in real problems
+        youtube_search_hints:
+          - "Pythagoras theorem proof class 10 CBSE converse"
+        questions:
+          - question: "In a right triangle, if legs are 8 cm and 15 cm, the hypotenuse is:"
+            options: ["16 cm", "17 cm", "18 cm", "23 cm"]
+            answer: "17 cm"
+            explanation: "c = √(8²+15²) = √(64+225) = √289 = 17 cm."
+            difficulty: 1
+          - question: "The sides 7, 24, 25 form a right triangle because:"
+            options: ["7+24=31>25", "7²+24²=25²", "They are integers", "25 is the largest"]
+            answer: "7²+24²=25²"
+            explanation: "49 + 576 = 625 = 25². Converse of Pythagoras theorem confirms it is a right triangle."
+            difficulty: 1
+
+      - id: areas-similar-triangles
+        title: Areas of Similar Triangles
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [similarity]
+        concepts:
+          - Ratio of areas = square of ratio of corresponding sides
+          - Area(△ABC)/Area(△DEF) = (AB/DE)² = (BC/EF)² = (AC/DF)²
+          - Applications combining with Pythagoras
+        youtube_search_hints:
+          - "areas similar triangles ratio class 10 CBSE"
+        questions:
+          - question: "If △ABC ~ △DEF and AB/DE = 2/3, then Area(△ABC)/Area(△DEF) ="
+            options: ["2/3", "4/9", "√2/√3", "8/27"]
+            answer: "4/9"
+            explanation: "Ratio of areas = square of ratio of sides = (2/3)² = 4/9."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: circles
+    title: Circles
+    sequence: 8
+    topics:
+      - id: tangent-to-circle
+        title: Tangent to a Circle
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [triangles.pythagoras-theorem]
+        concepts:
+          - Tangent — line touching circle at exactly one point
+          - Tangent is perpendicular to radius at point of contact
+          - Length of tangent from external point
+          - Two tangents from an external point are equal
+        youtube_search_hints:
+          - "tangent to circle class 10 CBSE properties theorem"
+        questions:
+          - question: "A tangent to a circle is perpendicular to the radius at:"
+            options: ["The centre", "Any point", "The point of contact", "The midpoint of arc"]
+            answer: "The point of contact"
+            explanation: "The radius drawn to the point of tangency is perpendicular to the tangent."
+            difficulty: 1
+          - question: "Two tangents PA and PB from external point P to a circle with centre O. If PA = 8 cm, PB ="
+            options: ["4 cm", "16 cm", "8 cm", "Cannot be determined"]
+            answer: "8 cm"
+            explanation: "Tangent segments from an external point are equal. PA = PB = 8 cm."
+            difficulty: 1
+
+      - id: angle-in-tangent
+        title: Angle Between Tangent and Chord
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [tangent-to-circle]
+        concepts:
+          - Angle between tangent and chord = inscribed angle in alternate segment
+          - ∠OAP = 90° (tangent-radius)
+          - ∠APB for two tangents from external point
+          - ∠AOB + ∠APB = 180°
+        youtube_search_hints:
+          - "tangent chord angle alternate segment theorem class 10"
+        questions:
+          - question: "PA and PB are tangents from P to a circle with centre O. If ∠APB = 50°, then ∠AOB ="
+            options: ["50°", "100°", "130°", "140°"]
+            answer: "130°"
+            explanation: "∠AOB + ∠APB = 180°. ∠AOB = 180° − 50° = 130°."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: constructions
+    title: Constructions
+    sequence: 9
+    topics:
+      - id: division-of-line-segment
+        title: Division of a Line Segment
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [triangles.similarity]
+        concepts:
+          - Dividing a segment in a given ratio using basic proportionality
+          - Constructing a segment of length m/n of a given segment
+          - Steps — draw auxiliary ray, mark equal divisions, use parallel line
+        youtube_search_hints:
+          - "division line segment construction class 10 CBSE compass"
+        questions:
+          - question: "To divide segment AB in ratio 3:2, we divide the auxiliary ray into how many equal parts?"
+            options: ["2", "3", "5", "6"]
+            answer: "5"
+            explanation: "Total parts = 3 + 2 = 5. We mark 5 equal arcs on the auxiliary ray."
+            difficulty: 1
+
+      - id: tangent-construction
+        title: Constructing Tangents to a Circle
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [circles.tangent-to-circle, division-of-line-segment]
+        concepts:
+          - Constructing a tangent at a given point on a circle
+          - Constructing tangents from an external point
+          - Bisecting OP to find the required arc (semicircle method)
+        youtube_search_hints:
+          - "construct tangent external point circle class 10 CBSE"
+        questions:
+          - question: "To construct tangents from an external point P to a circle with centre O, we first:"
+            options: ["Draw chord OP", "Find the midpoint of OP", "Draw perpendicular at O", "Extend the radius"]
+            answer: "Find the midpoint of OP"
+            explanation: "We find midpoint M of OP, draw a circle with centre M and radius MO. Its intersections with the given circle are the tangent points."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: trigonometric-ratios
+    title: Trigonometric Ratios
+    sequence: 10
+    topics:
+      - id: basic-trig-ratios
+        title: Sine, Cosine and Tangent
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [triangles.pythagoras-theorem]
+        concepts:
+          - sin θ = opposite/hypotenuse
+          - cos θ = adjacent/hypotenuse
+          - tan θ = opposite/adjacent = sin θ/cos θ
+          - cosec θ, sec θ, cot θ as reciprocals
+        youtube_search_hints:
+          - "trigonometric ratios sin cos tan class 10 CBSE definition"
+        questions:
+          - question: "In a right triangle, sin θ = 3/5. Then cos θ ="
+            options: ["4/5", "3/4", "5/4", "5/3"]
+            answer: "4/5"
+            explanation: "If sin θ = 3/5, hyp=5, opp=3. adj = √(25−9) = 4. cos θ = 4/5."
+            difficulty: 1
+          - question: "If tan θ = 7/24, then sin θ ="
+            options: ["7/25", "24/25", "7/24", "25/24"]
+            answer: "7/25"
+            explanation: "tan θ = 7/24 → opp=7, adj=24, hyp=25. sin θ = 7/25."
+            difficulty: 2
+
+      - id: trig-ratios-complementary
+        title: Trigonometric Ratios of Complementary Angles
+        sequence: 2
+        estimated_minutes: 35
+        prerequisites: [basic-trig-ratios]
+        concepts:
+          - sin(90°−θ) = cos θ; cos(90°−θ) = sin θ
+          - tan(90°−θ) = cot θ; cot(90°−θ) = tan θ
+          - sec(90°−θ) = cosec θ; cosec(90°−θ) = sec θ
+          - Simplifying expressions using complementary relations
+        youtube_search_hints:
+          - "trigonometric ratios complementary angles class 10 CBSE"
+        questions:
+          - question: "The value of sin 35° / cos 55° is:"
+            options: ["0", "1", "sin 35°", "undefined"]
+            answer: "1"
+            explanation: "cos 55° = cos(90°−35°) = sin 35°. So sin 35°/cos 55° = sin 35°/sin 35° = 1."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: t-ratios-particular-angles
+    title: T-Ratios of Some Particular Angles
+    sequence: 11
+    topics:
+      - id: standard-angle-values
+        title: Values of Trig Ratios at 0°, 30°, 45°, 60°, 90°
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: [trigonometric-ratios.basic-trig-ratios]
+        concepts:
+          - sin 0°=0, sin 30°=1/2, sin 45°=1/√2, sin 60°=√3/2, sin 90°=1
+          - cos and tan values at standard angles
+          - Undefined values — tan 90°, cosec 0°
+          - Using the "1, √3, 2" triangle for 30°-60°-90°
+        youtube_search_hints:
+          - "trigonometric values 30 45 60 class 10 CBSE table"
+        questions:
+          - question: "The value of sin 60° × cos 30° − cos 60° × sin 30° is:"
+            options: ["0", "1/2", "√3/2", "1"]
+            answer: "1/2"
+            explanation: "(√3/2)(√3/2) − (1/2)(1/2) = 3/4 − 1/4 = 2/4 = 1/2."
+            difficulty: 2
+          - question: "tan 45° + cos 60° − sin 30° ="
+            options: ["1", "0", "1/2", "2"]
+            answer: "1"
+            explanation: "1 + 1/2 − 1/2 = 1."
+            difficulty: 1
+
+  # -------------------------------------------------------------------------
+  - id: trigonometric-identities
+    title: Trigonometric Identities
+    sequence: 12
+    topics:
+      - id: pythagorean-identities
+        title: Pythagorean Trigonometric Identities
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: [trigonometric-ratios.basic-trig-ratios]
+        concepts:
+          - sin²θ + cos²θ = 1
+          - 1 + tan²θ = sec²θ
+          - 1 + cot²θ = cosec²θ
+          - Deriving one ratio from another using identities
+        youtube_search_hints:
+          - "trigonometric identities class 10 CBSE sin cos proof"
+        questions:
+          - question: "If sin θ = 12/13, find the value of cos²θ:"
+            options: ["5/13", "25/169", "144/169", "1/169"]
+            answer: "25/169"
+            explanation: "cos²θ = 1 − sin²θ = 1 − 144/169 = 25/169."
+            difficulty: 1
+          - question: "Simplify: (1 − sin²θ)/cos θ:"
+            options: ["cos θ", "sin θ", "tan θ", "1"]
+            answer: "cos θ"
+            explanation: "1 − sin²θ = cos²θ. So cos²θ/cos θ = cos θ."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: heights-and-distances
+    title: Heights and Distances
+    sequence: 13
+    topics:
+      - id: angle-elevation-depression
+        title: Angle of Elevation and Depression
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: [t-ratios-particular-angles.standard-angle-values, trigonometric-identities.pythagorean-identities]
+        concepts:
+          - Angle of elevation — looking upward from horizontal
+          - Angle of depression — looking downward from horizontal
+          - Line of sight, horizontal line
+          - Setting up right triangle from the problem
+        youtube_search_hints:
+          - "angle of elevation depression class 10 CBSE"
+        questions:
+          - question: "A tower 30 m high casts a shadow 30 m long. The angle of elevation of the sun is:"
+            options: ["30°", "45°", "60°", "90°"]
+            answer: "45°"
+            explanation: "tan θ = height/shadow = 30/30 = 1. θ = 45°."
+            difficulty: 1
+
+      - id: word-problems-heights
+        title: Word Problems on Heights and Distances
+        sequence: 2
+        estimated_minutes: 50
+        prerequisites: [angle-elevation-depression]
+        concepts:
+          - Two observation problems (two angles of elevation)
+          - Problems with two observers
+          - Pole/tower on a building
+          - Problems involving angle changes
+        youtube_search_hints:
+          - "heights distances word problems class 10 CBSE two angles"
+        questions:
+          - question: "From a point 20 m away from a building, the angle of elevation of the top is 60°. Height of building:"
+            options: ["20√3 m", "20/√3 m", "10√3 m", "40√3 m"]
+            answer: "20√3 m"
+            explanation: "tan 60° = h/20. √3 = h/20. h = 20√3 m."
+            difficulty: 2
+          - question: "A man on a cliff observes a boat at angle of depression 30°. If cliff is 60 m high, distance of boat:"
+            options: ["60√3 m", "30√3 m", "60/√3 m", "120 m"]
+            answer: "60√3 m"
+            explanation: "Angle of depression = angle of elevation from boat. tan 30° = 60/d. d = 60/tan 30° = 60√3."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: perimeter-areas-plane
+    title: Perimeter and Areas of Plane Figures
+    sequence: 14
+    topics:
+      - id: areas-triangles-quadrilaterals
+        title: Areas of Triangles and Quadrilaterals
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - Area of triangle — base×height/2, Heron's formula
+          - Heron's formula — s=(a+b+c)/2, A=√(s(s-a)(s-b)(s-c))
+          - Area of rectangle, parallelogram, rhombus, trapezium
+          - Area of regular polygons
+        youtube_search_hints:
+          - "Heron's formula area quadrilateral class 10 CBSE"
+        questions:
+          - question: "Using Heron's formula, area of triangle with sides 13, 14, 15 cm (s=21):"
+            options: ["72 cm²", "84 cm²", "90 cm²", "96 cm²"]
+            answer: "84 cm²"
+            explanation: "A = √(21×8×7×6) = √7056 = 84 cm²."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: areas-circle-sector-segment
+    title: Areas of Circle, Sector and Segment
+    sequence: 15
+    topics:
+      - id: sector-area
+        title: Area of a Sector
+        sequence: 1
+        estimated_minutes: 35
+        prerequisites: []
+        concepts:
+          - Area of sector = (θ/360°) × πr²
+          - Length of arc = (θ/360°) × 2πr
+          - Perimeter of sector = 2r + arc length
+        youtube_search_hints:
+          - "area of sector arc length class 10 CBSE"
+        questions:
+          - question: "Area of sector with radius 7 cm and angle 90° (π=22/7):"
+            options: ["38.5 cm²", "77 cm²", "154 cm²", "19.25 cm²"]
+            answer: "38.5 cm²"
+            explanation: "Area = (90/360) × (22/7) × 49 = (1/4) × 154 = 38.5 cm²."
+            difficulty: 1
+
+      - id: segment-area
+        title: Area of a Segment
+        sequence: 2
+        estimated_minutes: 40
+        prerequisites: [sector-area, triangles.pythagoras-theorem]
+        concepts:
+          - Area of segment = Area of sector − Area of triangle
+          - Minor and major segment
+          - Combined area problems (sector + segment)
+        youtube_search_hints:
+          - "area of segment circle class 10 CBSE minor major"
+        questions:
+          - question: "Area of minor segment with r=10cm and angle 60°. Area of equilateral triangle with side 10cm is 25√3 cm²."
+            options: ["(100π/6 − 25√3) cm²", "(50π − 25√3) cm²", "25√3 cm²", "100π/6 cm²"]
+            answer: "(100π/6 − 25√3) cm²"
+            explanation: "Area = sector area − triangle area = (60/360)πr² − 25√3 = 100π/6 − 25√3 cm²."
+            difficulty: 3
+
+  # -------------------------------------------------------------------------
+  - id: volume-surface-area-solids
+    title: Volume and Surface Areas of Solids
+    sequence: 16
+    topics:
+      - id: cone-sphere
+        title: Cone and Sphere
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: []
+        concepts:
+          - Volume of cone = (1/3)πr²h
+          - CSA of cone = πrl, TSA = πr(r+l), where l=slant height=√(r²+h²)
+          - Volume of sphere = (4/3)πr³
+          - Surface area of sphere = 4πr²
+          - Hemisphere — volume = (2/3)πr³, CSA = 2πr², TSA = 3πr²
+        youtube_search_hints:
+          - "volume surface area cone sphere hemisphere class 10 CBSE"
+        questions:
+          - question: "Volume of a cone with r=3cm and h=4cm (π=3.14):"
+            options: ["37.68 cm³", "150.72 cm³", "12.56 cm³", "75.36 cm³"]
+            answer: "37.68 cm³"
+            explanation: "V = (1/3)×3.14×9×4 = (1/3)×113.04 = 37.68 cm³."
+            difficulty: 1
+          - question: "Slant height of a cone with r=5cm and h=12cm:"
+            options: ["13 cm", "14 cm", "17 cm", "10 cm"]
+            answer: "13 cm"
+            explanation: "l = √(r²+h²) = √(25+144) = √169 = 13 cm."
+            difficulty: 1
+
+      - id: combinations-of-solids
+        title: Combinations of Solids
+        sequence: 2
+        estimated_minutes: 50
+        prerequisites: [cone-sphere]
+        concepts:
+          - Solid combinations — cylinder + cone, cylinder + hemisphere
+          - Total surface area of combined solids
+          - Volume of combined solids
+          - Conversion — melting and recasting problems
+        youtube_search_hints:
+          - "combination of solids class 10 CBSE recasting melting"
+        questions:
+          - question: "A toy is a cone on top of a cylinder, both with r=3cm. Cylinder h=4cm, cone h=4cm. Volume:"
+            options: ["150.72 cm³", "113.04 cm³", "113+37.68 cm³", "188.4 cm³"]
+            answer: "113+37.68 cm³"
+            explanation: "V_cyl = π×9×4 = 113.04 cm³. V_cone = (1/3)×π×9×4 = 37.68 cm³. Total ≈ 150.72 cm³."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: statistics-grouped-data
+    title: Mean, Median, Mode of Grouped Data
+    sequence: 17
+    topics:
+      - id: mean-grouped
+        title: Mean of Grouped Data
+        sequence: 1
+        estimated_minutes: 45
+        prerequisites: []
+        concepts:
+          - Direct method — Mean = Σfₓ / Σf
+          - Assumed mean method (deviation method) — d = x − a
+          - Step deviation method — u = (x − a)/h
+          - Choosing the most efficient method
+        youtube_search_hints:
+          - "mean grouped data assumed mean step deviation class 10 CBSE"
+        questions:
+          - question: "For a frequency distribution, Σf = 40 and Σfx = 800. The mean is:"
+            options: ["20", "40", "800", "32000"]
+            answer: "20"
+            explanation: "Mean = Σfx / Σf = 800 / 40 = 20."
+            difficulty: 1
+          - question: "In the step deviation method, u = (x − a)/h. If a=25 and h=10 and Σfu/Σf = 1.2, then mean ="
+            options: ["25", "37", "12", "36"]
+            answer: "37"
+            explanation: "Mean = a + (Σfu/Σf) × h = 25 + 1.2 × 10 = 25 + 12 = 37."
+            difficulty: 2
+
+      - id: median-mode-grouped
+        title: Median and Mode of Grouped Data
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [mean-grouped]
+        concepts:
+          - Median = l + [(n/2 − cf)/f] × h
+          - Mode = l + [(f₁ − f₀)/(2f₁ − f₀ − f₂)] × h
+          - Ogive (cumulative frequency curve)
+          - Reading median from ogive
+        youtube_search_hints:
+          - "median mode grouped data ogive class 10 CBSE"
+        questions:
+          - question: "In the median formula, 'cf' refers to:"
+            options: ["Class frequency", "Cumulative frequency before median class", "Total frequency", "Class width"]
+            answer: "Cumulative frequency before median class"
+            explanation: "cf is the cumulative frequency of all classes preceding the median class."
+            difficulty: 1
+          - question: "The modal class is the class with:"
+            options: ["Highest cumulative frequency", "Highest frequency", "Middle frequency", "Lowest class interval"]
+            answer: "Highest frequency"
+            explanation: "Modal class has the maximum frequency in the distribution."
+            difficulty: 1
+
+      - id: ogive
+        title: Cumulative Frequency Graph (Ogive)
+        sequence: 3
+        estimated_minutes: 40
+        prerequisites: [median-mode-grouped]
+        concepts:
+          - Less-than ogive and more-than ogive
+          - Plotting cumulative frequency vs upper class boundary
+          - Finding median graphically — intersection of the two ogives
+          - Percentiles and quartiles from ogive
+        youtube_search_hints:
+          - "ogive cumulative frequency graph class 10 CBSE median graphically"
+        questions:
+          - question: "The median from a less-than ogive is found by drawing a horizontal line from:"
+            options: ["Σf", "Σf/2", "The modal class", "The upper boundary"]
+            answer: "Σf/2"
+            explanation: "Locate Σf/2 on the y-axis, draw horizontal to ogive, then drop perpendicular to x-axis for median."
+            difficulty: 2
+
+  # -------------------------------------------------------------------------
+  - id: probability
+    title: Probability
+    sequence: 18
+    topics:
+      - id: classical-probability
+        title: Classical Probability
+        sequence: 1
+        estimated_minutes: 40
+        prerequisites: []
+        concepts:
+          - P(E) = Number of favourable outcomes / Total outcomes
+          - Equally likely outcomes assumption
+          - P(E) lies between 0 and 1
+          - P(E) + P(Ē) = 1 (complementary events)
+          - Sure event P=1, impossible event P=0
+        youtube_search_hints:
+          - "probability class 10 CBSE classical basic"
+        questions:
+          - question: "A card is drawn from a well-shuffled deck of 52 cards. P(king) ="
+            options: ["1/13", "4/13", "1/52", "1/4"]
+            answer: "1/13"
+            explanation: "4 kings in 52 cards. P(king) = 4/52 = 1/13."
+            difficulty: 1
+          - question: "A bag has 3 red, 4 blue, 5 green balls. P(not red) ="
+            options: ["3/12", "9/12", "4/12", "1/4"]
+            answer: "9/12"
+            explanation: "P(not red) = 1 − P(red) = 1 − 3/12 = 9/12 = 3/4."
+            difficulty: 1
+
+      - id: dice-cards-probability
+        title: Probability with Dice, Cards and Coins
+        sequence: 2
+        estimated_minutes: 45
+        prerequisites: [classical-probability]
+        concepts:
+          - Sample space for single/two dice
+          - Sample space for cards — suits, ranks, face cards
+          - Probability with multiple coins
+          - Mutually exclusive and exhaustive events
+        youtube_search_hints:
+          - "probability dice cards coins class 10 CBSE sample space"
+        questions:
+          - question: "Two dice are thrown. P(sum = 7) ="
+            options: ["1/6", "7/36", "6/36", "5/36"]
+            answer: "6/36"
+            explanation: "Favourable: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6 outcomes. P = 6/36 = 1/6."
+            difficulty: 2
+          - question: "From a deck, P(face card) ="
+            options: ["3/52", "12/52", "4/52", "16/52"]
+            answer: "12/52"
+            explanation: "Face cards = Jack, Queen, King in each of 4 suits = 12. P = 12/52 = 3/13."
+            difficulty: 1
+          - question: "P(at least one head) when two coins are tossed:"
+            options: ["1/4", "1/2", "3/4", "1"]
+            answer: "3/4"
+            explanation: "P(at least one head) = 1 − P(no head) = 1 − 1/4 = 3/4."
+            difficulty: 2

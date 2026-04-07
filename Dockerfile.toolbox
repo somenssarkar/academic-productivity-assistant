@@ -1,0 +1,21 @@
+# MCP Toolbox for Databases — serves Cloud SQL tools via HTTP on Cloud Run
+# Uses Alpine + gcompat for glibc shim (required for Go binary on Alpine)
+FROM alpine:3.19
+
+# gcompat provides glibc compatibility for the Go-compiled Toolbox binary
+RUN apk add --no-cache gcompat wget ca-certificates
+
+WORKDIR /app
+
+# Pinned to match local binary (confirmed: toolbox version 0.30.0+binary.windows.amd64)
+ARG TOOLBOX_VERSION=0.30.0
+RUN wget -O toolbox \
+    "https://storage.googleapis.com/genai-toolbox/v${TOOLBOX_VERSION}/linux/amd64/toolbox" \
+    && chmod +x toolbox
+
+COPY mcp_servers/database/tools.yaml ./tools.yaml
+
+# Cloud Run requires port 8080 — toolbox local dev uses 5000 but Cloud Run needs 8080
+EXPOSE 8080
+
+CMD ["./toolbox", "--tools-file=tools.yaml", "--port=8080", "--address=0.0.0.0"]

@@ -1,0 +1,86 @@
+from datetime import date
+from google.adk.agents import LlmAgent
+from google.adk.agents.readonly_context import ReadonlyContext
+
+from ..prompts.email_agent_prompt import EMAIL_AGENT_INSTRUCTION
+from ..tools.workspace import send_email
+
+MODEL = "gemini-2.5-pro"
+
+
+def _build_instruction(context: ReadonlyContext) -> str:
+    """Inject student and parent contact details so agent uses correct recipients."""
+    student_name = context.state.get("user:name", "Student")
+    student_email = context.state.get("user:email", "")
+    parent_email = context.state.get("user:parent_email", "")
+    grade_level = context.state.get("user:grade_level", "Grade 8")
+    session_topic = context.state.get("session_topic", "")
+    doc_url = context.state.get("doc_url", "")
+    assessment_result = context.state.get("assessment_result", "")
+    calendar_events = context.state.get("calendar_events", "")
+
+    session_videos = context.state.get("session_videos", "")
+
+    today = date.today().isoformat()
+
+    header = f"## Active Student Context\n"
+    header += f"- Today's Date: {today} (use this year and date for session scheduling in email)\n"
+    header += f"- Name: {student_name}\n"
+    header += f"- Student Email: {student_email}\n"
+    header += f"- Parent Email: {parent_email}\n"
+    header += f"- Grade: {grade_level}\n"
+    if session_topic:
+        header += f"- Current Topic: {session_topic}\n"
+    if doc_url:
+        header += f"- Study Notes Doc: {doc_url}\n"
+    if calendar_events:
+        header += f"- Calendar Events Created: {calendar_events}\n"
+    if assessment_result:
+        header += f"- Assessment Result: {assessment_result}\n"
+
+    videos_section = ""
+    if session_videos:
+        videos_section = (
+            f"\n\n## Video URLs for This Plan (from content_agent — use EXACTLY as shown)\n"
+            f"These are the real YouTube URLs returned by the YouTube API. "
+            f"Use the `url` field for each session_number in the Video column of the email table. "
+            f"Do NOT invent or modify these URLs in any way.\n\n"
+            f"{session_videos}"
+        )
+    else:
+        videos_section = (
+            "\n\n## Video URLs\n"
+            "No session_videos found in state. Use 'Video coming soon' for all Video cells — "
+            "do NOT invent YouTube URLs."
+        )
+
+    return EMAIL_AGENT_INSTRUCTION + f"\n\n{header}" + videos_section
+
+
+def make_email_agent(name: str = "email_agent") -> LlmAgent:
+    """Factory that creates a fresh email_agent instance.
+
+    ADK enforces the one-parent rule: each agent instance can only belong to one
+    SequentialAgent. Use this factory when the same email_agent logic is needed
+    in multiple pipelines (e.g. scheduling_pipeline and report_pipeline).
+
+    Args:
+        name: Unique name for this email_agent instance.
+
+    Returns:
+        A new LlmAgent configured as an email agent.
+    """
+    return LlmAgent(
+        name=name,
+        model=MODEL,
+        instruction=_build_instruction,
+        tools=[send_email],
+        description=(
+            "Sends learning plan emails to student + parent. "
+            "Sends progress reports after assessments."
+        ),
+        output_key="email_sent",
+    )
+
+
+email_agent = make_email_agent("email_agent")
