@@ -1,111 +1,115 @@
-# EduFlow — AI Academic Productivity Assistant
+# EduFlow — Multi-Agent AI Academic Assistant
 
-**Hackathon:** Google Cloud Gen AI Academy — APAC Edition (Hack2Skill)
-**Submission deadline:** 2026-04-08
+> **Built for Google Cloud Gen AI Academy — APAC Hackathon (Hack2Skill)**
 
-A multi-agent AI system built on **Google ADK** with **Gemini 2.5 Pro** that helps students manage their complete learning lifecycle — from planning study sessions to tracking progress and keeping parents informed.
+[![Google ADK](https://img.shields.io/badge/Google%20ADK-Multi--Agent-blue?logo=google)](https://google.github.io/adk-docs/)
+[![Gemini 2.5 Pro](https://img.shields.io/badge/Gemini-2.5%20Pro-orange?logo=google)](https://deepmind.google/technologies/gemini/)
+[![Cloud Run](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run-4285F4?logo=googlecloud)](https://cloud.google.com/run)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-green?logo=python)](https://python.org)
+
+**EduFlow turns a student's learning goal into a complete, automated study journey** — planning sessions, scheduling calendar events, teaching grade-aware lessons with live code verification, running quizzes, and emailing progress reports to parents. All from a single student message.
 
 ---
 
-## What EduFlow Does
+## Demo
 
-A student says: *"I want to learn Squares and Square Roots in 3 days"* — EduFlow handles everything:
+**Watch the 3-minute demo:**
 
-1. **Plans** — reads CBSE curriculum, breaks the topic into grade-appropriate sessions, finds YouTube videos per topic
-2. **Schedules** — creates Google Calendar events with video links and tutor starter prompts
-3. **Notifies** — emails the plan to student and parent with a Google Docs study notes link
-4. **Teaches** — delivers grade-aware tutoring with live code verification
-5. **Assesses** — runs quizzes from YAML curriculum questions, stores scores in database
-6. **Reports** — emails progress reports to parents after each assessment
+[![EduFlow Demo](https://img.youtube.com/vi/dR4lAGPrs6I/maxresdefault.jpg)](https://www.youtube.com/watch?v=dR4lAGPrs6I)
+
+> *Student says: "I want to learn Squares and Square Roots in 3 days"*
+> *EduFlow plans 3 sessions, books calendar events, sends the parent an email with a study notes link, teaches the lesson in grade-appropriate language, runs a quiz, and emails the parent a progress report — all automatically.*
+
+---
+
+## What It Does
+
+A student types one goal. EduFlow orchestrates 11 AI agents across 6 pipelines to handle their entire learning lifecycle:
+
+| Stage | What happens |
+|---|---|
+| **Plan** | Reads CBSE YAML curriculum, structures sessions by topic depth, finds YouTube videos per topic |
+| **Schedule** | Creates Google Calendar events with video links and tutor starter prompts |
+| **Notify** | Emails the plan to student + parent with a Google Docs study notes link |
+| **Teach** | Delivers grade-aware tutoring with live Python code verification |
+| **Assess** | Runs quizzes from YAML curriculum questions, stores scores in Cloud SQL |
+| **Report** | Emails a progress report (score, weak areas, doc link) to parents after every quiz |
 
 ---
 
 ## Architecture
 
-### Agent Hierarchy
-
-**1 orchestrator + 10 specialist agents across 6 pipelines = 11 agents total.**
+**1 orchestrator + 10 specialist agents across 6 pipelines.**
 
 ```
-orchestrator_agent  (LlmAgent — understands intent, coordinates workflow)
-│   Tools: set_user_profile (custom fn), AgentTool(x6 pipelines)
-│   Instruction: _build_orchestrator_instruction — dynamically injects student
-│                profile, notes_saved_topics, and latest formatted lesson each turn
+orchestrator_agent  (understands intent, coordinates all pipelines)
 │
-├── planning_pipeline  (SequentialAgent)
+├── planning_pipeline
 │   ├── curriculum_planner_agent   — reads YAML syllabus, structures sessions
-│   ├── content_agent              — finds YouTube videos per topic
+│   ├── content_agent              — finds grade-appropriate YouTube videos
 │   └── plan_saver_agent           — persists plan + sessions to Cloud SQL
-│                                    (gemini-2.5-flash-lite — see Tech Stack)
 │
-├── scheduling_pipeline  (SequentialAgent)
+├── scheduling_pipeline
 │   ├── calendar_agent             — creates Google Calendar events
 │   └── email_agent                — sends plan email to student + parent
 │
-├── tutoring_pipeline  (SequentialAgent)
-│   ├── tutor_agent                — teaches concepts with live code execution
-│   └── tutoring_formatter         — formats output (make_response_formatter factory,
-│                                    include_contents='none', reads tutor_solution from state)
+├── tutoring_pipeline
+│   ├── tutor_agent                — teaches with live code execution (BuiltInCodeExecutor)
+│   └── tutoring_formatter         — formats output into clean textbook-style lesson
 │
-├── notes_pipeline  (SequentialAgent)
-│   └── docs_agent                 — creates/appends Google Docs study notes
-│                                    (MODE A: chapter overview at plan time;
-│                                     MODE B: appends lesson notes after tutoring)
+├── notes_pipeline
+│   └── docs_agent                 — creates/appends Google Docs study notes in Drive
 │
-├── assessment_pipeline  (SequentialAgent)
-│   └── assessment_agent           — serves YAML quiz questions, evaluates answers, stores scores in DB
+├── assessment_pipeline
+│   └── assessment_agent           — YAML quiz questions, evaluates answers, saves scores
 │
-└── report_pipeline  (SequentialAgent)
-    └── report_email_agent         — sends progress report email to student + parent after assessment
-                                     (make_email_agent factory — ADK one-parent rule)
+└── report_pipeline
+    └── report_email_agent         — sends parent progress report after assessment
 ```
 
-**`set_user_profile` function tool** (on orchestrator): extracts student profile fields from conversation, sets `session_topic` before planning so `curriculum_planner_agent` can match the right YAML chapter, and appends to `notes_saved_topics` after each tutoring session to prevent duplicate Doc insertions.
-
-### Tech Stack
-
-| Component | Technology |
-|---|---|
-| Agent Framework | Google ADK (`google-adk`) |
-| LLM (most agents) | `gemini-2.5-pro` — orchestrator, curriculum planner, content, calendar, email, docs, tutor, response_formatter, assessment, report |
-| LLM (plan saver) | `gemini-2.5-flash-lite` — MCP tool calls only; Pro's thinking mode suppresses `output_key` writes on pure tool-call sequences |
-| LLM (audio transcription) | `gemini-2.5-flash-lite` — Streamlit layer only (separate quota pool); raw audio never reaches the ADK backend |
-| Code Execution | `BuiltInCodeExecutor` — sandboxed Python for live math/physics verification |
-| Custom Function Tool | `set_user_profile` — saves student profile to ADK `user:` state, sets `session_topic`, tracks `notes_saved_topics` |
-| Curriculum Data | YAML files (`data/curricula/cbse/math/grade-{7-10}.yaml`) — syllabus + quiz questions at zero DB cost |
-| Database | Cloud SQL PostgreSQL 15 — `learning_plans`, `study_sessions`, `assessments`, `progress` |
-| Database MCP | MCP Toolbox for Databases (`tools.yaml`) |
-| Workspace Tools | Google API Python Client — Calendar, Gmail, Docs, Drive (OAuth2 refresh token) |
-| Video Search | YouTube Data API v3 |
-| Frontend | Streamlit — streaming SSE chat, voice input (`st.audio_input`), quick-action buttons |
-| Backend API | FastAPI + ADK `get_fast_api_app()` with `DatabaseSessionService` (Cloud Run) / `InMemorySessionService` (local) |
-| Session State | ADK `DatabaseSessionService` — `user:` prefix persists profile across sessions; no custom `students` table needed |
-| Deployment | Google Cloud Run (3 services) + Cloud SQL Unix socket via `--add-cloudsql-instances` |
+**Key orchestration patterns:**
+- `_build_orchestrator_instruction` rebuilds the system prompt every turn — injects student profile, grade band, topics saved to notes, and the last formatted lesson
+- `set_user_profile` function tool — sets `session_topic` before planning, tracks `notes_saved_topics` to prevent duplicate doc insertions
+- Factory functions (`make_email_agent`, `make_response_formatter`) — ADK's one-parent-per-agent rule means each pipeline gets its own instance
 
 ---
 
-## Key Features
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| **Agent Framework** | Google ADK (`google-adk`) |
+| **LLM** | `gemini-2.5-pro` — all 8 main agents |
+| **LLM (plan saver + audio)** | `gemini-2.5-flash-lite` — tool-call-only sequences and transcription |
+| **Code Execution** | `BuiltInCodeExecutor` — sandboxed Python for math/physics verification |
+| **Workspace Integrations** | Google Calendar, Gmail, Docs, Drive — via `google-api-python-client` + OAuth2 |
+| **Video Search** | YouTube Data API v3 |
+| **Curriculum Data** | YAML files (`data/curricula/cbse/math/grade-7..10.yaml`) — auto-discovered, no DB needed |
+| **Database** | Cloud SQL PostgreSQL 15 — 4 custom tables + 5 ADK-managed tables |
+| **Database MCP** | MCP Toolbox for Databases |
+| **Frontend** | Streamlit — streaming SSE chat, voice input, progress tracker |
+| **Backend** | FastAPI + ADK `get_fast_api_app()` + `DatabaseSessionService` |
+| **Deployment** | Google Cloud Run — 3 services (frontend, backend, toolbox) |
+
+---
+
+## Key Differentiators
 
 ### Grade-Aware Teaching
-Four grade bands (Foundation 5-6 / Building 7-8 / Bridging 9-10 / Advanced 11-12) each with a distinct tutor persona — vocabulary, examples, hooks, and YouTube content all adapt to the student's grade.
+Four grade bands (Foundation 5-6 / Building 7-8 / Bridging 9-10 / Advanced 11-12) — each with a distinct tutor persona. The same topic, taught differently:
+- **Grade 6:** Area of a circle — thin segments rearranged into a rectangle (visual proof)
+- **Grade 10:** Same topic — derived using integration (concentric rings of width dr)
 
-### Voice Input (Multilingual)
-Students speak in any language (Hindi, Tamil, Telugu, Bengali, and 70+ more). `gemini-2.5-flash-lite` transcribes in Streamlit before the text reaches the backend — main agents never process raw audio, preserving their quota.
+### Voice Input + Multilingual
+Students speak in Hindi, Tamil, Bengali, or 70+ other languages. `gemini-2.5-flash-lite` transcribes in Streamlit before the text reaches the backend — main agent quota is fully preserved.
 
-### YAML Curriculum (Zero DB Cost)
-Syllabus structure and quiz questions live in `data/curricula/cbse/math/grade-{7-10}.yaml`. Auto-discovered at startup. Community-extensible — add a new grade by adding a YAML file, no code change.
+### Living Google Docs Study Notes
+`docs_agent` creates a Google Doc at plan time with a chapter overview, then appends each session's formatted lesson after tutoring. The doc grows with the student. `notes_saved_topics` in state prevents duplicate insertions if a topic is revisited.
 
-### Google Workspace Integration
-Real Calendar events with tutor starter prompts, real Gmail delivery to student + parent, real Google Docs study notes that grow session-by-session in Google Drive.
-
-### Dynamic Orchestrator Context Injection
-`_build_orchestrator_instruction` rebuilds the orchestrator's system prompt on every turn, injecting: current student profile (name, grade, language, grade_band), `notes_saved_topics` list for dedup decisions, and the full `formatted_response` from the last tutoring session so the orchestrator can relay it verbatim to the student.
-
-### Duplicate-Safe Notes
-`notes_saved_topics` in session state tracks which topics have already been appended to the study doc. If a student re-asks to learn the same topic, the orchestrator skips `notes_pipeline` — no duplicate sections in the doc.
-
-### Post-Assessment Parent Report
-After every quiz, `report_pipeline` automatically emails a structured progress report (score, weak areas, doc link, next session) to the parent. Uses a dedicated `report_email_agent` instance — separate from the `email_agent` in `scheduling_pipeline` due to ADK's one-parent-per-agent rule.
+### Real Google Workspace Integration
+- **Calendar:** Events include the video link and a tutor starter prompt ("Ask EduFlow → 'Teach me Perfect Squares'")
+- **Gmail:** Plan emails with the study doc link, progress report emails with scores and weak areas
+- **Docs + Drive:** Organized folders (`EduFlow/Math/Grade 8/`), formatted docs with headings
 
 ---
 
@@ -114,14 +118,14 @@ After every quiz, `report_pipeline` automatically emails a structured progress r
 ```
 ├── eduflow_agents/          # ADK agent package
 │   ├── agent.py             # root_agent + all 6 pipelines
-│   ├── subagents/           # 10 agents (9 files + factory-cloned report_email_agent)
+│   ├── subagents/           # 10 specialist agents
 │   ├── prompts/             # all instruction strings
 │   └── tools/               # YouTube search, curriculum loader, workspace tools
-├── data/curricula/          # YAML curriculum files (CBSE Math Grade 7-10)
+├── data/curricula/          # YAML curriculum (CBSE Math Grade 7-10)
 ├── mcp_servers/database/    # MCP Toolbox config (tools.yaml)
 ├── scripts/infra/           # DB setup, Toolbox start scripts
 ├── main.py                  # FastAPI backend
-├── streamlit_app.py         # Student-facing UI
+├── streamlit_app.py         # Student-facing Streamlit UI
 ├── Dockerfile.backend
 ├── Dockerfile.frontend
 └── Dockerfile.toolbox
@@ -129,21 +133,22 @@ After every quiz, `report_pipeline` automatically emails a structured progress r
 
 ---
 
-## Local Setup
+## How to Run Locally
 
 ### Prerequisites
 - Python 3.12+
-- Google Cloud project with Vertex AI, Cloud SQL, YouTube Data API enabled
+- Google Cloud project with Vertex AI, Cloud SQL, YouTube Data API v3 enabled
 - OAuth2 credentials for Google Workspace (Calendar, Gmail, Docs, Drive)
-- `gcloud` CLI authenticated (`gcloud auth application-default login`)
-- MCP Toolbox binary
+- `gcloud` CLI authenticated
+- MCP Toolbox binary in `scripts/infra/`
 
 ### Steps
 
 ```bash
-# 1. Clone and create virtual environment
+# 1. Create and activate virtual environment
 python -m venv .venv
 .venv\Scripts\Activate.ps1          # Windows PowerShell
+# source .venv/bin/activate          # Linux/macOS
 
 # 2. Install dependencies
 pip install -r requirements-backend.txt
@@ -163,16 +168,19 @@ uvicorn main:app --reload --port 8000
 streamlit run streamlit_app.py
 ```
 
+Open `http://localhost:8501`, fill in the student profile sidebar, and type:
+> *"I want to learn Quadratic Equations in 3 days"*
+
 ---
 
-## Database Schema (Cloud SQL)
+## Database Schema
 
-4 custom tables alongside ADK's auto-managed session tables:
+4 custom tables + 5 ADK-managed session tables (auto-created by `DatabaseSessionService`):
 
 | Table | Purpose |
 |---|---|
 | `learning_plans` | One row per student learning goal |
-| `study_sessions` | Individual sessions within a plan, with Calendar/Doc IDs |
+| `study_sessions` | Individual sessions with Calendar/Doc IDs and status |
 | `assessments` | Quiz scores, correct answers, weak areas per topic |
 | `progress` | Aggregated mastery level per student per topic |
 
@@ -184,17 +192,17 @@ Student profile (name, email, grade, language) is stored in ADK's `user_states` 
 
 | Variable | Purpose |
 |---|---|
-| `GOOGLE_GENAI_USE_VERTEXAI` | `1` for Vertex AI, `0` for API key |
-| `GOOGLE_API_KEY` | Gemini API key (dev) |
+| `GOOGLE_GENAI_USE_VERTEXAI` | `1` for Vertex AI (prod), `0` for API key (dev) |
+| `GOOGLE_API_KEY` | Gemini API key (dev only) |
 | `GOOGLE_CLOUD_PROJECT` | GCP project ID |
 | `GOOGLE_CLOUD_LOCATION` | `us-central1` |
-| `YOUTUBE_API_KEY` | YouTube Data API v3 |
+| `YOUTUBE_API_KEY` | YouTube Data API v3 key |
 | `GOOGLE_OAUTH_CLIENT_ID` | Google Workspace OAuth2 client ID |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | Google Workspace OAuth2 client secret |
 | `GOOGLE_OAUTH_REFRESH_TOKEN` | Pre-authorized OAuth2 refresh token |
 | `MCP_TOOLBOX_URL` | `http://localhost:5000/mcp` (local) or Cloud Run URL |
 | `SESSION_DB_URI` | `postgresql+asyncpg://...` for Cloud SQL (production) |
-| `BACKEND_URL` | Backend URL for Streamlit frontend |
+| `BACKEND_URL` | Backend Cloud Run URL (frontend service) |
 
 ---
 
@@ -202,8 +210,8 @@ Student profile (name, email, grade, language) is stored in ADK's `user_states` 
 
 Three services deployed to Google Cloud Run:
 
-| Service | Purpose |
-|---|---|
-| `eduflow-frontend` | Streamlit UI |
-| `eduflow-backend` | FastAPI + ADK agents |
-| `eduflow-toolbox` | MCP Toolbox → Cloud SQL |
+| Service | Image | Purpose |
+|---|---|---|
+| `eduflow-frontend` | `Dockerfile.frontend` | Streamlit UI |
+| `eduflow-backend` | `Dockerfile.backend` | FastAPI + ADK agents |
+| `eduflow-toolbox` | `Dockerfile.toolbox` | MCP Toolbox → Cloud SQL |
