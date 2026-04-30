@@ -7,6 +7,8 @@
 [![Cloud Run](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run-4285F4?logo=googlecloud)](https://cloud.google.com/run)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-green?logo=python)](https://python.org)
 
+**[Try EduFlow Live →](https://eduflow-frontend-538280901412.asia-southeast1.run.app)**
+
 **EduFlow turns a student's learning goal into a complete, automated study journey** — planning sessions, scheduling calendar events, teaching grade-aware lessons with live code verification, running quizzes, and emailing progress reports to parents. All from a single student message.
 
 ---
@@ -210,8 +212,8 @@ Student profile (name, email, grade, language) is stored in ADK's `user_states` 
 
 Three services deployed to Google Cloud Run:
 
-| Service | Image | Purpose |
-|---|---|---|
-| `eduflow-frontend` | `Dockerfile.frontend` | Streamlit UI |
-| `eduflow-backend` | `Dockerfile.backend` | FastAPI + ADK agents |
-| `eduflow-toolbox` | `Dockerfile.toolbox` | MCP Toolbox → Cloud SQL |
+| Service | Image | Purpose | URL |
+|---|---|---|---|
+| `eduflow-frontend` | `Dockerfile.frontend` | Streamlit UI | [eduflow-frontend-538280901412.asia-southeast1.run.app](https://eduflow-frontend-538280901412.asia-southeast1.run.app) |
+| `eduflow-backend` | `Dockerfile.backend` | FastAPI + ADK agents | internal |
+| `eduflow-toolbox` | `Dockerfile.toolbox` | MCP Toolbox → Cloud SQL | internal |
