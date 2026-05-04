@@ -20,7 +20,7 @@ def _build_instruction(context: ReadonlyContext) -> str:
     session_topic = context.state.get("session_topic", "")
     curriculum_plan = context.state.get("curriculum_plan", "")
     session_videos = context.state.get("session_videos", "")
-    backend_url = os.environ.get("BACKEND_URL", "http://localhost:8501")
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:8501")
 
     today = date.today().isoformat()
 
@@ -31,7 +31,7 @@ def _build_instruction(context: ReadonlyContext) -> str:
     header += f"- Today's Date: {today}\n"
     if session_topic:
         header += f"- Current Topic: {session_topic}\n"
-    header += f"- EduFlow App URL: {backend_url}\n"
+    header += f"- EduFlow App URL: {frontend_url}\n"
 
     plan_section = ""
     if curriculum_plan:

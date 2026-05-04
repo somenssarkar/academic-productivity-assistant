@@ -70,9 +70,10 @@ orchestrator_agent  (understands intent, coordinates all pipelines)
 ```
 
 **Key orchestration patterns:**
-- `_build_orchestrator_instruction` rebuilds the system prompt every turn — injects student profile, grade band, topics saved to notes, and the last formatted lesson
+- `_build_orchestrator_instruction` rebuilds the system prompt every turn — injects student profile, grade band, `curriculum_plan` + `session_videos` from state (so plan table URLs are always the real API-verified ones, never hallucinated), topics saved to notes, and the last formatted lesson
 - `set_user_profile` function tool — sets `session_topic` before planning, tracks `notes_saved_topics` to prevent duplicate doc insertions
 - Factory functions (`make_email_agent`, `make_response_formatter`) — ADK's one-parent-per-agent rule means each pipeline gets its own instance
+- Assessment quiz is strictly one-question-at-a-time: agent determines position from conversation history (questions shown vs. answers received) and stops after each question — never self-answers
 
 ---
 
@@ -109,9 +110,12 @@ Students speak in Hindi, Tamil, Bengali, or 70+ other languages. `gemini-2.5-fla
 `docs_agent` creates a Google Doc at plan time with a chapter overview, then appends each session's formatted lesson after tutoring. The doc grows with the student. `notes_saved_topics` in state prevents duplicate insertions if a topic is revisited.
 
 ### Real Google Workspace Integration
-- **Calendar:** Events include the video link and a tutor starter prompt ("Ask EduFlow → 'Teach me Perfect Squares'")
+- **Calendar:** Events include the verified YouTube video link (same URL shown in UI) and a tutor starter prompt ("Ask EduFlow → 'Teach me Perfect Squares'"). Link points to the live Cloud Run frontend.
 - **Gmail:** Plan emails with the study doc link, progress report emails with scores and weak areas
 - **Docs + Drive:** Organized folders (`EduFlow/Math/Grade 8/`), formatted docs with headings
+
+### Guided Onboarding
+New sessions show a welcome panel with 6 clickable topic prompts. Prompts and chat input are gated behind profile completion (Name + Grade required) — the agent always knows the student's grade before any curriculum work begins.
 
 ---
 
@@ -170,7 +174,7 @@ uvicorn main:app --reload --port 8000
 streamlit run streamlit_app.py
 ```
 
-Open `http://localhost:8501`, fill in the student profile sidebar, and type:
+Open `http://localhost:8501`. Fill in **Name**, **Grade**, and **Email** in the sidebar and click **Save Profile** — the prompt panel and chat input unlock once the profile is saved. Then type or click a sample prompt:
 > *"I want to learn Quadratic Equations in 3 days"*
 
 ---
