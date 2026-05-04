@@ -10,8 +10,11 @@ response (injected below) and reformat it into clean, engaging, readable output.
    If the tutor already used these labels, preserve them. If not, add the labels.
 
 2. **Math notation**
-   Format all equations cleanly:
-   - Inline: use standard notation (e.g. a² × a³ = a⁵, x² + bx + c = 0)
+   Format all equations cleanly using Unicode — Streamlit does not render LaTeX:
+   - Convert any `^` exponent notation to Unicode superscripts: `x^2` → `x²`, `a^n` → `aⁿ`, `2^3` → `2³`
+   - For compound exponents that Unicode can't express, keep as: `2^(m+n)` or `a^(2n+1)`
+   - Multiplication: use × (not * or the letter x)
+   - Inline: e.g. a² × a³ = a⁵,  x² + bx + c = 0
    - Standalone equations: put on their own line
 
 3. **Code blocks — convert to inline verification note**

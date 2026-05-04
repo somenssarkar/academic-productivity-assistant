@@ -74,6 +74,12 @@ def _backend_status(backend_url: str) -> bool:
 # Profile state delta builder
 # ---------------------------------------------------------------------------
 
+def _profile_complete() -> bool:
+    """Name and grade are the minimum required to start a conversation."""
+    p = st.session_state.profile
+    return bool(p.get("name")) and bool(p.get("grade_level"))
+
+
 def _build_state_delta(profile: dict) -> dict:
     """Convert profile form values to ADK user: state keys.
     Always includes user:id (the Streamlit uid) so agents can use it for DB operations.
@@ -349,6 +355,47 @@ if st.session_state["_audio_error"]:
         st.rerun()
 
 # ---------------------------------------------------------------------------
+# Welcome prompts — shown only when chat is empty (new session)
+# ---------------------------------------------------------------------------
+
+if not st.session_state.messages:
+    st.markdown("### 👋 Welcome to EduFlow!")
+    st.markdown("Your AI-powered study assistant. Pick a topic below to get started, or type your own message.")
+    st.divider()
+
+    if not _profile_complete():
+        st.info(
+            "**Complete your profile first** — fill in your **Name** and **Grade** "
+            "in the left panel and click **Save Profile** to unlock the prompts below.",
+            icon="👈",
+        )
+        # Show prompts as disabled placeholders so the student knows what's coming
+        cols = st.columns(3)
+        _PREVIEW_LABELS = [
+            "📐 Learn Exponents", "💰 Study Profit & Loss", "📏 Direct & Inverse Proportions",
+            "🔢 Squares & Square Roots", "📖 Teach me a concept", "📐 Learn Rational Numbers",
+        ]
+        for i, label in enumerate(_PREVIEW_LABELS):
+            with cols[i % 3]:
+                st.button(label, use_container_width=True, disabled=True, key=f"sample_disabled_{i}")
+    else:
+        _SAMPLE_PROMPTS = [
+            ("📐 Learn Exponents", "I'd like to learn about Exponents in the next 2 days"),
+            ("💰 Study Profit & Loss", "I'd like to learn about the concepts of Profit and Loss in the next 3 days"),
+            ("📏 Direct & Inverse Proportions", "I'd like to learn about Direct and Inverse Proportions in the next 2 days"),
+            ("🔢 Squares & Square Roots", "I want to learn Squares and Square Roots in 3 days"),
+            ("📖 Teach me about Exponents", "Teach me about Laws of Exponents"),
+            ("📐 Learn Rational Numbers", "I'd like to learn about Rational Numbers in 2 days"),
+        ]
+        cols = st.columns(3)
+        for i, (label, prompt_text) in enumerate(_SAMPLE_PROMPTS):
+            with cols[i % 3]:
+                if st.button(label, use_container_width=True, key=f"sample_{i}"):
+                    st.session_state.quick_action = prompt_text
+
+    st.divider()
+
+# ---------------------------------------------------------------------------
 # Chat history
 # ---------------------------------------------------------------------------
 
@@ -361,11 +408,14 @@ for msg in st.session_state.messages:
 # ---------------------------------------------------------------------------
 
 if quick_action := st.session_state.pop("quick_action", None):
-    st.session_state.messages.append({"role": "user", "content": quick_action})
-    with st.chat_message("user"):
-        st.markdown(quick_action)
-    _handle_message(quick_action)
-    st.rerun()
+    if not _profile_complete():
+        st.warning("Please fill in your **Name** and **Grade** in the sidebar and click **Save Profile** first.", icon="👈")
+    else:
+        st.session_state.messages.append({"role": "user", "content": quick_action})
+        with st.chat_message("user"):
+            st.markdown(quick_action)
+        _handle_message(quick_action)
+        st.rerun()
 
 # ---------------------------------------------------------------------------
 # Audio recorder — shown in main area only when mic is toggled ON via sidebar.
@@ -414,7 +464,10 @@ if st.session_state.show_mic:
 # ---------------------------------------------------------------------------
 
 if prompt := st.chat_input("Ask EduFlow anything about your studies..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    _handle_message(prompt)
+    if not _profile_complete():
+        st.warning("Please fill in your **Name** and **Grade** in the sidebar and click **Save Profile** first.", icon="👈")
+    else:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        _handle_message(prompt)

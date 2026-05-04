@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from google.adk.agents import LlmAgent, SequentialAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.tools.agent_tool import AgentTool
@@ -28,6 +30,8 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
     grade_band = context.state.get("user:grade_band", "")
     formatted_response = context.state.get("formatted_response", "")
     notes_saved_topics = context.state.get("notes_saved_topics", [])
+    curriculum_plan = context.state.get("curriculum_plan", "")
+    session_videos = context.state.get("session_videos", "")
 
     if grade_level and not grade_band:
         grade_band = get_grade_band(grade_level)
@@ -76,7 +80,45 @@ def _build_orchestrator_instruction(context: ReadonlyContext) -> str:
             f"{formatted_response}"
         )
 
-    return ORCHESTRATOR_INSTRUCTION + profile_section + notes_section + lesson_section
+    # Inject today's date and replace example placeholders in the static prompt.
+    today = date.today()
+    day1 = f"{today.strftime('%b')} {today.day}"
+    day2 = f"{(today + timedelta(days=1)).strftime('%b')} {(today + timedelta(days=1)).day}"
+    base_instruction = (
+        ORCHESTRATOR_INSTRUCTION
+        .replace("DATE_EXAMPLE_1", day1)
+        .replace("DATE_EXAMPLE_2", day2)
+    )
+    date_section = (
+        f"\n\n## Today's Date — USE FOR ALL SESSION DATES\n"
+        f"Today is **{today.strftime('%A, %B %d, %Y')}** (ISO: {today.isoformat()}).\n"
+        f"Session 1 = {day1}, Session 2 = {day2}, and so on (+1 day per session).\n"
+        f"NEVER use past dates. NEVER use the placeholder text DATE_EXAMPLE_1 / DATE_EXAMPLE_2 literally."
+    )
+
+    # Inject real curriculum plan + video URLs so the orchestrator uses them verbatim
+    # instead of reconstructing from memory (which causes hallucinated/wrong URLs in UI).
+    plan_section = ""
+    if curriculum_plan or session_videos:
+        plan_section = "\n\n## Plan Data — USE VERBATIM (do NOT reconstruct from memory)\n"
+        if curriculum_plan:
+            plan_section += (
+                "### Curriculum Plan\n"
+                f"{curriculum_plan}\n\n"
+            )
+        if session_videos:
+            plan_section += (
+                "### Session Videos — REAL URLs from YouTube API\n"
+                "These URLs were verified by the YouTube API. Copy them EXACTLY into "
+                "the plan table and any response — do NOT alter, shorten, or invent URLs.\n\n"
+                f"{session_videos}\n"
+            )
+        plan_section += (
+            "\nWhen building the plan table: use topic_title from Curriculum Plan "
+            "and url from Session Videos matching by session_number. Copy both exactly."
+        )
+
+    return base_instruction + profile_section + notes_section + lesson_section + plan_section + date_section
 
 
 # ---------------------------------------------------------------------------
